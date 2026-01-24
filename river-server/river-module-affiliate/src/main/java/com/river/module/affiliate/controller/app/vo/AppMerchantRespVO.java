@@ -40,4 +40,7 @@ public class AppMerchantRespVO {
     @Schema(description = "优惠券数量", example = "50")
     private Integer couponCount;
 
+    @Schema(description = "追踪链接ID", example = "abc123")
+    private String trackingLinkId;
+
 }

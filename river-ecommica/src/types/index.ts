@@ -7,7 +7,7 @@ export interface MerchantSimple {
 
 export interface Deal {
   id: number;
-  slug: string;
+  slug?: string;
   title: string;
   description: string;
   originalPrice: number;
@@ -33,6 +33,7 @@ export interface Store {
   rating: number;
   dealCount: number;
   couponCount: number;
+  trackingLinkId?: string;
   regions?: string[];
 }
 

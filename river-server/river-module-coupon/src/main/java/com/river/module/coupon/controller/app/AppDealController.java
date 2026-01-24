@@ -62,8 +62,23 @@ public class AppDealController {
     @Parameter(name = "slug", description = "Deal slug", required = true, example = "50-off-everything")
     public CommonResult<AppDealRespVO> getDealBySlug(@RequestParam("slug") String slug) {
         DealDO deal = dealService.getDealBySlug(slug);
+        return success(convertToAppDealVO(deal));
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "根据 ID 获取 Deal 详情")
+    @Parameter(name = "id", description = "Deal ID", required = true, example = "1")
+    public CommonResult<AppDealRespVO> getDealById(@RequestParam("id") Long id) {
+        DealDO deal = dealService.getDeal(id);
+        return success(convertToAppDealVO(deal));
+    }
+
+    /**
+     * 将 Deal DO 转换为 App VO
+     */
+    private AppDealRespVO convertToAppDealVO(DealDO deal) {
         if (deal == null) {
-            return success(null);
+            return null;
         }
         AppDealRespVO vo = BeanUtils.toBean(deal, AppDealRespVO.class);
         MerchantSimpleRespDTO merchant = merchantApi.getMerchant(deal.getMerchantId());
@@ -77,7 +92,7 @@ public class AppDealController {
         if (trackingLink != null) {
             vo.setTrackingLinkId(trackingLink.getSlug());
         }
-        return success(vo);
+        return vo;
     }
 
     /**

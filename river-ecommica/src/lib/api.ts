@@ -45,7 +45,13 @@ export async function fetchDeals(params?: { merchantId?: number; featured?: bool
 }
 
 export async function fetchDealBySlug(slug: string): Promise<Deal | null> {
-  const res = await fetchWithTenant(`${API_BASE_URL}/coupon/deal/get-by-slug?slug=${encodeURIComponent(slug)}`, {
+  // 如果是纯数字，则按 id 获取
+  const isNumericId = /^\d+$/.test(slug);
+  const endpoint = isNumericId
+    ? `${API_BASE_URL}/coupon/deal/get?id=${encodeURIComponent(slug)}`
+    : `${API_BASE_URL}/coupon/deal/get-by-slug?slug=${encodeURIComponent(slug)}`;
+
+  const res = await fetchWithTenant(endpoint, {
     next: { revalidate: 300 },
   })
   if (!res.ok) throw new Error('Fetch deal failed')

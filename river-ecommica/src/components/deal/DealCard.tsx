@@ -188,7 +188,7 @@ export function DealCard({ deal }: DealCardProps) {
         {/* Title */}
         <h3 className="font-semibold text-sm text-foreground leading-snug line-clamp-2 mb-4 min-h-[2.5rem] group-hover:text-primary transition-colors">
           <Link
-            href={`/${locale}/deals/${deal.slug}`}
+            href={`/${locale}/deals/${deal.slug || deal.id}`}
             className="hover:underline decoration-primary/30 underline-offset-2"
           >
             {deal.title}
@@ -197,14 +197,14 @@ export function DealCard({ deal }: DealCardProps) {
 
         {/* CTA Button */}
         <Link
-          href={deal.trackingLinkId ? `/api/go/${deal.trackingLinkId}` : deal.gotoUrl}
+          href={deal.trackingLinkId ? `/api/go/${deal.trackingLinkId}` : (deal.gotoUrl || '#')}
           target="_blank"
           rel="noopener"
           className={cn(
             "flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl",
             "bg-foreground text-background font-semibold text-sm",
             "transition-all duration-300",
-            "hover:opacity-90 hover:shadow-md",
+            deal.gotoUrl ? "hover:opacity-90 hover:shadow-md" : "opacity-50 cursor-not-allowed",
             "active:scale-[0.98]"
           )}
         >

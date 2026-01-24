@@ -92,15 +92,24 @@ public class ClickServiceImpl implements ClickService {
         log.debug("Click recorded: clickId={}, targetType={}, targetId={}",
                 clickId, trackingLink.getTargetType(), trackingLink.getTargetId());
 
-        // 直接使用 trackingLink.trackingUrl（已拼接好参数的完整追踪链接）
-        return StrUtil.nullToDefault(trackingLink.getTrackingUrl(), FALLBACK_URL);
+        // 替换 trackingUrl 中的所有占位符
+        String redirectUrl = StrUtil.nullToDefault(trackingLink.getTrackingUrl(), FALLBACK_URL);
+        redirectUrl = redirectUrl.replace("{click_id}", clickId);
+        redirectUrl = redirectUrl.replace("{sub1}", finalSub1 != null ? finalSub1 : "");
+        redirectUrl = redirectUrl.replace("{sub2}", finalSub2 != null ? finalSub2 : "");
+        redirectUrl = redirectUrl.replace("{sub3}", finalSub3 != null ? finalSub3 : "");
+        redirectUrl = redirectUrl.replace("{sub4}", finalSub4 != null ? finalSub4 : "");
+        redirectUrl = redirectUrl.replace("{sub5}", finalSub5 != null ? finalSub5 : "");
+        return redirectUrl;
     }
 
     private TrackingLinkDO findTrackingLink(String trackingLinkId) {
-        TrackingLinkDO link = trackingLinkMapper.selectBySlug(trackingLinkId);
+        // 不检查状态，确保能追踪所有链接
+        TrackingLinkDO link = trackingLinkMapper.selectBySlugAnyStatus(trackingLinkId);
         if (link != null) {
             return link;
         }
+        // slug 没找到，尝试按 ID 查找
         try {
             Long id = Long.parseLong(trackingLinkId);
             return trackingLinkMapper.selectById(id);

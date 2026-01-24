@@ -1,5 +1,8 @@
 package com.river.module.affiliate.controller.app;
 
+import com.river.framework.common.biz.tracking.TrackingLinkCommonApi;
+import com.river.framework.common.biz.tracking.TrackingTargetTypeEnum;
+import com.river.framework.common.biz.tracking.dto.TrackingLinkRespDTO;
 import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.common.pojo.CommonResult;
 import com.river.framework.common.pojo.PageResult;
@@ -40,6 +43,9 @@ public class AppMerchantController {
     @Resource
     private CouponStatisticsApi couponStatisticsApi;
 
+    @Resource
+    private TrackingLinkCommonApi trackingLinkApi;
+
     @GetMapping("/list")
     @Operation(summary = "获取商家列表")
     public CommonResult<List<AppMerchantRespVO>> getMerchantList(
@@ -53,9 +59,9 @@ public class AppMerchantController {
     public CommonResult<PageResult<AppMerchantRespVO>> getMerchantPage(
             @Valid AppMerchantPageReqVO pageReqVO) {
         PageResult<MerchantDO> pageResult = merchantService.getMerchantPage(BeanUtils.toBean(pageReqVO,
-                MerchantPageReqVO.class,info->{
-                info.setStatus(CommonStatusEnum.ENABLE.getStatus());
-        }));
+                MerchantPageReqVO.class, info -> {
+                    info.setStatus(CommonStatusEnum.ENABLE.getStatus());
+                }));
         return success(convertToAppVOPage(pageResult));
     }
 
@@ -88,6 +94,13 @@ public class AppMerchantController {
         vo.setRegions(merchant.getRegions() != null ? merchant.getRegions() : Collections.emptyList());
         vo.setDealCount(dealCount != null ? dealCount.intValue() : 0);
         vo.setCouponCount(couponCount != null ? couponCount.intValue() : 0);
+
+        // 设置追踪链接 ID
+        TrackingLinkRespDTO trackingLink = trackingLinkApi.getTrackingLink(TrackingTargetTypeEnum.MERCHANT.getType(), merchant.getId());
+        if (trackingLink != null) {
+            vo.setTrackingLinkId(trackingLink.getSlug());
+        }
+
         return vo;
     }
 

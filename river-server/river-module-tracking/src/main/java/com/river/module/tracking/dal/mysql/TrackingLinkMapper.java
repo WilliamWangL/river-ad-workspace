@@ -17,10 +17,17 @@ public interface TrackingLinkMapper extends BaseMapperX<TrackingLinkDO> {
                 .eq(TrackingLinkDO::getStatus, CommonStatusEnum.ENABLE.getStatus()));
     }
 
+    // 不检查状态，用于追踪重定向
+    default TrackingLinkDO selectBySlugAnyStatus(String slug) {
+        return selectOne(new LambdaQueryWrapperX<TrackingLinkDO>()
+                .eq(TrackingLinkDO::getSlug, slug));
+    }
+
     default TrackingLinkDO selectByTarget(Integer targetType, Long targetId) {
         return selectOne(new LambdaQueryWrapperX<TrackingLinkDO>()
                 .eq(TrackingLinkDO::getTargetType, targetType)
-                .eq(TrackingLinkDO::getTargetId, targetId));
+                .eq(TrackingLinkDO::getTargetId, targetId)
+                .eq(TrackingLinkDO::getStatus, CommonStatusEnum.ENABLE.getStatus()));
     }
 
     default PageResult<TrackingLinkDO> selectPage(TrackingLinkPageReqVO reqVO) {
