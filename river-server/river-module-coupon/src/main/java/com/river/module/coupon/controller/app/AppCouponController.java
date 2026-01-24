@@ -2,6 +2,9 @@ package com.river.module.coupon.controller.app;
 
 import com.river.framework.common.biz.affiliate.MerchantCommonApi;
 import com.river.framework.common.biz.affiliate.dto.MerchantSimpleRespDTO;
+import com.river.framework.common.biz.tracking.TrackingLinkCommonApi;
+import com.river.framework.common.biz.tracking.TrackingTargetTypeEnum;
+import com.river.framework.common.biz.tracking.dto.TrackingLinkRespDTO;
 import com.river.framework.common.pojo.CommonResult;
 import com.river.framework.common.pojo.PageResult;
 import com.river.framework.common.util.collection.CollectionUtils;
@@ -11,6 +14,7 @@ import com.river.module.coupon.controller.app.vo.AppCouponPageReqVO;
 import com.river.module.coupon.controller.app.vo.AppCouponMerchantRespVO;
 import com.river.module.coupon.controller.app.vo.AppCouponRespVO;
 import com.river.module.coupon.dal.dataobject.CouponDO;
+import com.river.module.coupon.dal.mysql.CouponMapper;
 import com.river.module.coupon.service.CouponService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +42,9 @@ public class AppCouponController {
     @Resource
     private MerchantCommonApi merchantApi;
 
+    @Resource
+    private TrackingLinkCommonApi trackingLinkApi;
+
     @GetMapping("/page")
     @Operation(summary = "获取优惠券分页")
     public CommonResult<PageResult<AppCouponRespVO>> getCouponPage(
@@ -50,7 +57,7 @@ public class AppCouponController {
     }
 
     /**
-     * 将优惠券DO列表转换为App VO列表，包含商家信息
+     * 将优惠券DO列表转换为App VO列表，包含商家信息和追踪链接
      */
     private List<AppCouponRespVO> convertToAppVOList(List<CouponDO> coupons) {
         if (coupons == null || coupons.isEmpty()) {
@@ -65,6 +72,15 @@ public class AppCouponController {
         List<MerchantSimpleRespDTO> merchants = merchantApi.getMerchantList(merchantIds);
         Map<Long, MerchantSimpleRespDTO> merchantMap = CollectionUtils.convertMap(merchants, MerchantSimpleRespDTO::getId);
 
+        // 批量获取追踪链接
+        Map<Long, TrackingLinkRespDTO> trackingLinkMap = CollectionUtils.convertMap(
+                coupons.stream()
+                        .map(coupon -> trackingLinkApi.getTrackingLink(TrackingTargetTypeEnum.COUPON.getType(), coupon.getId()))
+                        .filter(link -> link != null)
+                        .toList(),
+                link -> link.getTargetId()
+        );
+
         // 转换结果
         return coupons.stream().map(coupon -> {
             AppCouponRespVO vo = BeanUtils.toBean(coupon, AppCouponRespVO.class);
@@ -74,6 +90,11 @@ public class AppCouponController {
                 vo.setMerchant(BeanUtils.toBean(merchant, AppCouponMerchantRespVO.class));
                 vo.setMerchantName(merchant.getName());
                 vo.setMerchantLogo(merchant.getLogoUrl());
+            }
+            // 设置追踪链接 ID
+            TrackingLinkRespDTO trackingLink = trackingLinkMap.get(coupon.getId());
+            if (trackingLink != null) {
+                vo.setTrackingLinkId(trackingLink.getSlug());
             }
             return vo;
         }).toList();

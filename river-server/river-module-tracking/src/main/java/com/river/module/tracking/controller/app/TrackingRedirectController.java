@@ -1,6 +1,8 @@
 package com.river.module.tracking.controller.app;
 
 import com.river.module.tracking.service.ClickService;
+import com.river.framework.tenant.core.context.TenantContextHolder;
+import com.river.framework.web.core.util.WebFrameworkUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -44,6 +46,9 @@ public class TrackingRedirectController {
             @RequestParam(value = "sub5", required = false) String sub5,
             HttpServletRequest request) {
 
+        // 初始化租户上下文（解决多租户隔离问题）
+        initTenantContext(request);
+
         String ip = getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
         String referer = request.getHeader("Referer");
@@ -54,6 +59,16 @@ public class TrackingRedirectController {
         RedirectView redirectView = new RedirectView(redirectUrl);
         redirectView.setStatusCode(HttpStatus.FOUND);
         return redirectView;
+    }
+
+    /**
+     * 初始化租户上下文，从请求头中读取 tenant-id
+     */
+    private void initTenantContext(HttpServletRequest request) {
+        Long tenantId = WebFrameworkUtils.getTenantId(request);
+        if (tenantId != null) {
+            TenantContextHolder.setTenantId(tenantId);
+        }
     }
 
     private String getClientIp(HttpServletRequest request) {

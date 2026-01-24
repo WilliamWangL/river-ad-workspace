@@ -1,5 +1,6 @@
 package com.river.module.tracking.dal.mysql;
 
+import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.common.pojo.PageResult;
 import com.river.framework.mybatis.core.mapper.BaseMapperX;
 import com.river.framework.mybatis.core.query.LambdaQueryWrapperX;
@@ -13,7 +14,7 @@ public interface TrackingLinkMapper extends BaseMapperX<TrackingLinkDO> {
     default TrackingLinkDO selectBySlug(String slug) {
         return selectOne(new LambdaQueryWrapperX<TrackingLinkDO>()
                 .eq(TrackingLinkDO::getSlug, slug)
-                .eq(TrackingLinkDO::getStatus, 1));
+                .eq(TrackingLinkDO::getStatus, CommonStatusEnum.ENABLE.getStatus()));
     }
 
     default TrackingLinkDO selectByTarget(Integer targetType, Long targetId) {

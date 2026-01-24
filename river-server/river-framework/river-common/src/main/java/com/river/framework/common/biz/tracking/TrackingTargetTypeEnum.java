@@ -1,8 +1,11 @@
-package com.river.module.tracking.enums;
+package com.river.framework.common.biz.tracking;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * 追踪目标类型枚举
+ */
 @Getter
 @AllArgsConstructor
 public enum TrackingTargetTypeEnum {

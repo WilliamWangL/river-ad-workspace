@@ -46,7 +46,7 @@ public class ConversionDO extends BaseDO {
 
     // ========== 冗余字段（便于统计，与 ClickDO 保持一致）==========
 
-    /** {@link com.river.module.tracking.enums.TrackingTargetTypeEnum} */
+    /** {@link com.river.framework.common.biz.tracking.TrackingTargetTypeEnum} */
     private Integer targetType;
 
     private Long targetId;

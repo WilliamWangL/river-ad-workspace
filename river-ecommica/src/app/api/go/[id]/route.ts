@@ -3,21 +3,8 @@ import { getTrackingUrl } from '@/lib/tracking'
 
 export const runtime = 'edge'
 
-// 允许重定向的域名白名单（联盟网络域名）
-const ALLOWED_REDIRECT_DOMAINS = [
-  'admitad.com',
-  'ad.admitad.com',
-  'click.admitad.com',
-  'goto.target.my.com',
-  'ad.doubleclick.net',
-  'click.linksynergy.com',
-  'www.anrdoezrs.net',
-  'www.dpbolvw.net',
-  'www.jdoqocy.com',
-  'www.kqzyfj.com',
-  'www.tkqlhce.com',
-  // 添加更多联盟域名
-]
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:48080'
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || '1'
 
 /**
  * 验证重定向 URL 是否安全（防止开放重定向攻击）
@@ -26,14 +13,7 @@ function isValidRedirectUrl(url: string): boolean {
   try {
     const parsed = new URL(url)
     // 只允许 https 协议
-    if (parsed.protocol !== 'https:') {
-      return false
-    }
-    // 检查域名是否在白名单中
-    const hostname = parsed.hostname.toLowerCase()
-    return ALLOWED_REDIRECT_DOMAINS.some(domain => 
-      hostname === domain || hostname.endsWith('.' + domain)
-    )
+    return parsed.protocol === 'https:'
   } catch {
     return false
   }
@@ -56,6 +36,7 @@ export async function GET(
   headers.set('X-Forwarded-For', request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '')
   headers.set('User-Agent', request.headers.get('user-agent') || '')
   headers.set('Referer', request.headers.get('referer') || '')
+  headers.set('tenant-id', TENANT_ID)
 
   try {
     const response = await fetch(trackingUrl, {
