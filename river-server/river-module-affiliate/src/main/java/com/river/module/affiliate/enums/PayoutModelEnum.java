@@ -46,4 +46,17 @@ public enum PayoutModelEnum {
             default -> CPS;
         };
     }
+
+    /**
+     * 从 Rakuten API 佣金类型映射
+     */
+    public static PayoutModelEnum fromRakutenType(String type) {
+        if (type == null) return CPS;
+        return switch (type.toLowerCase()) {
+            case "sale", "per_sale" -> CPS;
+            case "lead", "per_lead" -> CPA;
+            case "click", "per_click" -> CPC;
+            default -> CPS;
+        };
+    }
 }

@@ -11,6 +11,7 @@ import com.river.module.affiliate.dal.dataobject.NetworkCredentialDO;
 import com.river.module.affiliate.dal.mysql.NetworkCredentialMapper;
 import com.river.module.affiliate.service.AffiliateNetworkService;
 import com.river.module.affiliate.service.network.admitad.AdmitadSyncService;
+import com.river.module.affiliate.service.network.rakuten.RakutenSyncService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,6 +41,9 @@ public class AffiliateNetworkController {
 
     @Resource
     private AdmitadSyncService admitadSyncService;
+
+    @Resource
+    private RakutenSyncService rakutenSyncService;
 
     @Resource
     private NetworkCredentialMapper credentialMapper;
@@ -126,8 +130,8 @@ public class AffiliateNetworkController {
             }
         }
 
-        // 调用同步逻辑（Merchant + Offer）
-        SyncResult result = admitadSyncService.syncData(finalCode);
+        // 调用同步逻辑（Merchant + Offer），根据 code 路由到对应的 SyncService
+        SyncResult result = dispatchSyncData(finalCode);
         return success(result);
     }
 
@@ -164,8 +168,8 @@ public class AffiliateNetworkController {
             }
         }
 
-        // 调用同步逻辑（Coupon + Deal）
-        SyncResult result = admitadSyncService.syncCouponsOnly(finalCode);
+        // 调用同步逻辑（Coupon + Deal），根据 code 路由
+        SyncResult result = dispatchSyncCoupons(finalCode);
         return success(result);
     }
 
@@ -202,8 +206,8 @@ public class AffiliateNetworkController {
             }
         }
 
-        // 调用同步逻辑（Deal only）
-        SyncResult result = admitadSyncService.syncDeals(finalCode);
+        // 调用同步逻辑（Deal only），根据 code 路由
+        SyncResult result = dispatchSyncCoupons(finalCode);
         return success(result);
     }
 
@@ -240,9 +244,31 @@ public class AffiliateNetworkController {
             }
         }
 
-        // 调用同步逻辑（Coupon only）
-        SyncResult result = admitadSyncService.syncCouponsOnly(finalCode);
+        // 调用同步逻辑（Coupon only），根据 code 路由
+        SyncResult result = dispatchSyncCoupons(finalCode);
         return success(result);
+    }
+
+    // ==================== 内部路由方法 ====================
+
+    /**
+     * 根据网络 code 路由到对应的 SyncService
+     */
+    private SyncResult dispatchSyncData(String networkCode) {
+        if ("rakuten".equalsIgnoreCase(networkCode)) {
+            return rakutenSyncService.syncData(networkCode);
+        }
+        // 默认使用 Admitad
+        return admitadSyncService.syncData(networkCode);
+    }
+
+    /**
+     * 根据网络 code 路由到对应的 Coupon/Deal SyncService
+     * 注：Rakuten 暂无 Coupon API，Coupon/Deal 同步仅走 Admitad
+     */
+    private SyncResult dispatchSyncCoupons(String networkCode) {
+        // Rakuten 无 Coupon/Deal API，统一走 Admitad
+        return admitadSyncService.syncCouponsOnly(networkCode);
     }
 
     /**
