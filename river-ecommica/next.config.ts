@@ -48,6 +48,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '*.samsclubimages.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i5.samsclubimages.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'cdn.admitad.com',
         pathname: '/**',
       },
