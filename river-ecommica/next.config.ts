@@ -78,6 +78,11 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.admitad-connect.com',
         pathname: '/**',
       },
+       {
+        protocol: 'http',
+        hostname: 'tripcdn.com',
+        pathname: '/**',
+      },
     ],
   },
 };
