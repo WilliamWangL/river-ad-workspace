@@ -60,6 +60,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '*.tripcdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ak-d.tripcdn.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'cdn.admitad.com',
         pathname: '/**',
       },
