@@ -70,7 +70,8 @@ public class AppCategoryController {
             return success(null);
         }
         AppCategoryRespVO vo = convertToAppVO(category);
-        List<CategoryDO> children = categoryService.getCategoryListByParentId(category.getId(), region);
+        // 使用分类自身地区查子分类，兼容跨地区兜底命中的分类
+        List<CategoryDO> children = categoryService.getCategoryListByParentId(category.getId(), category.getRegion());
         vo.setChildren(children.stream().map(this::convertToAppVO).collect(Collectors.toList()));
         return success(vo);
     }

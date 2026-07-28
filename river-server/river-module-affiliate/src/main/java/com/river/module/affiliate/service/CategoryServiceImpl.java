@@ -139,6 +139,10 @@ public class CategoryServiceImpl implements CategoryService {
         if (category == null && !DEFAULT_REGION.equals(effectiveRegion)) {
             category = categoryMapper.selectBySlugAndRegion(slug, DEFAULT_REGION);
         }
+        // 仍找不到则跨地区兜底，避免其他地区分类链接被判定 404
+        if (category == null) {
+            category = categoryMapper.selectFirstBySlug(slug);
+        }
         return category;
     }
 

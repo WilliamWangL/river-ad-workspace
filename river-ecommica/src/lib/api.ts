@@ -149,6 +149,18 @@ export async function fetchCategories(params?: { region?: string }): Promise<Cat
   return json.data || []
 }
 
+export async function fetchCategoryBySlug(slug: string, region?: string): Promise<Category | null> {
+  const url = new URL(`${getApiBaseUrl()}/affiliate/category/get-by-slug`)
+  url.searchParams.set('slug', slug)
+  if (region) {
+    url.searchParams.set('region', region)
+  }
+  const res = await fetchWithTenant(url.toString(), { next: { revalidate: 3600 } })
+  if (!res.ok) throw new Error('Fetch category failed')
+  const json = await res.json()
+  return json.data || null
+}
+
 export interface Region {
   code: string;
   name: string;

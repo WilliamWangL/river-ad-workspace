@@ -52,6 +52,17 @@ public interface CategoryMapper extends BaseMapperX<CategoryDO> {
     }
 
     /**
+     * 仅根据 slug 跨地区查询分类（slug+region 为复合唯一，取第一条）
+     */
+    default CategoryDO selectFirstBySlug(String slug) {
+        List<CategoryDO> list = selectList(new LambdaQueryWrapperX<CategoryDO>()
+                .eq(CategoryDO::getSlug, slug)
+                .orderByAsc(CategoryDO::getId)
+                .last("LIMIT 1"));
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    /**
      * 查询某地区下分类数量
      */
     default Long selectCountByRegion(String region) {
