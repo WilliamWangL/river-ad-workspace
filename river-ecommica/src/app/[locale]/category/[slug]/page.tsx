@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchDeals, fetchCoupons, fetchCategories } from '@/lib/api';
+import { fetchDeals, fetchCoupons, fetchCategories, fetchCategoryBySlug } from '@/lib/api';
 import { getRegionFilter, DEFAULT_REGION } from '@/lib/region-constants';
 import { Category } from '@/types';
 import DealCard from '@/components/deal/DealCard';
@@ -94,7 +94,8 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'CategoryDetail' });
   const categories = await fetchCategories();
-  const category = findCategoryBySlug(categories, slug);
+  // 地区树里找不到时通过 get-by-slug 兜底（支持跨地区），避免误返回 Not Found 元信息
+  const category = findCategoryBySlug(categories, slug) || await fetchCategoryBySlug(slug);
 
   if (!category) {
     return { title: t('meta.notFound') };
@@ -147,22 +148,29 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
   // First fetch categories to find the category by slug
   const categories = await fetchCategories({ region: regionFilter });
-  const category = findCategoryBySlug(categories, slug);
+  // 当前地区树里找不到时，通过 get-by-slug 兜底（后端支持跨地区回退），
+  // 避免其他地区分类链接命中带 noindex 的 404 页
+  const category = findCategoryBySlug(categories, slug)
+    || await fetchCategoryBySlug(slug, regionFilter);
 
   if (!category) {
     notFound();
   }
 
+  // 兜底命中的分类可能属于其他地区，用分类自身地区查询内容更准确
+  const categoryRegion = category.region && category.region !== '00' ? category.region : undefined;
+  const effectiveRegions = regionsArray ?? (categoryRegion ? [categoryRegion] : undefined);
+
   // Then fetch deals and coupons filtered by categoryId
   const [dealsResult, couponsResult] = await Promise.all([
     fetchDeals({
       categoryId: category.id,
-      regions: regionsArray,
+      regions: effectiveRegions,
       pageSize: 8
     }),
     fetchCoupons({
       categoryId: category.id,
-      regions: regionsArray,
+      regions: effectiveRegions,
       pageSize: 6
     }),
   ]);
@@ -173,8 +181,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const IconComponent = iconMap[category.icon || 'Tag'] || Tag;
 
   const parentCategory = findParentCategory(categories, slug);
-  const isSubcategory = parentCategory?.slug !== slug;
-  const subcategories = isSubcategory ? [] : (parentCategory?.children || []);
+  const isSubcategory = parentCategory != null && parentCategory.slug !== slug;
+  // 兜底命中时分类不在当前地区树中，直接使用接口返回的 children
+  const subcategories = isSubcategory ? [] : (parentCategory?.children || category.children || []);
 
   const breadcrumbs = [
     { label: t('breadcrumbHome'), href: '/' },
