@@ -56,6 +56,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '*.walmartimages.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'cdn.admitad.com',
         pathname: '/**',
       },
