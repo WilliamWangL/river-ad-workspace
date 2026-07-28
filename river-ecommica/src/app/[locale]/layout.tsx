@@ -3,6 +3,7 @@ import {getMessages, setRequestLocale} from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import "@/app/globals.css";
 import { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google';
@@ -76,6 +77,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${plusJakarta.variable} ${spaceGrotesk.variable}`}>
       <body className="font-sans">
+        <GoogleAnalytics />
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground">
           Skip to main content
         </a>
