@@ -132,9 +132,9 @@ export default async function CategoriesPage({
           </div>
         </section>
 
-        {/* Categories Grid */}
+        {/* Categories Grid - 显示全部分类，不受默认 maxCategories=8 限制 */}
         {categories.length > 0 ? (
-          <CategorySection categories={categories} locale={locale} />
+          <CategorySection categories={categories} locale={locale} maxCategories={categories.length} />
         ) : (
           <section className="py-16 lg:py-20 bg-background">
             <div className="container mx-auto px-4">
