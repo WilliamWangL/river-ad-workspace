@@ -454,7 +454,8 @@
     "offersSectionTitle": "Affiliate Programs",
     "offersCount": "{count} Programs",
     "emptyOffersTitle": "No programs yet",
-    "emptyOffersDescription": "No affiliate programs available at the moment"
+    "emptyOffersDescription": "No affiliate programs available at the moment",
+    "aboutStore": "About {name}"
   },
   "DealDetail": {
     "meta": {

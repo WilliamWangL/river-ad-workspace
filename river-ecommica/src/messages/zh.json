@@ -454,7 +454,8 @@
     "offersSectionTitle": "联盟推广计划",
     "offersCount": "{count} 个推广计划",
     "emptyOffersTitle": "暂无推广计划",
-    "emptyOffersDescription": "目前没有可用的推广计划"
+    "emptyOffersDescription": "目前没有可用的推广计划",
+    "aboutStore": "关于 {name}"
   },
   "Offer": {
     "type": {

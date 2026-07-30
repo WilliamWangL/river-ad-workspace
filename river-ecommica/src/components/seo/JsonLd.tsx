@@ -1,4 +1,5 @@
 import { Deal, Store, BlogPost, Coupon } from '@/types';
+import { stripHtml } from '@/lib/utils';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://deals.ecommica.com';
 
@@ -28,7 +29,7 @@ export function generateStoreJsonLd(store: Store) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: store.name,
-    description: store.description,
+    description: stripHtml(store.description, 160) || undefined,
     url: `${BASE_URL}/stores/${store.slug}`,
     logo: store.logoUrl || undefined,
     ...(store.rating && {

@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchStores, fetchStoreBySlug, fetchDeals, fetchOffersByMerchant } from '@/lib/api';
 import { getTrackingLink } from '@/lib/tracking';
+import { stripHtml } from '@/lib/utils';
+import { MarkdownRenderer } from '@/components/blog';
 import DealCard from '@/components/deal/DealCard';
 import OfferCard from '@/components/offer/OfferCard';
 import { Badge } from '@/components/ui/badge';
@@ -52,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: t('meta.title', { name: store.name }),
-    description: store.description || t('meta.description', { name: store.name }),
+    description: store.description ? stripHtml(store.description, 160) : t('meta.description', { name: store.name }),
     alternates: {
       canonical: `${BASE_URL}/${locale}/stores/${store.slug}`,
       languages: {
@@ -62,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       title: t('meta.title', { name: store.name }),
-      description: store.description || t('meta.description', { name: store.name }),
+      description: store.description ? stripHtml(store.description, 160) : t('meta.description', { name: store.name }),
       url: `${BASE_URL}/${locale}/stores/${store.slug}`,
       type: 'website',
       images: [
@@ -77,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: t('meta.title', { name: store.name }),
-      description: store.description || t('meta.description', { name: store.name }),
+      description: store.description ? stripHtml(store.description, 160) : t('meta.description', { name: store.name }),
       images: [ogImage],
     },
   };
@@ -149,7 +151,9 @@ export default async function StoreDetailPage({ params }: Props) {
               <div className="flex-1 text-center md:text-left space-y-4">
                 <div>
                   <h1 className="text-4xl font-bold font-display text-foreground mb-2">{store.name}</h1>
-                  <p className="text-lg text-muted-foreground max-w-2xl">{store.description}</p>
+                  {store.description && (
+                    <p className="text-lg text-muted-foreground max-w-2xl line-clamp-3">{stripHtml(store.description)}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-6">
@@ -196,6 +200,21 @@ export default async function StoreDetailPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* 关于商家 - 富文本简介 */}
+        {store.description && (
+          <section className="container mx-auto px-4 max-w-4xl py-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100">
+                <StoreIcon className="w-5 h-5 text-cyan-600" />
+              </div>
+              <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
+                {t('aboutStore', { name: store.name })}
+              </h2>
+            </div>
+            <MarkdownRenderer content={store.description} className="prose prose-lg prose-slate max-w-none" />
+          </section>
+        )}
 
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between mb-8">
