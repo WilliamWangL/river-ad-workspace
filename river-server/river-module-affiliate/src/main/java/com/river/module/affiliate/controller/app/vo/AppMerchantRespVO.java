@@ -25,8 +25,14 @@ public class AppMerchantRespVO {
     @Schema(description = "Logo URL", example = "https://example.com/logo.png")
     private String logoUrl;
 
-    @Schema(description = "商家描述", example = "Everything store")
+    @Schema(description = "商家描述（联盟同步原始描述，回退值）", example = "Everything store")
     private String description;
+
+    @Schema(description = "商家简介（短文本，为空回退 description）", example = "Up to 40% off electronics")
+    private String intro;
+
+    @Schema(description = "商家描述（长富文本，为空回退 description）")
+    private String about;
 
     @Schema(description = "评分", example = "4.5")
     private BigDecimal rating;

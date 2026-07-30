@@ -7,11 +7,10 @@ import { getTrackingLink } from '@/lib/tracking';
 import { stripHtml } from '@/lib/utils';
 import { MarkdownRenderer } from '@/components/blog';
 import DealCard from '@/components/deal/DealCard';
-import OfferCard from '@/components/offer/OfferCard';
 import { Badge } from '@/components/ui/badge';
 import { JsonLd, BASE_URL, generateStoreJsonLd, generateBreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
-import { Star, ShoppingBag, Ticket, ShieldCheck, Store as StoreIcon, ArrowUpRight, Gift } from 'lucide-react';
+import { Star, ShoppingBag, Ticket, ShieldCheck, Store as StoreIcon, ArrowUpRight } from 'lucide-react';
 
 // 使用 ISR，每 5 分钟重新生成
 export const revalidate = 300;
@@ -54,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: t('meta.title', { name: store.name }),
-    description: store.description ? stripHtml(store.description, 160) : t('meta.description', { name: store.name }),
+    description: (store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }),
     alternates: {
       canonical: `${BASE_URL}/${locale}/stores/${store.slug}`,
       languages: {
@@ -64,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       title: t('meta.title', { name: store.name }),
-      description: store.description ? stripHtml(store.description, 160) : t('meta.description', { name: store.name }),
+      description: (store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }),
       url: `${BASE_URL}/${locale}/stores/${store.slug}`,
       type: 'website',
       images: [
@@ -79,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: t('meta.title', { name: store.name }),
-      description: store.description ? stripHtml(store.description, 160) : t('meta.description', { name: store.name }),
+      description: (store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }),
       images: [ogImage],
     },
   };
@@ -151,8 +150,8 @@ export default async function StoreDetailPage({ params }: Props) {
               <div className="flex-1 text-center md:text-left space-y-4">
                 <div>
                   <h1 className="text-4xl font-bold font-display text-foreground mb-2">{store.name}</h1>
-                  {store.description && (
-                    <p className="text-lg text-muted-foreground max-w-2xl line-clamp-3">{stripHtml(store.description)}</p>
+                  {(store.intro || store.description) && (
+                    <p className="text-lg text-muted-foreground max-w-2xl line-clamp-3">{stripHtml(store.intro || store.description)}</p>
                   )}
                 </div>
 
@@ -201,21 +200,6 @@ export default async function StoreDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* 关于商家 - 富文本简介 */}
-        {store.description && (
-          <section className="container mx-auto px-4 max-w-4xl py-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100">
-                <StoreIcon className="w-5 h-5 text-cyan-600" />
-              </div>
-              <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
-                {t('aboutStore', { name: store.name })}
-              </h2>
-            </div>
-            <MarkdownRenderer content={store.description} className="prose prose-lg prose-slate max-w-none" />
-          </section>
-        )}
-
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold font-display flex items-center gap-2">
@@ -241,31 +225,22 @@ export default async function StoreDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Offers Section */}
-          <div className="flex items-center justify-between mb-8 mt-12">
-            <h2 className="text-2xl font-bold font-display flex items-center gap-2">
-              <span className="w-1 h-8 bg-emerald-500 rounded-full block"></span>
-              {t('offersSectionTitle')}
-            </h2>
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              {t('offersCount', { count: offers.length })}
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {offers.length > 0 ? offers.map(offer => (
-              <OfferCard key={offer.id} offer={offer} />
-            )) : (
-              <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Gift size={24} className="text-gray-400" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">{t('emptyOffersTitle')}</h3>
-                <p className="text-gray-500">{t('emptyOffersDescription')}</p>
-              </div>
-            )}
-          </div>
         </div>
+
+        {/* 商家描述 - 富文本（about 为空回退 description） */}
+        {(store.about || store.description) && (
+          <section className="container mx-auto px-4 max-w-4xl py-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100">
+                <StoreIcon className="w-5 h-5 text-cyan-600" />
+              </div>
+              <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
+                {t('aboutStore', { name: store.name })}
+              </h2>
+            </div>
+            <MarkdownRenderer content={store.about || store.description} className="prose prose-lg prose-slate max-w-none" />
+          </section>
+        )}
       </main>
     </>
   );

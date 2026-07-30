@@ -78,10 +78,10 @@ export function StoreCard({ store, locale = 'en' }: { store: Store; locale?: str
           </div>
 
           {/* Description if available */}
-          {store.description && (
+          {(store.intro || store.description) && (
             <div className="mt-4">
               <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                {stripHtml(store.description)}
+                {stripHtml(store.intro || store.description)}
               </p>
             </div>
           )}

@@ -74,6 +74,10 @@ export interface MerchantVO {
   domain: string
   logoUrl: string
   description: string
+  /** 商家简介（短文本，为空回退 description） */
+  intro?: string
+  /** 商家描述（长富文本，为空回退 description） */
+  about?: string
   rating: number
   status: number
   regions: string
