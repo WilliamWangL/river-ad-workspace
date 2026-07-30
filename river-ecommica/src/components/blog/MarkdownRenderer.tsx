@@ -22,6 +22,24 @@ function isHtmlContent(content: string): boolean {
   return (startsWithTag || hasBlockTags) && hasClosingTag;
 }
 
+// 检测内容是否包含 Markdown 语法特征
+function isMarkdownContent(content: string): boolean {
+  const lines = content.split('\n');
+  for (const raw of lines) {
+    const trimmed = raw.trimStart();
+    if (/^#{1,6}\s/.test(trimmed)) return true; // 标题
+    if (/^>\s?/.test(trimmed)) return true; // 引用
+    if (/^[-*+]\s/.test(trimmed)) return true; // 无序列表
+    if (/^\d+\.\s/.test(trimmed)) return true; // 有序列表
+    if (/^\|/.test(trimmed)) return true; // 表格
+    if (/^(---|\*\*\*|___)\s*$/.test(trimmed)) return true; // 水平线
+    if (/^```/.test(trimmed)) return true; // 代码块
+  }
+  // 行内语法：粗体/斜体/删除线/代码/链接/图片
+  if (/\*\*|__|~~|`|!\[[^\]]*\]|\[[^\]]+\]\([^)]+\)/.test(content)) return true;
+  return false;
+}
+
 // 解码基础 HTML 实体
 function decodeHtmlEntities(content: string): string {
   return content
@@ -106,6 +124,15 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
         className={`markdown-renderer ${className}`}
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(decodedContent) }}
       />
+    );
+  }
+
+  // 纯文本（不含 Markdown 语法）：按文本原样显示，避免被 Markdown 误解析
+  if (!isMarkdownContent(processedContent)) {
+    return (
+      <div className={`markdown-renderer ${className}`}>
+        <p className="whitespace-pre-wrap">{processedContent}</p>
+      </div>
     );
   }
 
