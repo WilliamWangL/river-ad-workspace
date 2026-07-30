@@ -43,8 +43,14 @@ public class MerchantDO extends TenantBaseDO {
     /** Logo URL */
     private String logoUrl;
 
-    /** 商家描述 */
+    /** 商家描述（联盟同步的原始描述，作为简介/详情的回退值） */
     private String description;
+
+    /** 商家简介（短文本，用于详情页头部摘要，为空时回退到 description） */
+    private String intro;
+
+    /** 商家描述（长富文本，用于详情页底部，为空时回退到 description） */
+    private String about;
 
     /** 商家评级（1-5） */
     private BigDecimal rating;
