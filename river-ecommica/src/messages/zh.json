@@ -455,7 +455,11 @@
     "offersCount": "{count} 个推广计划",
     "emptyOffersTitle": "暂无推广计划",
     "emptyOffersDescription": "目前没有可用的推广计划",
-    "aboutStore": "关于 {name}"
+    "aboutStore": "关于 {name}",
+    "couponsTitle": "优惠券",
+    "couponsAvailable": "{count} 张优惠券可用",
+    "noCouponsTitle": "暂无优惠券",
+    "noCouponsDescription": "目前没有 {name} 的优惠券"
   },
   "Offer": {
     "type": {

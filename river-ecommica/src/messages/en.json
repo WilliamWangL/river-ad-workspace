@@ -455,7 +455,11 @@
     "offersCount": "{count} Programs",
     "emptyOffersTitle": "No programs yet",
     "emptyOffersDescription": "No affiliate programs available at the moment",
-    "aboutStore": "About {name}"
+    "aboutStore": "About {name}",
+    "couponsTitle": "Coupons",
+    "couponsAvailable": "{count} coupons available",
+    "noCouponsTitle": "No coupons available",
+    "noCouponsDescription": "There are no coupons for {name} at the moment."
   },
   "DealDetail": {
     "meta": {
