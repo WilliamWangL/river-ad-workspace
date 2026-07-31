@@ -2,11 +2,12 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchStores, fetchStoreBySlug, fetchDeals, fetchOffersByMerchant } from '@/lib/api';
+import { fetchStores, fetchStoreBySlug, fetchDeals, fetchCoupons, fetchOffersByMerchant } from '@/lib/api';
 import { getTrackingLink } from '@/lib/tracking';
 import { stripHtml } from '@/lib/utils';
 import { MarkdownRenderer } from '@/components/blog';
 import DealCard from '@/components/deal/DealCard';
+import CouponCard from '@/components/coupon/CouponCard';
 import { Badge } from '@/components/ui/badge';
 import { JsonLd, BASE_URL, generateStoreJsonLd, generateBreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -94,9 +95,10 @@ export default async function StoreDetailPage({ params }: Props) {
     notFound();
   }
 
-  // 并行获取 deals 和 offers
-  const [{ list: deals }, offers] = await Promise.all([
+  // 并行获取 deals、coupons 和 offers
+  const [{ list: deals }, { list: coupons }, offers] = await Promise.all([
     fetchDeals({ merchantId: store.id }),
+    fetchCoupons({ merchantId: store.id }),
     fetchOffersByMerchant(store.id),
   ]);
 
@@ -225,6 +227,34 @@ export default async function StoreDetailPage({ params }: Props) {
             )}
           </div>
 
+          {/* Coupons Section */}
+          <div className="mt-14">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold font-display flex items-center gap-2">
+                <span className="w-1 h-8 bg-orange-500 rounded-full block"></span>
+                {t('couponsTitle')}
+              </h2>
+              <Badge variant="outline" className="text-sm px-3 py-1">
+                {t('couponsAvailable', { count: coupons.length })}
+              </Badge>
+            </div>
+
+            {coupons.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
+                {coupons.map(coupon => (
+                  <CouponCard key={coupon.id} coupon={coupon} locale={locale} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Ticket size={24} className="text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">{t('noCouponsTitle')}</h3>
+                <p className="text-gray-500">{t('noCouponsDescription', { name: store.name })}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 商家描述 - 富文本（about 为空回退 description） */}
