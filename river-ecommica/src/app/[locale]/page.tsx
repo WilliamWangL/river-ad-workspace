@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DealCard } from '@/components/deal/DealCard';
 import { StoreCard } from '@/components/store/StoreCard';
-import { AffiliateNetworks } from '@/components/home/AffiliateNetworks';
 import { CategorySection } from '@/components/home/CategorySection';
 import { fetchDeals, fetchStores, fetchCategories } from '@/lib/api';
 import { getCurrentRegion } from '@/lib/region';
@@ -393,11 +392,6 @@ export default async function HomePage({
           </div>
         </div>
       </section>
-
-      {/* ============================================
-          AFFILIATE NETWORKS
-          ============================================ */}
-      <AffiliateNetworks />
 
       {/* ============================================
           CTA SECTION
