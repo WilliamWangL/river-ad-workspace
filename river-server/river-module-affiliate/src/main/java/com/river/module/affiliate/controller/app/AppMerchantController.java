@@ -85,6 +85,8 @@ public class AppMerchantController {
         vo.setDescription(merchant.getDescription());
         vo.setIntro(merchant.getIntro());
         vo.setAbout(merchant.getAbout());
+        vo.setMetaTitle(merchant.getMetaTitle());
+        vo.setMetaDescription(merchant.getMetaDescription());
         vo.setRating(merchant.getRating());
         vo.setRegions(merchant.getRegions() != null ? merchant.getRegions() : Collections.emptyList());
         vo.setDealCount(dealCount != null ? dealCount.intValue() : 0);
@@ -111,6 +113,8 @@ public class AppMerchantController {
             vo.setDescription(merchant.getDescription());
             vo.setIntro(merchant.getIntro());
             vo.setAbout(merchant.getAbout());
+            vo.setMetaTitle(merchant.getMetaTitle());
+            vo.setMetaDescription(merchant.getMetaDescription());
             vo.setRating(merchant.getRating());
             vo.setRegions(merchant.getRegions() != null ? merchant.getRegions() : Collections.emptyList());
             Long dealCount = dealCounts.getOrDefault(merchant.getId(), 0L);

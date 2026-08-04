@@ -47,12 +47,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: t('meta.notFound') };
   }
 
-  const description = deal.description || t('meta.description', { percent: deal.discountPercent, store: deal.merchant.name });
+  // SEO: metaTitle 优先，为空回退默认标题；metaDescription 优先，为空回退 description
+  const pageTitle = deal.metaTitle || `${deal.title} - ${deal.merchant.name}`;
+  const pageDescription = deal.metaDescription || deal.description || t('meta.description', { percent: deal.discountPercent, store: deal.merchant.name });
   const ogImage = deal.imageUrl || '/og-image.png';
 
   return {
-    title: `${deal.title} - ${deal.merchant.name}`,
-    description,
+    title: pageTitle,
+    description: pageDescription,
     alternates: {
       canonical: `${BASE_URL}/${locale}/deals/${deal.slug}`,
       languages: {
@@ -61,8 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: `${deal.title} - ${deal.merchant.name}`,
-      description,
+      title: pageTitle,
+      description: pageDescription,
       url: `${BASE_URL}/${locale}/deals/${deal.slug}`,
       type: 'article',
       images: [
@@ -76,8 +78,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${deal.title} - ${deal.merchant.name}`,
-      description,
+      title: pageTitle,
+      description: pageDescription,
       images: [ogImage],
     },
   };

@@ -52,6 +52,12 @@ public class MerchantDO extends TenantBaseDO {
     /** 商家描述（长富文本，用于详情页底部，为空时回退到 description） */
     private String about;
 
+    /** SEO 页面标题（为空时回退到 name） */
+    private String metaTitle;
+
+    /** SEO meta 描述（为空时回退到 intro/description） */
+    private String metaDescription;
+
     /** 商家评级（1-5） */
     private BigDecimal rating;
 

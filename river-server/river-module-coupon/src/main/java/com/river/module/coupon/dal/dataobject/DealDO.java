@@ -39,6 +39,12 @@ public class DealDO extends TenantBaseDO {
 
     private String description;
 
+    /** SEO 页面标题（为空时回退到 title） */
+    private String metaTitle;
+
+    /** SEO meta 描述（为空时回退到 description） */
+    private String metaDescription;
+
     private BigDecimal originalPrice;
 
     private BigDecimal dealPrice;

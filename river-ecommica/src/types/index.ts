@@ -10,6 +10,10 @@ export interface Deal {
   slug: string;
   title: string;
   description: string;
+  /** SEO 页面标题（为空回退 title） */
+  metaTitle?: string;
+  /** SEO meta 描述（为空回退 description） */
+  metaDescription?: string;
   originalPrice: number;
   dealPrice: number;
   discountPercent: number;
@@ -33,6 +37,10 @@ export interface Store {
   intro?: string;
   /** 商家描述（长富文本，为空回退 description） */
   about?: string;
+  /** SEO 页面标题（为空回退 name） */
+  metaTitle?: string;
+  /** SEO meta 描述（为空回退 intro/description） */
+  metaDescription?: string;
   domain: string;
   rating: number;
   dealCount: number;
@@ -57,6 +65,10 @@ export interface Coupon {
   id: number;
   code: string;
   title?: string;
+  /** SEO 页面标题（为空回退 title） */
+  metaTitle?: string;
+  /** SEO meta 描述（为空回退 terms） */
+  metaDescription?: string;
   description: string;
   discountType: number;
   discountValue: number;

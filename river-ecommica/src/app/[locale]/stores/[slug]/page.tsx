@@ -52,9 +52,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const ogImage = store.logoUrl || '/og-image.png';
 
+  // SEO: metaTitle 优先，为空回退 i18n 默认标题
+  const pageTitle = store.metaTitle || t('meta.title', { name: store.name });
+  // SEO: metaDescription 优先，为空回退 intro/description
+  const pageDescription = store.metaDescription
+    || ((store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }));
+
   return {
-    title: t('meta.title', { name: store.name }),
-    description: (store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }),
+    title: pageTitle,
+    description: pageDescription,
     alternates: {
       canonical: `${BASE_URL}/${locale}/stores/${store.slug}`,
       languages: {
@@ -63,8 +69,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: t('meta.title', { name: store.name }),
-      description: (store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }),
+      title: pageTitle,
+      description: pageDescription,
       url: `${BASE_URL}/${locale}/stores/${store.slug}`,
       type: 'website',
       images: [
@@ -78,8 +84,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: t('meta.title', { name: store.name }),
-      description: (store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }),
+      title: pageTitle,
+      description: pageDescription,
       images: [ogImage],
     },
   };

@@ -26,6 +26,12 @@ public class CouponSaveReqVO {
     @NotBlank(message = "优惠码不能为空")
     private String code;
 
+    @Schema(description = "SEO 页面标题（为空回退 title）", example = "20% Off Nike Coupon Code 2026")
+    private String metaTitle;
+
+    @Schema(description = "SEO meta 描述（为空回退 terms）", example = "Save 20% on your order with Nike coupon code SAVE20")
+    private String metaDescription;
+
     @Schema(description = "折扣类型：1-百分比 2-固定金额 3-免邮", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "折扣类型不能为空")
     private Integer discountType;

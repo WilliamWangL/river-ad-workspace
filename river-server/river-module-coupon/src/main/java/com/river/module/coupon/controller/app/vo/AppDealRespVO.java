@@ -22,6 +22,12 @@ public class AppDealRespVO {
     @Schema(description = "Deal描述", example = "Get 50% off sitewide")
     private String description;
 
+    @Schema(description = "SEO 页面标题（为空回退 title）", example = "50% Off Everything - Amazon Deal 2026")
+    private String metaTitle;
+
+    @Schema(description = "SEO meta 描述（为空回退 description）", example = "Get 50% off sitewide at Amazon. Limited time offer!")
+    private String metaDescription;
+
     @Schema(description = "原价", example = "100.00")
     private BigDecimal originalPrice;
 

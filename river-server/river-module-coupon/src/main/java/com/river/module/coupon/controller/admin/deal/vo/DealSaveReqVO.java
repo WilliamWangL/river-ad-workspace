@@ -29,6 +29,12 @@ public class DealSaveReqVO {
     @Schema(description = "描述")
     private String description;
 
+    @Schema(description = "SEO 页面标题（为空回退 title）", example = "50% Off Electronics - Amazon Deal 2026")
+    private String metaTitle;
+
+    @Schema(description = "SEO meta 描述（为空回退 description）", example = "Get 50% off electronics at Amazon. Limited time offer!")
+    private String metaDescription;
+
     @Schema(description = "原价", example = "199.99")
     private BigDecimal originalPrice;
 

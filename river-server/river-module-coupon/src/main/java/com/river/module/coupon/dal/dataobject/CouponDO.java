@@ -38,6 +38,12 @@ public class CouponDO extends TenantBaseDO {
 
     private String code;
 
+    /** SEO 页面标题（为空时回退到 title） */
+    private String metaTitle;
+
+    /** SEO meta 描述（为空时回退到 terms） */
+    private String metaDescription;
+
     private Integer discountType;
 
     private BigDecimal discountValue;
