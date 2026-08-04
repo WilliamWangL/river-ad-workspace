@@ -41,6 +41,12 @@ public class MerchantSaveReqVO {
     @Schema(description = "商家描述（长富文本，为空回退 description）")
     private String about;
 
+    @Schema(description = "SEO 页面标题（为空回退 name）", example = "Amazon Deals & Coupons 2026")
+    private String metaTitle;
+
+    @Schema(description = "SEO meta 描述（为空回退 intro/description）", example = "Save up to 50% with Amazon coupons and deals")
+    private String metaDescription;
+
     @Schema(description = "商家评级（1-5）", example = "4.5")
     private BigDecimal rating;
 
