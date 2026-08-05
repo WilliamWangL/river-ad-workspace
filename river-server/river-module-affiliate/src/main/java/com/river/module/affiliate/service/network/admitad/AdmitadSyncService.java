@@ -110,10 +110,22 @@ public class AdmitadSyncService {
                 break;
             }
 
+            // Filter to only active partnerships (exclude pending/declined/suspended)
+            List<AdmitadCampaign> activeCampaigns = campaigns.stream()
+                .filter(c -> "active".equalsIgnoreCase(c.getConnectionStatus()))
+                .toList();
+            if (activeCampaigns.isEmpty()) {
+                offset += limit;
+                if (campaigns.size() < limit) {
+                    break;
+                }
+                continue;
+            }
+
             // Batch sync: preload existing merchants and process in batch
-            syncCampaignsBatch(credential.getNetworkId(), campaigns, credential);
-            totalSynced += campaigns.size();
-            this.lastSyncMerchants += campaigns.size();
+            syncCampaignsBatch(credential.getNetworkId(), activeCampaigns, credential);
+            totalSynced += activeCampaigns.size();
+            this.lastSyncMerchants += activeCampaigns.size();
 
             offset += limit;
             if (campaigns.size() < limit) {
@@ -138,9 +150,18 @@ public class AdmitadSyncService {
             return;
         }
 
+        // 0. 只同步合作关系为 active 的 campaigns（排除 pending/declined/suspended）
+        List<AdmitadCampaign> activeCampaigns = campaigns.stream()
+            .filter(c -> "active".equalsIgnoreCase(c.getConnectionStatus()))
+            .toList();
+        if (activeCampaigns.isEmpty()) {
+            log.debug("No active campaigns to sync (skipped {} non-active)", campaigns.size());
+            return;
+        }
+
         // 1. 去重：同一批次内按 externalId 去重（保留最后一条）
         Map<String, AdmitadCampaign> campaignMap = new HashMap<>();
-        for (AdmitadCampaign campaign : campaigns) {
+        for (AdmitadCampaign campaign : activeCampaigns) {
             campaignMap.put(String.valueOf(campaign.getId()), campaign);
         }
 
