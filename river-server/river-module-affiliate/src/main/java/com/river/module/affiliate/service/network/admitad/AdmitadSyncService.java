@@ -36,18 +36,11 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-import com.river.framework.common.biz.tracking.TrackingLinkCommonApi;
-import com.river.framework.common.biz.tracking.dto.TrackingLinkCreateReqDTO;
 import com.river.module.affiliate.controller.admin.network.AffiliateNetworkController;
 
 @Slf4j
 @Service
 public class AdmitadSyncService {
-
-    /** 目标类型常量 */
-    private static final int TARGET_TYPE_OFFER = 2;
-    private static final int TARGET_TYPE_DEAL = 3;
-    private static final int TARGET_TYPE_COUPON = 4;
 
     @Resource
     private AdmitadClient admitadClient;
@@ -69,9 +62,6 @@ public class AdmitadSyncService {
 
     @Resource
     private DealMapper dealMapper;
-
-    @Resource
-    private TrackingLinkCommonApi trackingLinkCommonApi;
 
     @Resource
     private NetworkCredentialMapper credentialMapper;
@@ -217,10 +207,6 @@ public class AdmitadSyncService {
             syncOffersBatch(networkId, merchantId, offers);
             this.lastSyncOffers += offers.size();
 
-            // 创建 TrackingLinks
-            for (OfferDO offer : offers) {
-                createOrUpdateOfferTrackingLink(offer);
-            }
         }
     }
 
@@ -421,13 +407,6 @@ public class AdmitadSyncService {
             log.info("Batch updated {} coupons", toUpdate.size());
         }
 
-        // 创建 TrackingLinks
-        for (CouponDO coupon : toInsert) {
-            createOrUpdateCouponTrackingLink(coupon);
-        }
-        for (CouponDO coupon : toUpdate) {
-            createOrUpdateCouponTrackingLink(coupon);
-        }
     }
 
     /**
@@ -493,13 +472,6 @@ public class AdmitadSyncService {
             log.info("Batch updated {} deals", toUpdate.size());
         }
 
-        // 创建 TrackingLinks
-        for (DealDO deal : toInsert) {
-            createOrUpdateDealTrackingLink(deal);
-        }
-        for (DealDO deal : toUpdate) {
-            createOrUpdateDealTrackingLink(deal);
-        }
     }
 
     // ==================== 单个同步方法（向后兼容） ====================
@@ -577,7 +549,6 @@ public class AdmitadSyncService {
             offerMapper.insert(offer);
         }
 
-        createOrUpdateOfferTrackingLink(offer);
         return offer;
     }
 
@@ -628,7 +599,7 @@ public class AdmitadSyncService {
     }
 
     /**
-     * 生成 TrackingLink 的 slug，统一格式：{type}-{name-slug}-{id}
+     * 生成 slug，统一格式：{type}-{name-slug}-{id}
      * @param type 类型前缀（merchant, offer, deal, coupon）
      * @param name 名称（用于生成可读的 slug）
      * @param id 实体 ID（保证唯一性）
@@ -884,11 +855,9 @@ public class AdmitadSyncService {
         if (existingCoupon != null) {
             updateCoupon(existingCoupon, networkId, merchantId, admitadCoupon);
             couponMapper.updateById(existingCoupon);
-            createOrUpdateCouponTrackingLink(existingCoupon);
         } else {
             CouponDO coupon = createCoupon(networkId, merchantId, admitadCoupon);
             couponMapper.insert(coupon);
-            createOrUpdateCouponTrackingLink(coupon);
         }
     }
 
@@ -950,11 +919,9 @@ public class AdmitadSyncService {
         if (existingDeal != null) {
             updateDeal(existingDeal, networkId, merchantId, admitadCoupon);
             dealMapper.updateById(existingDeal);
-            createOrUpdateDealTrackingLink(existingDeal);
         } else {
             DealDO deal = createDeal(networkId, merchantId, admitadCoupon);
             dealMapper.insert(deal);
-            createOrUpdateDealTrackingLink(deal);
         }
     }
 
@@ -994,105 +961,6 @@ public class AdmitadSyncService {
         if (admitadCoupon.getCategories() != null && !admitadCoupon.getCategories().isEmpty()) {
             String categoryIds = mapCouponCategories(networkId, admitadCoupon.getCategories());
             deal.setCategoryIds(categoryIds);
-        }
-    }
-
-    private void createOrUpdateCouponTrackingLink(CouponDO coupon) {
-        try {
-            String trackingUrl = coupon.getGotoUrl();
-            if (trackingUrl == null && coupon.getMerchantId() != null) {
-                MerchantDO merchant = merchantMapper.selectById(coupon.getMerchantId());
-                if (merchant != null && merchant.getExternalId() != null) {
-                    trackingUrl = String.format(
-                        "https://ad.admitad.com/g/%s/?subid={click_id}&subid1={sub1}&subid2={sub2}",
-                        merchant.getExternalId());
-                }
-            }
-
-            if (trackingUrl == null) {
-                log.warn("Cannot create tracking link for coupon {}: no tracking URL available", coupon.getId());
-                return;
-            }
-
-            String slug = generateTrackingSlug("coupon", coupon.getTitle(), coupon.getId());
-
-            TrackingLinkCreateReqDTO reqDTO = new TrackingLinkCreateReqDTO();
-            reqDTO.setTargetType(TARGET_TYPE_COUPON);
-            reqDTO.setTargetId(coupon.getId());
-            reqDTO.setMerchantId(coupon.getMerchantId());
-            reqDTO.setSlug(slug);
-            reqDTO.setTrackingUrl(trackingUrl);
-
-            trackingLinkCommonApi.createOrUpdateTrackingLink(reqDTO);
-            log.debug("Created/updated tracking link for coupon={}", coupon.getId());
-        } catch (Exception e) {
-            log.error("Failed to create/update tracking link for coupon {}: {}", coupon.getId(), e.getMessage());
-        }
-    }
-
-    private void createOrUpdateDealTrackingLink(DealDO deal) {
-        try {
-            String trackingUrl = deal.getGotoUrl();
-            if (trackingUrl == null && deal.getMerchantId() != null) {
-                MerchantDO merchant = merchantMapper.selectById(deal.getMerchantId());
-                if (merchant != null && merchant.getExternalId() != null) {
-                    trackingUrl = String.format(
-                        "https://ad.admitad.com/g/%s/?subid={click_id}&subid1={sub1}&subid2={sub2}",
-                        merchant.getExternalId());
-                }
-            }
-
-            if (trackingUrl == null) {
-                log.warn("Cannot create tracking link for deal {}: no tracking URL available", deal.getId());
-                return;
-            }
-
-            String slug = generateTrackingSlug("deal", deal.getTitle(), deal.getId());
-
-            TrackingLinkCreateReqDTO reqDTO = new TrackingLinkCreateReqDTO();
-            reqDTO.setTargetType(TARGET_TYPE_DEAL);
-            reqDTO.setTargetId(deal.getId());
-            reqDTO.setMerchantId(deal.getMerchantId());
-            reqDTO.setSlug(slug);
-            reqDTO.setTrackingUrl(trackingUrl);
-
-            trackingLinkCommonApi.createOrUpdateTrackingLink(reqDTO);
-            log.debug("Created/updated tracking link for deal={}", deal.getId());
-        } catch (Exception e) {
-            log.error("Failed to create/update tracking link for deal {}: {}", deal.getId(), e.getMessage());
-        }
-    }
-
-    private void createOrUpdateOfferTrackingLink(OfferDO offer) {
-        try {
-            String trackingUrl = offer.getGotoUrl();
-            if (trackingUrl == null) {
-                MerchantDO merchant = merchantMapper.selectById(offer.getMerchantId());
-                if (merchant != null && merchant.getExternalId() != null) {
-                    trackingUrl = String.format(
-                        "https://ad.admitad.com/g/%s/?subid={click_id}&subid1={sub1}&subid2={sub2}",
-                        merchant.getExternalId());
-                }
-            }
-
-            if (trackingUrl == null) {
-                log.warn("Cannot create tracking link for offer {}: no tracking URL available", offer.getId());
-                return;
-            }
-
-            String slug = generateTrackingSlug("offer", offer.getName(), offer.getId());
-
-            TrackingLinkCreateReqDTO reqDTO = new TrackingLinkCreateReqDTO();
-            reqDTO.setTargetType(TARGET_TYPE_OFFER);
-            reqDTO.setTargetId(offer.getId());
-            reqDTO.setMerchantId(offer.getMerchantId());
-            reqDTO.setSlug(slug);
-            reqDTO.setTrackingUrl(trackingUrl);
-
-            trackingLinkCommonApi.createOrUpdateTrackingLink(reqDTO);
-            log.debug("Created/updated tracking link for offer={}", offer.getId());
-        } catch (Exception e) {
-            log.error("Failed to create/update tracking link for offer {}: {}", offer.getId(), e.getMessage());
         }
     }
 

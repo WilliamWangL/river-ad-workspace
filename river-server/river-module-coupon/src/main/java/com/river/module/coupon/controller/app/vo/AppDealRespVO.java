@@ -58,9 +58,6 @@ public class AppDealRespVO {
     @Schema(description = "是否精选", example = "true")
     private Boolean featured;
 
-    @Schema(description = "追踪链接ID", example = "abc123")
-    private String trackingLinkId;
-
     @Schema(description = "跳转链接", example = "https://www.amazon.com/dp/B0123456")
     private String gotoUrl;
 
