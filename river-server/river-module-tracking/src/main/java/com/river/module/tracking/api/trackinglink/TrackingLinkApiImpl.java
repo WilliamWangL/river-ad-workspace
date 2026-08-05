@@ -38,6 +38,7 @@ public class TrackingLinkApiImpl implements TrackingLinkCommonApi {
             // 更新现有链接
             existingLink.setSlug(reqDTO.getSlug());
             existingLink.setTrackingUrl(reqDTO.getTrackingUrl());
+            existingLink.setMerchantId(reqDTO.getMerchantId());
             existingLink.setStatus(CommonStatusEnum.ENABLE.getStatus());
             trackingLinkService.updateTrackingLink(existingLink);
             return BeanUtils.toBean(existingLink, TrackingLinkRespDTO.class);

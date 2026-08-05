@@ -19,6 +19,9 @@ public class TrackingLinkCreateReqDTO {
     @NotNull(message = "目标 ID 不能为空")
     private Long targetId;
 
+    @Schema(description = "商家 ID（冗余字段，便于点击记录填充）", example = "1")
+    private Long merchantId;
+
     @Schema(description = "短链接标识", example = "offer-1")
     private String slug;
 

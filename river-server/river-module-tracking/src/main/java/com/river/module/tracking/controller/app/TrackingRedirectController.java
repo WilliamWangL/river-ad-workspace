@@ -15,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.Map;
+
 @Tag(name = "公开 API - 追踪重定向")
 @RestController
 @RequestMapping("/api/go")
@@ -22,13 +24,21 @@ import org.springframework.web.servlet.view.RedirectView;
 @Slf4j
 public class TrackingRedirectController {
 
+    private static final Map<String, Integer> TYPE_MAP = Map.of(
+            "merchant", 1,
+            "offer", 2,
+            "deal", 3,
+            "coupon", 4
+    );
+
     @Resource
     private ClickService clickService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/{type}/{id}")
     @Operation(summary = "追踪重定向", description = "记录点击并重定向到联盟链接")
     @Parameters({
-            @Parameter(name = "id", description = "追踪链接 ID 或 Slug", required = true),
+            @Parameter(name = "type", description = "目标类型: merchant/offer/deal/coupon", required = true),
+            @Parameter(name = "id", description = "目标实体 ID", required = true),
             @Parameter(name = "sub1", description = "Sub ID 1"),
             @Parameter(name = "sub2", description = "Sub ID 2"),
             @Parameter(name = "sub3", description = "Sub ID 3"),
@@ -36,9 +46,10 @@ public class TrackingRedirectController {
             @Parameter(name = "sub5", description = "Sub ID 5")
     })
     @PermitAll
-    @TenantIgnore  // 追踪重定向不需要租户校验，TrackingLink 本身已关联租户
+    @TenantIgnore
     public RedirectView redirect(
-            @PathVariable("id") String id,
+            @PathVariable("type") String type,
+            @PathVariable("id") Long id,
             @RequestParam(value = "sub1", required = false) String sub1,
             @RequestParam(value = "sub2", required = false) String sub2,
             @RequestParam(value = "sub3", required = false) String sub3,
@@ -46,12 +57,20 @@ public class TrackingRedirectController {
             @RequestParam(value = "sub5", required = false) String sub5,
             HttpServletRequest request) {
 
+        Integer targetType = TYPE_MAP.get(type.toLowerCase());
+        if (targetType == null) {
+            log.warn("Invalid tracking type: {}", type);
+            RedirectView errorView = new RedirectView("/");
+            errorView.setStatusCode(HttpStatus.FOUND);
+            return errorView;
+        }
+
         String ip = getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
         String referer = request.getHeader("Referer");
 
         String redirectUrl = clickService.recordClickAndGetRedirectUrl(
-                id, sub1, sub2, sub3, sub4, sub5, ip, userAgent, referer);
+                targetType, id, sub1, sub2, sub3, sub4, sub5, ip, userAgent, referer);
 
         RedirectView redirectView = new RedirectView(redirectUrl);
         redirectView.setStatusCode(HttpStatus.FOUND);

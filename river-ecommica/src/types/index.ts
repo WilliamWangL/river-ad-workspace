@@ -23,7 +23,6 @@ export interface Deal {
   featured: boolean;
   exclusive?: boolean;
   gotoUrl: string;
-  trackingLinkId?: string;
   merchant: MerchantSimple;
 }
 
@@ -57,8 +56,7 @@ export interface Offer {
   commissionValue: number;
   currency?: string;
   regions?: string[];
-  trackingLinkId?: string;
-  trackingUrl?: string;
+  gotoUrl?: string;
 }
 
 export interface Coupon {
@@ -76,7 +74,6 @@ export interface Coupon {
   endTime: string;
   verified: boolean;
   gotoUrl: string;
-  trackingLinkId?: string;
   merchant: MerchantSimple;
 }
 

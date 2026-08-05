@@ -23,6 +23,9 @@ public class TrackingLinkDO extends TenantBaseDO {
     /** 目标实体 ID */
     private Long targetId;
 
+    /** 商家 ID（冗余字段，便于点击记录填充） */
+    private Long merchantId;
+
     /** 短链接标识 */
     private String slug;
 

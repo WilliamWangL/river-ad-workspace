@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchStores, fetchStoreBySlug, fetchDeals, fetchCoupons, fetchOffersByMerchant } from '@/lib/api';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTrackingUrl } from '@/lib/tracking';
 import { stripHtml } from '@/lib/utils';
 import { MarkdownRenderer } from '@/components/blog';
 import DealCard from '@/components/deal/DealCard';
@@ -110,9 +110,9 @@ export default async function StoreDetailPage({ params }: Props) {
 
   // 获取第一个可用的 Offer（用于 Visit Store 按钮）
   const firstOffer = offers.length > 0 ? offers[0] : null;
-  // Visit Store URL：有可用 Offer 使用其 tracking link，否则跳转商家官网
-  const visitStoreUrl = firstOffer?.trackingLinkId
-    ? getTrackingLink(firstOffer.trackingLinkId, firstOffer.trackingUrl)
+  // Visit Store URL：有可用 Offer 使用其追踪链接，否则跳转商家官网
+  const visitStoreUrl = firstOffer?.gotoUrl
+    ? getTrackingUrl('offer', firstOffer.id, firstOffer.gotoUrl)
     : `https://${store.domain}`;
 
   const breadcrumbs = [

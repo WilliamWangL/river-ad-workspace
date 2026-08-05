@@ -24,6 +24,12 @@ public class ClickPageReqVO extends PageParam {
     @Schema(description = "商家 ID")
     private Long merchantId;
 
+    @Schema(description = "优惠券 ID")
+    private Long couponId;
+
+    @Schema(description = "Deal ID")
+    private Long dealId;
+
     @Schema(description = "Campaign ID")
     private Long campaignId;
 

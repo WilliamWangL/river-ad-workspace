@@ -4,20 +4,20 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, Copy, ExternalLink, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTrackingUrl } from '@/lib/tracking';
 
 interface CouponCardActionsProps {
   code: string;
+  couponId: number;
   gotoUrl: string;
-  trackingLinkId?: string;
   getCouponText: string;
   expired?: boolean;
 }
 
 export function CouponCardActions({
   code,
+  couponId,
   gotoUrl,
-  trackingLinkId,
   getCouponText,
   expired,
 }: CouponCardActionsProps) {
@@ -100,7 +100,7 @@ export function CouponCardActions({
       {/* Footer Link */}
       <div className="mt-4 flex items-center justify-between">
         <a
-          href={getTrackingLink(trackingLinkId, gotoUrl)}
+          href={getTrackingUrl('coupon', couponId, gotoUrl)}
           target="_blank"
           rel="noopener"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors group/link hover-underline"

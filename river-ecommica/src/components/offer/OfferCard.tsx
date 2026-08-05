@@ -4,7 +4,7 @@ import { Offer } from "@/types"
 import { useTranslations } from 'next-intl';
 import { ArrowUpRight, Percent, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getTrackingLink } from "@/lib/tracking"
+import { getTrackingUrl } from "@/lib/tracking"
 
 interface OfferCardProps {
   offer: Offer;
@@ -37,9 +37,7 @@ export function OfferCard({ offer }: OfferCardProps) {
     return `${currency} ${offer.commissionValue}`;
   };
 
-  const trackingUrl = offer.trackingLinkId
-    ? getTrackingLink(offer.trackingLinkId, offer.trackingUrl)
-    : '#';
+  const trackingUrl = getTrackingUrl('offer', offer.id, offer.gotoUrl || '#');
 
   return (
     <article className="group relative card-interactive h-full flex flex-col overflow-hidden bg-gradient-to-br from-emerald-50/50 to-background border border-emerald-100/50">
@@ -79,7 +77,7 @@ export function OfferCard({ offer }: OfferCardProps) {
               "transition-all duration-300",
               "hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/20",
               "active:scale-[0.98]",
-              !offer.trackingLinkId && "opacity-50 pointer-events-none"
+              !offer.gotoUrl && "opacity-50 pointer-events-none"
             )}
           >
             <span>{t('visitOffer')}</span>

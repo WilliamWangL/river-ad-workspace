@@ -23,6 +23,8 @@ public interface ClickMapper extends BaseMapperX<ClickDO> {
                 .eqIfPresent(ClickDO::getTargetType, reqVO.getTargetType())
                 .eqIfPresent(ClickDO::getTargetId, reqVO.getTargetId())
                 .eqIfPresent(ClickDO::getMerchantId, reqVO.getMerchantId())
+                .eqIfPresent(ClickDO::getCouponId, reqVO.getCouponId())
+                .eqIfPresent(ClickDO::getDealId, reqVO.getDealId())
                 .eqIfPresent(ClickDO::getCampaignId, reqVO.getCampaignId())
                 .likeIfPresent(ClickDO::getSub1, reqVO.getSub1())
                 .likeIfPresent(ClickDO::getIp, reqVO.getIp())
