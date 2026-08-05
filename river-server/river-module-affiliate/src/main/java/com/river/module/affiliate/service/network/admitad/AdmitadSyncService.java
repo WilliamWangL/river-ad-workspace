@@ -141,8 +141,8 @@ public class AdmitadSyncService {
      * 批量同步 Campaigns/Merchants
      * 1. 预加载已存在的商家（减少重复查询）
      * 2. 去重：同一批次内按 externalId 去重
-     * 3. 幂等写入：区分 insert vs update
-     * 4. 批量操作：只使用 insertBatch（已存在的不修改）
+     * 3. 幂等写入：新商家 insert，已存在商家跳过（无 goto_url 字段）
+     * 4. 批量操作：insertBatch + 逐条 updateById
      */
     @Transactional
     public void syncCampaignsBatch(Long networkId, List<AdmitadCampaign> campaigns, NetworkCredentialDO credential) {
@@ -243,16 +243,29 @@ public class AdmitadSyncService {
             .collect(Collectors.toMap(OfferDO::getExternalId, o -> o));
 
         List<OfferDO> toInsert = new ArrayList<>();
+        List<OfferDO> toUpdate = new ArrayList<>();
 
         for (OfferDO offer : offers) {
-            if (!existingOfferMap.containsKey(offer.getExternalId())) {
+            OfferDO existing = existingOfferMap.get(offer.getExternalId());
+            if (existing == null) {
                 toInsert.add(offer);
+            } else {
+                // 已存在，只更新 goto_url
+                OfferDO update = new OfferDO();
+                update.setId(existing.getId());
+                update.setGotoUrl(offer.getGotoUrl());
+                toUpdate.add(update);
             }
         }
 
         if (!toInsert.isEmpty()) {
             offerMapper.insertBatch(toInsert);
-            log.info("Batch inserted {} offers (skipped {} existing)", toInsert.size(), offers.size() - toInsert.size());
+        }
+        for (OfferDO update : toUpdate) {
+            offerMapper.updateById(update);
+        }
+        if (!toInsert.isEmpty() || !toUpdate.isEmpty()) {
+            log.info("Offers: inserted {} new, updated goto_url for {} existing", toInsert.size(), toUpdate.size());
         }
     }
 
@@ -379,12 +392,11 @@ public class AdmitadSyncService {
         }
 
         List<CouponDO> toInsert = new ArrayList<>();
+        List<CouponDO> toUpdate = new ArrayList<>();
 
         for (AdmitadCoupon admitadCoupon : promoCodes) {
             String externalId = String.valueOf(admitadCoupon.getId());
-            if (existingCouponMap.containsKey(externalId)) {
-                continue; // 已存在，跳过
-            }
+            CouponDO existing = existingCouponMap.get(externalId);
 
             Long merchantId = null;
             if (admitadCoupon.getCampaign() != null) {
@@ -394,13 +406,26 @@ public class AdmitadSyncService {
                 }
             }
 
-            CouponDO coupon = createCoupon(networkId, merchantId, admitadCoupon);
-            toInsert.add(coupon);
+            if (existing != null) {
+                // 已存在，只更新 goto_url
+                CouponDO update = new CouponDO();
+                update.setId(existing.getId());
+                update.setGotoUrl(admitadCoupon.getGotoLink());
+                toUpdate.add(update);
+            } else {
+                CouponDO coupon = createCoupon(networkId, merchantId, admitadCoupon);
+                toInsert.add(coupon);
+            }
         }
 
         if (!toInsert.isEmpty()) {
             couponMapper.insertBatch(toInsert);
-            log.info("Batch inserted {} coupons (skipped {} existing)", toInsert.size(), promoCodes.size() - toInsert.size());
+        }
+        for (CouponDO update : toUpdate) {
+            couponMapper.updateById(update);
+        }
+        if (!toInsert.isEmpty() || !toUpdate.isEmpty()) {
+            log.info("Coupons: inserted {} new, updated goto_url for {} existing", toInsert.size(), toUpdate.size());
         }
 
     }
@@ -434,12 +459,11 @@ public class AdmitadSyncService {
         }
 
         List<DealDO> toInsert = new ArrayList<>();
+        List<DealDO> toUpdate = new ArrayList<>();
 
         for (AdmitadCoupon admitadCoupon : deals) {
             String externalId = String.valueOf(admitadCoupon.getId());
-            if (existingDealMap.containsKey(externalId)) {
-                continue; // 已存在，跳过
-            }
+            DealDO existing = existingDealMap.get(externalId);
 
             Long merchantId = null;
             if (admitadCoupon.getCampaign() != null) {
@@ -449,13 +473,26 @@ public class AdmitadSyncService {
                 }
             }
 
-            DealDO deal = createDeal(networkId, merchantId, admitadCoupon);
-            toInsert.add(deal);
+            if (existing != null) {
+                // 已存在，只更新 goto_url
+                DealDO update = new DealDO();
+                update.setId(existing.getId());
+                update.setGotoUrl(admitadCoupon.getGotoLink());
+                toUpdate.add(update);
+            } else {
+                DealDO deal = createDeal(networkId, merchantId, admitadCoupon);
+                toInsert.add(deal);
+            }
         }
 
         if (!toInsert.isEmpty()) {
             dealMapper.insertBatch(toInsert);
-            log.info("Batch inserted {} deals (skipped {} existing)", toInsert.size(), deals.size() - toInsert.size());
+        }
+        for (DealDO update : toUpdate) {
+            dealMapper.updateById(update);
+        }
+        if (!toInsert.isEmpty() || !toUpdate.isEmpty()) {
+            log.info("Deals: inserted {} new, updated goto_url for {} existing", toInsert.size(), toUpdate.size());
         }
 
     }
@@ -524,15 +561,18 @@ public class AdmitadSyncService {
         String externalId = campaign.getId() + "_" + action.getId();
         OfferDO existingOffer = offerMapper.selectByMerchantAndExternalId(merchantId, externalId);
 
-        OfferDO offer;
         if (existingOffer != null) {
-            // 已存在不修改，直接使用
-            offer = existingOffer;
-        } else {
-            offer = createOffer(networkId, merchantId, campaign, action, credential);
-            offerMapper.insert(offer);
+            // 已存在，只更新 goto_url
+            OfferDO newOffer = createOffer(networkId, merchantId, campaign, action, credential);
+            OfferDO update = new OfferDO();
+            update.setId(existingOffer.getId());
+            update.setGotoUrl(newOffer.getGotoUrl());
+            offerMapper.updateById(update);
+            return existingOffer;
         }
 
+        OfferDO offer = createOffer(networkId, merchantId, campaign, action, credential);
+        offerMapper.insert(offer);
         return offer;
     }
 
@@ -837,7 +877,11 @@ public class AdmitadSyncService {
         }
 
         if (existingCoupon != null) {
-            // 已存在不修改，直接跳过
+            // 已存在，只更新 goto_url
+            CouponDO update = new CouponDO();
+            update.setId(existingCoupon.getId());
+            update.setGotoUrl(admitadCoupon.getGotoLink());
+            couponMapper.updateById(update);
             return;
         }
         CouponDO coupon = createCoupon(networkId, merchantId, admitadCoupon);
@@ -900,7 +944,11 @@ public class AdmitadSyncService {
         }
 
         if (existingDeal != null) {
-            // 已存在不修改，直接跳过
+            // 已存在，只更新 goto_url
+            DealDO update = new DealDO();
+            update.setId(existingDeal.getId());
+            update.setGotoUrl(admitadCoupon.getGotoLink());
+            dealMapper.updateById(update);
             return;
         }
         DealDO deal = createDeal(networkId, merchantId, admitadCoupon);
