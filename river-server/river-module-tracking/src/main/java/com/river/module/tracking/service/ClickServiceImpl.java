@@ -66,7 +66,7 @@ public class ClickServiceImpl implements ClickService {
                 log.warn("GeoLite2-Country.mmdb not found in classpath, country resolution disabled");
                 return;
             }
-            geoIpReader = new DatabaseReader.Builder(IoUtil.readBytes(is)).build();
+            geoIpReader = new DatabaseReader.Builder(is).build();
             log.info("GeoIP2 database loaded successfully");
         } catch (Exception e) {
             log.error("Failed to load GeoIP2 database", e);
