@@ -100,7 +100,7 @@
       <el-table-column label="IP地址" prop="ip" width="140" />
       <el-table-column label="国家" prop="country" width="80">
         <template #default="scope">
-          <span v-if="scope.row.country">{{ scope.row.country }}</span>
+          <span v-if="scope.row.country" class="font-mono text-xs">{{ scope.row.country }}</span>
           <span v-else class="text-gray-400">-</span>
         </template>
       </el-table-column>
@@ -179,7 +179,7 @@
         {{ currentDetail.landingPageId || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="IP地址">{{ currentDetail.ip || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="国家代码">
+      <el-descriptions-item label="国家">
         {{ currentDetail.country || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="设备类型">

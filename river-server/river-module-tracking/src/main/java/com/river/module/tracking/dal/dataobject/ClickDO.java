@@ -73,7 +73,7 @@ public class ClickDO extends TenantBaseDO {
     /** 设备类型 */
     private String deviceType;
 
-    /** 国家 */
+    /** ISO 国家代码（如 US、CN、GB） */
     private String country;
 
     /** 点击时间 */

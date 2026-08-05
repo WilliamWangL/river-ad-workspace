@@ -28,7 +28,7 @@ CREATE TABLE `river_tracking_click` (
     `user_agent`          LONGTEXT COMMENT 'User-Agent',
     `referer`             LONGTEXT COMMENT 'Referer',
     `device_type`         VARCHAR(50) DEFAULT NULL COMMENT '设备类型',
-    `country`             VARCHAR(10) DEFAULT NULL COMMENT '国家',
+    `country`             VARCHAR(10) DEFAULT NULL COMMENT 'ISO 国家代码（如 US、CN、GB）',
     `click_time`          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '点击时间',
     `creator`             VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

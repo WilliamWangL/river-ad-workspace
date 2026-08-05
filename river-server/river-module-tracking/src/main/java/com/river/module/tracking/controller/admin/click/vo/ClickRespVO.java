@@ -66,7 +66,7 @@ public class ClickRespVO {
     @Schema(description = "设备类型")
     private String deviceType;
 
-    @Schema(description = "国家")
+    @Schema(description = "ISO 国家代码")
     private String country;
 
     @Schema(description = "点击时间")

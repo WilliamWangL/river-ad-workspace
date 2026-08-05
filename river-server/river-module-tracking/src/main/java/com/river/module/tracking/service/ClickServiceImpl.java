@@ -1,11 +1,10 @@
 package com.river.module.tracking.service;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
+import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.model.CountryResponse;
 import com.river.framework.common.pojo.PageResult;
-import com.river.framework.ip.core.Area;
-import com.river.framework.ip.core.enums.AreaTypeEnum;
-import com.river.framework.ip.core.utils.AreaUtils;
-import com.river.framework.ip.core.utils.IPUtils;
 import com.river.framework.tenant.core.util.TenantUtils;
 import com.river.module.affiliate.dal.dataobject.MerchantDO;
 import com.river.module.affiliate.dal.dataobject.OfferDO;
@@ -18,11 +17,15 @@ import com.river.module.coupon.service.DealService;
 import com.river.module.tracking.controller.admin.click.vo.ClickPageReqVO;
 import com.river.module.tracking.dal.dataobject.ClickDO;
 import com.river.module.tracking.dal.mysql.ClickMapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.io.InputStream;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -51,6 +54,29 @@ public class ClickServiceImpl implements ClickService {
 
     @Resource
     private MerchantService merchantService;
+
+    /** MaxMind GeoIP2 数据库读取器，启动时加载 */
+    private DatabaseReader geoIpReader;
+
+    @PostConstruct
+    public void initGeoIp() {
+        try (InputStream is = getClass().getClassLoader()
+                .getResourceAsStream("data/GeoLite2-Country.mmdb")) {
+            if (is == null) {
+                log.warn("GeoLite2-Country.mmdb not found in classpath, country resolution disabled");
+                return;
+            }
+            geoIpReader = new DatabaseReader.Builder(IoUtil.readBytes(is)).build();
+            log.info("GeoIP2 database loaded successfully");
+        } catch (Exception e) {
+            log.error("Failed to load GeoIP2 database", e);
+        }
+    }
+
+    @PreDestroy
+    public void destroyGeoIp() {
+        IoUtil.close(geoIpReader);
+    }
 
     @Override
     public ClickDO getClick(String clickId) {
@@ -96,7 +122,7 @@ public class ClickServiceImpl implements ClickService {
             Long dealId = targetType != null && targetType == 3 ? targetId : null;
             Long couponId = targetType != null && targetType == 4 ? targetId : null;
 
-            // 解析国家
+            // 解析国家 ISO 代码
             String country = resolveCountry(ip);
 
             // 构建 ClickDO
@@ -185,21 +211,17 @@ public class ClickServiceImpl implements ClickService {
     }
 
     /**
-     * 解析 IP 对应的国家名称
+     * 通过 MaxMind GeoIP2 解析 IP 对应的 ISO 国家代码（如 US、CN、GB）
      */
     private String resolveCountry(String ip) {
-        if (StrUtil.isBlank(ip)) {
+        if (StrUtil.isBlank(ip) || geoIpReader == null) {
             return null;
         }
         try {
-            Area area = IPUtils.getArea(ip);
-            if (area == null) {
-                return null;
-            }
-            Integer countryId = AreaUtils.getParentIdByType(area.getId(), AreaTypeEnum.COUNTRY);
-            if (countryId != null) {
-                Area country = AreaUtils.getArea(countryId);
-                return country != null ? country.getName() : null;
+            InetAddress ipAddress = InetAddress.getByName(ip);
+            CountryResponse response = geoIpReader.country(ipAddress);
+            if (response != null && response.getCountry() != null) {
+                return response.getCountry().getIsoCode();
             }
             return null;
         } catch (Exception e) {

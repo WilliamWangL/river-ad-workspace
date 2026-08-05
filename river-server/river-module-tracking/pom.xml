@@ -67,10 +67,17 @@
             <artifactId>river-spring-boot-starter-excel</artifactId>
         </dependency>
 
-        <!-- IP 解析相关 -->
+        <!-- IP 解析相关（ip2region 中文区域解析） -->
         <dependency>
             <groupId>com.river</groupId>
             <artifactId>river-spring-boot-starter-biz-ip</artifactId>
+        </dependency>
+
+        <!-- MaxMind GeoIP2（ISO 国家代码解析） -->
+        <dependency>
+            <groupId>com.maxmind.geoip2</groupId>
+            <artifactId>geoip2</artifactId>
+            <version>4.2.0</version>
         </dependency>
     </dependencies>
 
