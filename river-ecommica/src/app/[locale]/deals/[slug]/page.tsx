@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { JsonLd, BASE_URL, generateDealJsonLd, generateBreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { CheckCircle, Clock, ShieldCheck, ExternalLink, Store, Tag } from 'lucide-react';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTrackingUrl } from '@/lib/tracking';
 
 // 使用 ISR，每 5 分钟重新生成
 export const revalidate = 300;
@@ -95,7 +95,7 @@ export default async function DealDetailPage({ params }: Props) {
     notFound();
   }
 
-  const trackingUrl = getTrackingLink(deal.trackingLinkId, deal.gotoUrl);
+  const trackingUrl = getTrackingUrl('deal', deal.id, deal.gotoUrl);
 
   const breadcrumbs = [
     { label: t('breadcrumbHome'), href: '/' },

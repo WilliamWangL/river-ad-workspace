@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Sparkles, Crown, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTrackingUrl } from '@/lib/tracking';
 import { CountdownTimer } from './CountdownTimer';
 
 interface DealCardProps {
@@ -130,7 +130,7 @@ export async function DealCard({ deal, locale }: DealCardProps) {
         <div className="mt-auto">
           {/* CTA Button - 使用原生 <a> 标签避免 Next.js Link 的 prefetch 行为 */}
           <a
-            href={getTrackingLink(deal.trackingLinkId, deal.gotoUrl)}
+            href={getTrackingUrl('deal', deal.id, deal.gotoUrl)}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

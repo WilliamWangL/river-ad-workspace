@@ -1019,6 +1019,7 @@ public class AdmitadSyncService {
             TrackingLinkCreateReqDTO reqDTO = new TrackingLinkCreateReqDTO();
             reqDTO.setTargetType(TARGET_TYPE_COUPON);
             reqDTO.setTargetId(coupon.getId());
+            reqDTO.setMerchantId(coupon.getMerchantId());
             reqDTO.setSlug(slug);
             reqDTO.setTrackingUrl(trackingUrl);
 
@@ -1051,6 +1052,7 @@ public class AdmitadSyncService {
             TrackingLinkCreateReqDTO reqDTO = new TrackingLinkCreateReqDTO();
             reqDTO.setTargetType(TARGET_TYPE_DEAL);
             reqDTO.setTargetId(deal.getId());
+            reqDTO.setMerchantId(deal.getMerchantId());
             reqDTO.setSlug(slug);
             reqDTO.setTrackingUrl(trackingUrl);
 
@@ -1083,6 +1085,7 @@ public class AdmitadSyncService {
             TrackingLinkCreateReqDTO reqDTO = new TrackingLinkCreateReqDTO();
             reqDTO.setTargetType(TARGET_TYPE_OFFER);
             reqDTO.setTargetId(offer.getId());
+            reqDTO.setMerchantId(offer.getMerchantId());
             reqDTO.setSlug(slug);
             reqDTO.setTrackingUrl(trackingUrl);
 

@@ -2,7 +2,7 @@ import { Coupon } from '@/types';
 import { Clock, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTranslations } from 'next-intl/server';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTrackingUrl } from '@/lib/tracking';
 import { CouponCardActions } from './CouponCardActions';
 
 interface CouponCardProps {
@@ -59,7 +59,7 @@ export default async function CouponCard({ coupon, locale }: CouponCardProps) {
           {/* Merchant Info */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <a
-              href={getTrackingLink(coupon.trackingLinkId, coupon.gotoUrl)}
+              href={getTrackingUrl('coupon', coupon.id, coupon.gotoUrl)}
               target="_blank"
               rel="noopener"
               className="relative shrink-0"
@@ -80,7 +80,7 @@ export default async function CouponCard({ coupon, locale }: CouponCardProps) {
             </a>
             <div className="min-w-0 flex-1">
               <a
-                href={getTrackingLink(coupon.trackingLinkId, coupon.gotoUrl)}
+                href={getTrackingUrl('coupon', coupon.id, coupon.gotoUrl)}
                 target="_blank"
                 rel="noopener"
                 className="font-semibold text-sm text-foreground truncate block hover:text-primary transition-colors"
@@ -148,8 +148,8 @@ export default async function CouponCard({ coupon, locale }: CouponCardProps) {
         {/* Client-side Actions (copy button, code reveal, etc.) */}
         <CouponCardActions
           code={coupon.code}
+          couponId={coupon.id}
           gotoUrl={coupon.gotoUrl}
-          trackingLinkId={coupon.trackingLinkId}
           getCouponText={t('getCoupon')}
           expired={expiry?.expired}
         />

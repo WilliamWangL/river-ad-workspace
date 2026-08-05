@@ -28,6 +28,18 @@ public class ClickDO extends TenantBaseDO {
     /** 商家 ID（冗余字段，便于统计） */
     private Long merchantId;
 
+    /** 商家名称（冗余字段，便于展示） */
+    private String merchantName;
+
+    /** 优惠券 ID（冗余字段，targetType=4 时填充） */
+    private Long couponId;
+
+    /** Deal ID（冗余字段，targetType=3 时填充） */
+    private Long dealId;
+
+    /** 实际跳转使用的 gotoUrl */
+    private String gotoUrl;
+
     /** 活动 ID */
     private Long campaignId;
 

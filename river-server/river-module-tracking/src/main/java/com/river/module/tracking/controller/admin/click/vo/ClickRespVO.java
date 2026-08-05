@@ -21,6 +21,18 @@ public class ClickRespVO {
     @Schema(description = "商家 ID", example = "1")
     private Long merchantId;
 
+    @Schema(description = "商家名称", example = "Amazon")
+    private String merchantName;
+
+    @Schema(description = "优惠券 ID", example = "1")
+    private Long couponId;
+
+    @Schema(description = "Deal ID", example = "1")
+    private Long dealId;
+
+    @Schema(description = "实际跳转 URL")
+    private String gotoUrl;
+
     @Schema(description = "Campaign ID", example = "1")
     private Long campaignId;
 

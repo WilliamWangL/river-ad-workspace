@@ -25,6 +25,13 @@
             <version>${revision}</version>
         </dependency>
 
+        <!-- 依赖 coupon 模块（查询 Deal/Coupon 实体的 gotoUrl） -->
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>river-module-coupon</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.river</groupId>
@@ -58,6 +65,12 @@
         <dependency>
             <groupId>com.river</groupId>
             <artifactId>river-spring-boot-starter-excel</artifactId>
+        </dependency>
+
+        <!-- IP 解析相关 -->
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>river-spring-boot-starter-biz-ip</artifactId>
         </dependency>
     </dependencies>
 

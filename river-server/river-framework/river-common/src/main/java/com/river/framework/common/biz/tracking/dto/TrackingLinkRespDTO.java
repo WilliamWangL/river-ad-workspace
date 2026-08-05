@@ -21,6 +21,9 @@ public class TrackingLinkRespDTO {
     @Schema(description = "目标实体 ID", example = "1")
     private Long targetId;
 
+    @Schema(description = "商家 ID（冗余字段）", example = "1")
+    private Long merchantId;
+
     @Schema(description = "短链接标识", example = "offer-1")
     private String slug;
 
