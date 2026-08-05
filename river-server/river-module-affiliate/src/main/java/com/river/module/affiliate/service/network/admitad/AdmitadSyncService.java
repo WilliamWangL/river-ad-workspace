@@ -110,10 +110,22 @@ public class AdmitadSyncService {
                 break;
             }
 
+            // Filter to only active partnerships (exclude pending/declined/suspended)
+            List<AdmitadCampaign> activeCampaigns = campaigns.stream()
+                .filter(c -> "active".equalsIgnoreCase(c.getConnectionStatus()))
+                .toList();
+            if (activeCampaigns.isEmpty()) {
+                offset += limit;
+                if (campaigns.size() < limit) {
+                    break;
+                }
+                continue;
+            }
+
             // Batch sync: preload existing merchants and process in batch
-            syncCampaignsBatch(credential.getNetworkId(), campaigns, credential);
-            totalSynced += campaigns.size();
-            this.lastSyncMerchants += campaigns.size();
+            syncCampaignsBatch(credential.getNetworkId(), activeCampaigns, credential);
+            totalSynced += activeCampaigns.size();
+            this.lastSyncMerchants += activeCampaigns.size();
 
             offset += limit;
             if (campaigns.size() < limit) {
@@ -130,7 +142,7 @@ public class AdmitadSyncService {
      * 1. 预加载已存在的商家（减少重复查询）
      * 2. 去重：同一批次内按 externalId 去重
      * 3. 幂等写入：区分 insert vs update
-     * 4. 批量操作：使用 insertBatch/updateBatch
+     * 4. 批量操作：只使用 insertBatch（已存在的不修改）
      */
     @Transactional
     public void syncCampaignsBatch(Long networkId, List<AdmitadCampaign> campaigns, NetworkCredentialDO credential) {
@@ -138,9 +150,18 @@ public class AdmitadSyncService {
             return;
         }
 
+        // 0. 只同步合作关系为 active 的 campaigns（排除 pending/declined/suspended）
+        List<AdmitadCampaign> activeCampaigns = campaigns.stream()
+            .filter(c -> "active".equalsIgnoreCase(c.getConnectionStatus()))
+            .toList();
+        if (activeCampaigns.isEmpty()) {
+            log.debug("No active campaigns to sync (skipped {} non-active)", campaigns.size());
+            return;
+        }
+
         // 1. 去重：同一批次内按 externalId 去重（保留最后一条）
         Map<String, AdmitadCampaign> campaignMap = new HashMap<>();
-        for (AdmitadCampaign campaign : campaigns) {
+        for (AdmitadCampaign campaign : activeCampaigns) {
             campaignMap.put(String.valueOf(campaign.getId()), campaign);
         }
 
@@ -152,9 +173,8 @@ public class AdmitadSyncService {
         Map<String, MerchantDO> existingMerchantMap = existingMerchants.stream()
             .collect(Collectors.toMap(MerchantDO::getExternalId, m -> m));
 
-        // 3. 分类：toInsert 和 toUpdate
+        // 3. 只新增，不修改已存在的商家
         List<MerchantDO> toInsert = new ArrayList<>();
-        List<MerchantDO> toUpdate = new ArrayList<>();
 
         // 4. 保存 campaign -> merchant 的映射，用于后续创建 Offer
         Map<String, MerchantDO> campaignMerchantMap = new HashMap<>();
@@ -165,9 +185,8 @@ public class AdmitadSyncService {
 
             MerchantDO merchant;
             if (existing != null) {
+                // 已存在的商家不修改，直接使用
                 merchant = existing;
-                updateMerchant(merchant, campaign);
-                toUpdate.add(merchant);
             } else {
                 merchant = createMerchant(networkId, campaign);
                 toInsert.add(merchant);
@@ -175,14 +194,10 @@ public class AdmitadSyncService {
             campaignMerchantMap.put(externalId, merchant);
         }
 
-        // 5. 批量插入/更新 Merchants（先插入，这样新 Merchant 才有 ID）
+        // 5. 批量插入新 Merchants（先插入，这样新 Merchant 才有 ID）
         if (!toInsert.isEmpty()) {
             merchantMapper.insertBatch(toInsert);
-            log.info("Batch inserted {} merchants", toInsert.size());
-        }
-        if (!toUpdate.isEmpty()) {
-            merchantMapper.updateBatch(toUpdate);
-            log.info("Batch updated {} merchants", toUpdate.size());
+            log.info("Batch inserted {} merchants (skipped {} existing)", toInsert.size(), existingMerchants.size());
         }
 
         // 6. 在 Merchant 插入后，再创建 Offers（此时 merchant.getId() 已有值）
@@ -228,25 +243,16 @@ public class AdmitadSyncService {
             .collect(Collectors.toMap(OfferDO::getExternalId, o -> o));
 
         List<OfferDO> toInsert = new ArrayList<>();
-        List<OfferDO> toUpdate = new ArrayList<>();
 
         for (OfferDO offer : offers) {
-            OfferDO existing = existingOfferMap.get(offer.getExternalId());
-            if (existing != null) {
-                offer.setId(existing.getId());
-                // 更新 merchantId（如果 merchant 被重新创建）
-                offer.setMerchantId(merchantId);
-                toUpdate.add(offer);
-            } else {
+            if (!existingOfferMap.containsKey(offer.getExternalId())) {
                 toInsert.add(offer);
             }
         }
 
         if (!toInsert.isEmpty()) {
             offerMapper.insertBatch(toInsert);
-        }
-        if (!toUpdate.isEmpty()) {
-            offerMapper.updateBatch(toUpdate);
+            log.info("Batch inserted {} offers (skipped {} existing)", toInsert.size(), offers.size() - toInsert.size());
         }
     }
 
@@ -373,11 +379,12 @@ public class AdmitadSyncService {
         }
 
         List<CouponDO> toInsert = new ArrayList<>();
-        List<CouponDO> toUpdate = new ArrayList<>();
 
         for (AdmitadCoupon admitadCoupon : promoCodes) {
             String externalId = String.valueOf(admitadCoupon.getId());
-            CouponDO existing = existingCouponMap.get(externalId);
+            if (existingCouponMap.containsKey(externalId)) {
+                continue; // 已存在，跳过
+            }
 
             Long merchantId = null;
             if (admitadCoupon.getCampaign() != null) {
@@ -387,24 +394,13 @@ public class AdmitadSyncService {
                 }
             }
 
-            CouponDO coupon;
-            if (existing != null) {
-                coupon = existing;
-                updateCoupon(coupon, networkId, merchantId, admitadCoupon);
-                toUpdate.add(coupon);
-            } else {
-                coupon = createCoupon(networkId, merchantId, admitadCoupon);
-                toInsert.add(coupon);
-            }
+            CouponDO coupon = createCoupon(networkId, merchantId, admitadCoupon);
+            toInsert.add(coupon);
         }
 
         if (!toInsert.isEmpty()) {
             couponMapper.insertBatch(toInsert);
-            log.info("Batch inserted {} coupons", toInsert.size());
-        }
-        if (!toUpdate.isEmpty()) {
-            couponMapper.updateBatch(toUpdate);
-            log.info("Batch updated {} coupons", toUpdate.size());
+            log.info("Batch inserted {} coupons (skipped {} existing)", toInsert.size(), promoCodes.size() - toInsert.size());
         }
 
     }
@@ -438,11 +434,12 @@ public class AdmitadSyncService {
         }
 
         List<DealDO> toInsert = new ArrayList<>();
-        List<DealDO> toUpdate = new ArrayList<>();
 
         for (AdmitadCoupon admitadCoupon : deals) {
             String externalId = String.valueOf(admitadCoupon.getId());
-            DealDO existing = existingDealMap.get(externalId);
+            if (existingDealMap.containsKey(externalId)) {
+                continue; // 已存在，跳过
+            }
 
             Long merchantId = null;
             if (admitadCoupon.getCampaign() != null) {
@@ -452,24 +449,13 @@ public class AdmitadSyncService {
                 }
             }
 
-            DealDO deal;
-            if (existing != null) {
-                deal = existing;
-                updateDeal(deal, networkId, merchantId, admitadCoupon);
-                toUpdate.add(deal);
-            } else {
-                deal = createDeal(networkId, merchantId, admitadCoupon);
-                toInsert.add(deal);
-            }
+            DealDO deal = createDeal(networkId, merchantId, admitadCoupon);
+            toInsert.add(deal);
         }
 
         if (!toInsert.isEmpty()) {
             dealMapper.insertBatch(toInsert);
-            log.info("Batch inserted {} deals", toInsert.size());
-        }
-        if (!toUpdate.isEmpty()) {
-            dealMapper.updateBatch(toUpdate);
-            log.info("Batch updated {} deals", toUpdate.size());
+            log.info("Batch inserted {} deals (skipped {} existing)", toInsert.size(), deals.size() - toInsert.size());
         }
 
     }
@@ -488,9 +474,8 @@ public class AdmitadSyncService {
 
         MerchantDO merchant;
         if (existingMerchant != null) {
+            // 已存在不修改，直接使用
             merchant = existingMerchant;
-            updateMerchant(merchant, campaign);
-            merchantMapper.updateById(merchant);
         } else {
             merchant = createMerchant(networkId, campaign);
             merchantMapper.insert(merchant);
@@ -541,9 +526,8 @@ public class AdmitadSyncService {
 
         OfferDO offer;
         if (existingOffer != null) {
+            // 已存在不修改，直接使用
             offer = existingOffer;
-            updateOffer(offer, campaign, action, credential);
-            offerMapper.updateById(offer);
         } else {
             offer = createOffer(networkId, merchantId, campaign, action, credential);
             offerMapper.insert(offer);
@@ -853,12 +837,11 @@ public class AdmitadSyncService {
         }
 
         if (existingCoupon != null) {
-            updateCoupon(existingCoupon, networkId, merchantId, admitadCoupon);
-            couponMapper.updateById(existingCoupon);
-        } else {
-            CouponDO coupon = createCoupon(networkId, merchantId, admitadCoupon);
-            couponMapper.insert(coupon);
+            // 已存在不修改，直接跳过
+            return;
         }
+        CouponDO coupon = createCoupon(networkId, merchantId, admitadCoupon);
+        couponMapper.insert(coupon);
     }
 
     private CouponDO createCoupon(Long networkId, Long merchantId, AdmitadCoupon admitadCoupon) {
@@ -917,12 +900,11 @@ public class AdmitadSyncService {
         }
 
         if (existingDeal != null) {
-            updateDeal(existingDeal, networkId, merchantId, admitadCoupon);
-            dealMapper.updateById(existingDeal);
-        } else {
-            DealDO deal = createDeal(networkId, merchantId, admitadCoupon);
-            dealMapper.insert(deal);
+            // 已存在不修改，直接跳过
+            return;
         }
+        DealDO deal = createDeal(networkId, merchantId, admitadCoupon);
+        dealMapper.insert(deal);
     }
 
     private DealDO createDeal(Long networkId, Long merchantId, AdmitadCoupon admitadCoupon) {

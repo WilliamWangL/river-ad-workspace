@@ -23,6 +23,10 @@ public class AdmitadCampaign {
 
     private String status;
 
+    /** 合作关系状态：active/pending/declined/suspended */
+    @JsonProperty("connection_status")
+    private String connectionStatus;
+
     @JsonProperty("rating")
     private BigDecimal rating;
 
