@@ -91,6 +91,12 @@ const nextConfig: NextConfig = {
         hostname: 'tripcdn.com',
         pathname: '/**',
       },
+      ,
+       {
+        protocol: 'https',
+        hostname: 'down-mx.img.susercontent.com',
+        pathname: '/**',
+      }
     ],
   },
 };
