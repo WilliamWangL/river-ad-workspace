@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io//williamwangl/river-ad-workspace
+  IMAGE_PREFIX: ghcr.io/williamwangl/river-ad-workspace
 
 jobs:
   build-server:
