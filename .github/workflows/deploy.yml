@@ -161,16 +161,16 @@ jobs:
               echo "Created self-signed SSL certificate"
             fi
 
-            # 创建环境变量文件
-            echo "GITHUB_REPO=${{ github.repository }}" > .env
+            # 创建环境变量文件（GHCR 镜像名必须全小写）
+            echo "GITHUB_REPO=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" > .env
             echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
 
             # 拉取最新镜像并重启服务
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml up -d --force-recreate
 
-            # 确保 nginx 重新加载静态文件（admin-dist 可能在容器运行时被更新）
-            docker restart river-nginx
+            # 重载宿主机 nginx（admin-dist 可能已更新）
+            systemctl reload nginx 2>/dev/null || true
 
             # 清理旧镜像
             docker image prune -f
