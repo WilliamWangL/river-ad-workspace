@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+  IMAGE_PREFIX: ghcr.io//williamwangl/river-ad-workspace
 
 jobs:
   build-server:
@@ -167,7 +167,7 @@ jobs:
 
             # 拉取最新镜像并重启服务
             docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml up -d
+            docker-compose -f docker-compose.prod.yml up -d --force-recreate
 
             # 确保 nginx 重新加载静态文件（admin-dist 可能在容器运行时被更新）
             docker restart river-nginx
