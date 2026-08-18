@@ -1,6 +1,6 @@
 package com.river.module.mediabuy.service;
 
-import com.river.framework.common.util.json.JsonUtils;
+import com.river.framework.common.util.http.JsRedirectUtil;
 import com.river.module.affiliate.dal.dataobject.OfferDO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,30 +33,7 @@ public class MediabuyJumpServiceImpl implements MediabuyJumpService {
 
         String trackLink = clickLogService.recordClick(offer, publisherClickId, subid1, subid2, request);
 
-        // use JSON string as JS string literal (safe escaping)
-        String urlLiteral = JsonUtils.toJsonString(trackLink);
-        // 返回完整 HTML 页面：浏览器顶级导航时才会执行 <script>。
-        // 同时附带 <noscript> meta refresh 兜底，覆盖禁用 JS 的客户端。
-        return """
-                <!DOCTYPE html>
-                <html><head><meta charset="UTF-8">
-                <title>Redirecting...</title>
-                <noscript><meta http-equiv="refresh" content="0;url=%s"></noscript>
-                </head><body>
-                <script>
-                (function () {
-                  try {
-                    var url = %s;
-                    if (window && window.location) {
-                      window.location.replace(url);
-                    }
-                  } catch (e) {
-                    // ignore
-                  }
-                })();
-                </script>
-                </body></html>
-                """.formatted(trackLink.replace("\"", "&quot;"), urlLiteral);
+        return JsRedirectUtil.buildRedirectHtml(trackLink);
     }
 
 }

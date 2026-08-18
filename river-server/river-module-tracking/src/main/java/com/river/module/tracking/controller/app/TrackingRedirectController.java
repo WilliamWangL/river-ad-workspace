@@ -1,5 +1,6 @@
 package com.river.module.tracking.controller.app;
 
+import com.river.framework.common.util.http.JsRedirectUtil;
 import com.river.framework.tenant.core.aop.TenantIgnore;
 import com.river.module.tracking.service.ClickService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,10 +11,10 @@ import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class TrackingRedirectController {
     private ClickService clickService;
 
     @GetMapping("/{type}/{id}")
-    @Operation(summary = "追踪重定向", description = "记录点击并重定向到联盟链接")
+    @Operation(summary = "追踪重定向", description = "记录点击并通过 JS 200 跳转到联盟链接")
     @Parameters({
             @Parameter(name = "type", description = "目标类型: merchant/offer/deal/coupon", required = true),
             @Parameter(name = "id", description = "目标实体 ID", required = true),
@@ -47,7 +48,7 @@ public class TrackingRedirectController {
     })
     @PermitAll
     @TenantIgnore
-    public RedirectView redirect(
+    public ResponseEntity<String> redirect(
             @PathVariable("type") String type,
             @PathVariable("id") Long id,
             @RequestParam(value = "sub1", required = false) String sub1,
@@ -60,9 +61,9 @@ public class TrackingRedirectController {
         Integer targetType = TYPE_MAP.get(type.toLowerCase());
         if (targetType == null) {
             log.warn("Invalid tracking type: {}", type);
-            RedirectView errorView = new RedirectView("/");
-            errorView.setStatusCode(HttpStatus.FOUND);
-            return errorView;
+            return ResponseEntity.ok()
+                    .contentType(MediaType.valueOf("text/html;charset=UTF-8"))
+                    .body(JsRedirectUtil.buildRedirectHtml("/"));
         }
 
         String ip = getClientIp(request);
@@ -72,9 +73,11 @@ public class TrackingRedirectController {
         String redirectUrl = clickService.recordClickAndGetRedirectUrl(
                 targetType, id, sub1, sub2, sub3, sub4, sub5, ip, userAgent, referer);
 
-        RedirectView redirectView = new RedirectView(redirectUrl);
-        redirectView.setStatusCode(HttpStatus.FOUND);
-        return redirectView;
+        // 返回 JS 200 跳转 HTML：搜索引擎爬虫/服务端 HTTP 客户端不执行 JS，无法跟踪到真实联盟链接
+        String html = JsRedirectUtil.buildRedirectHtml(redirectUrl);
+        return ResponseEntity.ok()
+                .contentType(MediaType.valueOf("text/html;charset=UTF-8"))
+                .body(html);
     }
 
     private String getClientIp(HttpServletRequest request) {
