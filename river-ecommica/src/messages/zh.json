@@ -488,10 +488,6 @@
     "getThisDeal": "获取此优惠",
     "verifiedWorking": "验证有效",
     "expires": "过期时间: {date}",
-    "aboutThisDeal": "关于此优惠",
-    "termsTitle": "条款和条件:",
-    "termSupplies": "优惠数量有限，先到先得。",
-    "termPrices": "价格和库存可能随时变更，恕不另行通知。",
-    "termDetails": "详情请参阅商家网站。"
+    "aboutThisDeal": "关于此优惠"
   }
 }

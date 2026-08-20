@@ -476,11 +476,7 @@
     "getThisDeal": "Get This Deal",
     "verifiedWorking": "Verified Working",
     "expires": "Expires: {date}",
-    "aboutThisDeal": "About this deal",
-    "termsTitle": "Terms & Conditions:",
-    "termSupplies": "Offer valid while supplies last.",
-    "termPrices": "Prices and availability subject to change without notice.",
-    "termDetails": "See merchant website for full details."
+    "aboutThisDeal": "About this deal"
   },
   "Offer": {
     "type": {
