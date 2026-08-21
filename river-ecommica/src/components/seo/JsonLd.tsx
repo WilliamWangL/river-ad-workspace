@@ -8,7 +8,7 @@ export function generateDealJsonLd(deal: Deal) {
     '@context': 'https://schema.org',
     '@type': 'Offer',
     name: deal.title,
-    description: deal.description,
+    description: stripHtml(deal.description, 160) || undefined,
     url: `${BASE_URL}/deals/${deal.slug}`,
     priceCurrency: 'USD',
     price: deal.dealPrice || 0,

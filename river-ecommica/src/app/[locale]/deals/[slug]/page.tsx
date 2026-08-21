@@ -9,6 +9,8 @@ import { JsonLd, BASE_URL, generateDealJsonLd, generateBreadcrumbJsonLd } from '
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { CheckCircle, Clock, ShieldCheck, ExternalLink, Store, Tag } from 'lucide-react';
 import { getTrackingUrl } from '@/lib/tracking';
+import { MarkdownRenderer } from '@/components/blog';
+import { stripHtml } from '@/lib/utils';
 
 // 使用 ISR，每 5 分钟重新生成
 export const revalidate = 300;
@@ -47,9 +49,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: t('meta.notFound') };
   }
 
-  // SEO: metaTitle 优先，为空回退默认标题；metaDescription 优先，为空回退 description
+  // SEO: metaTitle 优先，为空回退默认标题；metaDescription 优先，为空回退 description（去除 HTML 标签，避免 meta 中出现标签）
   const pageTitle = deal.metaTitle || `${deal.title} - ${deal.merchant.name}`;
-  const pageDescription = deal.metaDescription || deal.description || t('meta.description', { percent: deal.discountPercent, store: deal.merchant.name });
+  const pageDescription = deal.metaDescription || (deal.description ? stripHtml(deal.description, 160) : '') || t('meta.description', { percent: deal.discountPercent, store: deal.merchant.name });
   const ogImage = deal.imageUrl || '/og-image.png';
 
   return {
@@ -221,18 +223,9 @@ export default async function DealDetailPage({ params }: Props) {
                   </div>
                 </div>
 
-                <div className="prose prose-gray max-w-none">
+                <div>
                   <h3 className="text-lg font-bold font-display mb-2">{t('aboutThisDeal')}</h3>
-                  <p className="text-gray-600 leading-relaxed">{deal.description}</p>
-                </div>
-
-                <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-500 border border-gray-100">
-                  <p className="font-medium mb-1 text-gray-700">{t('termsTitle')}</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>{t('termSupplies')}</li>
-                    <li>{t('termPrices')}</li>
-                    <li>{t('termDetails')}</li>
-                  </ul>
+                  <MarkdownRenderer content={deal.description} className="prose prose-gray max-w-none" />
                 </div>
 
               </div>
