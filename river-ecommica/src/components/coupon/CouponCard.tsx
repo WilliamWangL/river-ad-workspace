@@ -1,5 +1,5 @@
 import { Coupon } from '@/types';
-import { Clock, BadgeCheck } from 'lucide-react';
+import { Clock, BadgeCheck, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTranslations } from 'next-intl/server';
 import { getTrackingUrl } from '@/lib/tracking';
@@ -45,6 +45,7 @@ function getExpiryInfo(coupon: Coupon) {
 
 export default async function CouponCard({ coupon, locale }: CouponCardProps) {
   const t = await getTranslations({ locale, namespace: 'Deal' });
+  const merchantName = coupon.merchant?.name || 'Store';
   const discount = getDiscountDisplay(coupon);
   const expiry = getExpiryInfo(coupon);
 
@@ -65,16 +66,18 @@ export default async function CouponCard({ coupon, locale }: CouponCardProps) {
               className="relative shrink-0"
             >
               <div className="w-11 h-11 rounded-xl bg-white border border-border flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105 shadow-sm">
-                {coupon.merchant.logoUrl ? (
+                {coupon.merchant?.logoUrl ? (
                   <img
                     src={coupon.merchant.logoUrl}
-                    alt={coupon.merchant.name}
+                    alt={merchantName}
                     className="w-8 h-8 object-contain"
                   />
-                ) : (
+                ) : coupon.merchant?.name ? (
                   <span className="text-base font-bold text-muted-foreground">
                     {coupon.merchant.name.charAt(0)}
                   </span>
+                ) : (
+                  <Store className="w-5 h-5 text-muted-foreground" />
                 )}
               </div>
             </a>
@@ -85,7 +88,7 @@ export default async function CouponCard({ coupon, locale }: CouponCardProps) {
                 rel="noopener"
                 className="font-semibold text-sm text-foreground truncate block hover:text-primary transition-colors"
               >
-                {coupon.merchant.name}
+                {merchantName}
               </a>
               <div className="flex items-center gap-2 mt-0.5">
                 {coupon.verified && (

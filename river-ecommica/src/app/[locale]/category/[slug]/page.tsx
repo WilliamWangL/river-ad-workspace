@@ -207,7 +207,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const couponItemList = coupons
     .filter(coupon => coupon.id)
     .map(coupon => ({
-      name: `${coupon.merchant.name} - ${coupon.title || coupon.description}`,
+      name: `${coupon.merchant?.name || 'Store'} - ${coupon.title || coupon.description}`,
       url: `${BASE_URL}/${locale}/coupons#coupon-${coupon.id}`
     }));
 
