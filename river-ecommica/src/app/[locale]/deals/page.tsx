@@ -51,6 +51,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       description: t('meta.description'),
       images: ['/og-image.png'],
     },
+    other: {
+      'mitgo-verification': '8ece394d-b3b0-47fa-9650-b6dac6eaa396',
+    },
   };
 }
 
