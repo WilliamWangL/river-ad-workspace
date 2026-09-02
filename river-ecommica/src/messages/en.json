@@ -476,7 +476,8 @@
     "getThisDeal": "Get This Deal",
     "verifiedWorking": "Verified Working",
     "expires": "Expires: {date}",
-    "aboutThisDeal": "About this deal"
+    "aboutThisDeal": "About this deal",
+    "store": "Store"
   },
   "Offer": {
     "type": {

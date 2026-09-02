@@ -83,7 +83,7 @@ export default async function CouponsPage(props: {
   const displayCoupons = q
     ? allCoupons.filter(c =>
         c.code.toLowerCase().includes(q.toLowerCase()) ||
-        c.merchant.name?.toLowerCase().includes(q.toLowerCase()) ||
+        c.merchant?.name?.toLowerCase().includes(q.toLowerCase()) ||
         c.description?.toLowerCase().includes(q.toLowerCase())
       )
     : allCoupons;
@@ -111,7 +111,7 @@ export default async function CouponsPage(props: {
   const itemListJsonLdItems = displayCoupons
     .filter(coupon => coupon.id)
     .map(coupon => ({
-      name: `${coupon.merchant.name} - ${coupon.title || coupon.description}`,
+      name: `${coupon.merchant?.name || 'Store'} - ${coupon.title || coupon.description}`,
       url: `${BASE_URL}/${locale}/coupons#coupon-${coupon.id}`
     }));
 

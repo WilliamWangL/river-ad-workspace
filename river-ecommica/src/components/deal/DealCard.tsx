@@ -2,7 +2,7 @@ import { Deal } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Sparkles, Crown, ArrowUpRight } from 'lucide-react';
+import { Sparkles, Crown, ArrowUpRight, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTrackingUrl } from '@/lib/tracking';
 import { CountdownTimer } from './CountdownTimer';
@@ -14,6 +14,7 @@ interface DealCardProps {
 
 export async function DealCard({ deal, locale }: DealCardProps) {
   const t = await getTranslations({ locale, namespace: 'Deal' });
+  const merchantName = deal.merchant?.name || 'Store';
   const hasDiscount = deal.discountPercent > 0;
   const discountHigh = deal.discountPercent >= 50;
 
@@ -59,18 +60,20 @@ export async function DealCard({ deal, locale }: DealCardProps) {
                 'transition-all duration-300 group-hover:shadow-md group-hover:scale-105'
               )}
             >
-              {deal.merchant.logoUrl ? (
+              {deal.merchant?.logoUrl ? (
                 <Image
                   src={deal.merchant.logoUrl}
-                  alt={deal.merchant.name}
+                  alt={merchantName}
                   width={40}
                   height={40}
                   className="object-contain w-10 h-10"
                 />
-              ) : (
+              ) : deal.merchant?.name ? (
                 <span className="text-lg font-bold text-muted-foreground">
                   {deal.merchant.name.charAt(0)}
                 </span>
+              ) : (
+                <Store className="w-5 h-5 text-muted-foreground" />
               )}
             </div>
           </div>
@@ -112,7 +115,7 @@ export async function DealCard({ deal, locale }: DealCardProps) {
               )}
             </div>
             <span className="text-sm font-medium text-muted-foreground truncate block">
-              {deal.merchant.name}
+              {merchantName}
             </span>
           </div>
         </div>

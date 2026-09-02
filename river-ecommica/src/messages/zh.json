@@ -488,6 +488,7 @@
     "getThisDeal": "获取此优惠",
     "verifiedWorking": "验证有效",
     "expires": "过期时间: {date}",
-    "aboutThisDeal": "关于此优惠"
+    "aboutThisDeal": "关于此优惠",
+    "store": "商店"
   }
 }

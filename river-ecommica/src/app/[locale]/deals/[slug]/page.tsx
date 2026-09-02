@@ -50,8 +50,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   // SEO: metaTitle 优先，为空回退默认标题；metaDescription 优先，为空回退 description（去除 HTML 标签，避免 meta 中出现标签）
-  const pageTitle = deal.metaTitle || `${deal.title} - ${deal.merchant.name}`;
-  const pageDescription = deal.metaDescription || (deal.description ? stripHtml(deal.description, 160) : '') || t('meta.description', { percent: deal.discountPercent, store: deal.merchant.name });
+  const merchantName = deal.merchant?.name;
+  const pageTitle = deal.metaTitle || (merchantName ? `${deal.title} - ${merchantName}` : deal.title);
+  const pageDescription = deal.metaDescription || (deal.description ? stripHtml(deal.description, 160) : '') || t('meta.description', { percent: deal.discountPercent, store: merchantName || '' });
   const ogImage = deal.imageUrl || '/og-image.png';
 
   return {
@@ -170,14 +171,20 @@ export default async function DealDetailPage({ params }: Props) {
 
               <div className="lg:col-span-7 space-y-6">
                 <div>
-                  <Link 
-                    href={`/${locale}/stores/${deal.merchant.slug}`}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-3 group"
-                  >
-                    <Store size={16} className="group-hover:text-primary" />
-                    {deal.merchant.name}
-                  </Link>
-                  
+                  {deal.merchant ? (
+                    <Link
+                      href={`/${locale}/stores/${deal.merchant.slug}`}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-3 group"
+                    >
+                      <Store size={16} className="group-hover:text-primary" />
+                      {deal.merchant.name}
+                    </Link>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
+                      <Store size={16} />
+                      {t('store')}
+                    </div>
+                  )}
                   <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-foreground mb-4 leading-tight">
                     {deal.title}
                   </h1>

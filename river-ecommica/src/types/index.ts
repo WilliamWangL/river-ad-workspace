@@ -23,7 +23,8 @@ export interface Deal {
   featured: boolean;
   exclusive?: boolean;
   gotoUrl: string;
-  merchant: MerchantSimple;
+  /** 商家信息（商家不存在或已删除时为空） */
+  merchant?: MerchantSimple | null;
 }
 
 export interface Store {
@@ -74,7 +75,8 @@ export interface Coupon {
   endTime: string;
   verified: boolean;
   gotoUrl: string;
-  merchant: MerchantSimple;
+  /** 商家信息（商家不存在或已删除时为空） */
+  merchant?: MerchantSimple | null;
 }
 
 export interface BlogPost {

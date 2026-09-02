@@ -14,10 +14,12 @@ export function generateDealJsonLd(deal: Deal) {
     price: deal.dealPrice || 0,
     priceValidUntil: deal.endTime,
     availability: 'https://schema.org/InStock',
-    seller: {
-      '@type': 'Organization',
-      name: deal.merchant.name,
-    },
+    ...(deal.merchant?.name && {
+      seller: {
+        '@type': 'Organization',
+        name: deal.merchant.name,
+      },
+    }),
     ...(deal.discountPercent > 0 && {
       discount: `${deal.discountPercent}%`,
     }),
@@ -76,11 +78,12 @@ function getDiscountText(discountType: number, discountValue: number): string {
 
 export function generateCouponJsonLd(coupon: Coupon) {
   const discountText = getDiscountText(coupon.discountType, coupon.discountValue);
+  const merchantName = coupon.merchant?.name || 'Store';
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Offer',
-    name: `${coupon.merchant.name} - ${discountText}`,
+    name: `${merchantName} - ${discountText}`,
     description: coupon.description,
     priceCurrency: 'USD',
     price: 0,
@@ -88,7 +91,7 @@ export function generateCouponJsonLd(coupon: Coupon) {
     availability: 'https://schema.org/InStock',
     seller: {
       '@type': 'Organization',
-      name: coupon.merchant.name,
+      name: merchantName,
     },
     ...(coupon.code && {
       'schema:discountCode': coupon.code,
