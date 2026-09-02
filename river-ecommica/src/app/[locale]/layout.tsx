@@ -54,6 +54,9 @@ export const metadata: Metadata = {
       'zh': `${BASE_URL}/zh`,
     },
   },
+  other: {
+    'mitgo-verification': '8ece394d-b3b0-47fa-9650-b6dac6eaa396',
+  },
 };
 
 export default async function LocaleLayout({
