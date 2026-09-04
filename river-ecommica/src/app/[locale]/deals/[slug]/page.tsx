@@ -11,6 +11,9 @@ import { CheckCircle, Clock, ShieldCheck, ExternalLink, Store, Tag } from 'lucid
 import { getTrackingUrl } from '@/lib/tracking';
 import { MarkdownRenderer } from '@/components/blog';
 import { stripHtml } from '@/lib/utils';
+import { RelatedDeals } from '@/components/deal/RelatedDeals';
+import { FeedbackForm } from '@/components/layout/FeedbackForm';
+import { ShareButtons } from '@/components/layout/ShareButtons';
 
 // 使用 ISR，每 5 分钟重新生成
 export const revalidate = 300;
@@ -92,6 +95,7 @@ export default async function DealDetailPage({ params }: Props) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'DealDetail' });
+  const tFeedback = await getTranslations({ locale, namespace: 'Feedback' });
   const deal = await fetchDealBySlug(slug);
 
   if (!deal) {
@@ -189,6 +193,8 @@ export default async function DealDetailPage({ params }: Props) {
                     {deal.title}
                   </h1>
 
+                  <ShareButtons title={deal.title} labels={{ share: t('share') }} />
+
                   {(deal.originalPrice > 0 || deal.dealPrice > 0) && (
                     <div className="flex items-baseline gap-3 mb-6">
                       {deal.dealPrice > 0 && (
@@ -239,6 +245,33 @@ export default async function DealDetailPage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Related Deals */}
+        <RelatedDeals
+          categoryId={deal.categoryId}
+          currentDealId={deal.id}
+          locale={locale}
+        />
+
+        {/* Feedback Form */}
+        <FeedbackForm
+          locale={locale}
+          sourceType="deal"
+          sourcePage={deal.slug}
+          labels={{
+            title: tFeedback('title'),
+            subtitle: tFeedback('subtitle'),
+            namePlaceholder: tFeedback('namePlaceholder'),
+            emailPlaceholder: tFeedback('emailPlaceholder'),
+            messagePlaceholder: tFeedback('messagePlaceholder'),
+            submit: tFeedback('submit'),
+            submitting: tFeedback('submitting'),
+            successTitle: tFeedback('successTitle'),
+            successMessage: tFeedback('successMessage'),
+            errorTitle: tFeedback('errorTitle'),
+            errorMessage: tFeedback('errorMessage'),
+          }}
+        />
       </main>
     </>
   );

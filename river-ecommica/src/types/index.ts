@@ -23,6 +23,8 @@ export interface Deal {
   featured: boolean;
   exclusive?: boolean;
   gotoUrl: string;
+  /** 分类 ID */
+  categoryId?: number;
   /** 商家信息（商家不存在或已删除时为空） */
   merchant?: MerchantSimple | null;
 }

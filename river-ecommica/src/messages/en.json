@@ -166,7 +166,11 @@
     "typeTutorial": "Tutorial",
     "typeNews": "News",
     "views": "{count} views",
-    "filedUnder": "Filed under: {type}"
+    "filedUnder": "Filed under: {type}",
+    "relatedPosts": "Related Articles",
+    "viewMore": "View More",
+    "readMore": "Read",
+    "share": "Share"
   },
   "categories": {
     "meta": {
@@ -477,7 +481,24 @@
     "verifiedWorking": "Verified Working",
     "expires": "Expires: {date}",
     "aboutThisDeal": "About this deal",
-    "store": "Store"
+    "store": "Store",
+    "relatedDeals": "Related Deals",
+    "viewMore": "View More",
+    "getDeal": "Get Deal",
+    "share": "Share"
+  },
+  "Feedback": {
+    "title": "Have Feedback?",
+    "subtitle": "Help us improve — share your thoughts, suggestions, or report an issue.",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Email (optional)",
+    "messagePlaceholder": "Tell us what you think or report a problem...",
+    "submit": "Send Feedback",
+    "submitting": "Sending...",
+    "successTitle": "Thank You!",
+    "successMessage": "Your feedback has been received. We appreciate your input!",
+    "errorTitle": "Submission Failed",
+    "errorMessage": "Something went wrong. Please try again later."
   },
   "Offer": {
     "type": {

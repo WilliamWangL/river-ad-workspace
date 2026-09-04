@@ -6,7 +6,7 @@ import { getRegionFilter } from '@/lib/region-constants';
 import { PAGINATION } from '@/constants/pagination';
 import CouponCard from '@/components/coupon/CouponCard';
 import CouponsToolbar from '@/components/coupon/CouponsToolbar';
-import { CouponPagination } from '@/components/coupon/CouponPagination';
+import { CouponsInfiniteList } from '@/components/coupon/CouponsInfiniteList';
 import { EmptyState } from '@/components/ui/empty-state';
 import { JsonLd, BASE_URL, generateBreadcrumbJsonLd, generateItemListJsonLd } from '@/components/seo/JsonLd';
 import {
@@ -200,16 +200,17 @@ export default async function CouponsPage(props: {
 
       <section className="container mx-auto px-4 py-8 md:py-12">
         {displayCoupons.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
-              {displayCoupons.map(coupon => (
-                <CouponCard key={coupon.id} coupon={coupon} locale={locale} />
-              ))}
-            </div>
-            <div className="mt-12">
-              <CouponPagination total={total} pageSize={pageSize} currentPage={currentPage} />
-            </div>
-          </>
+          <CouponsInfiniteList
+            initialCount={displayCoupons.length}
+            total={total}
+            pageSize={pageSize}
+            locale={locale}
+            verified={verifiedOnly ? true : undefined}
+          >
+            {displayCoupons.map(coupon => (
+              <CouponCard key={coupon.id} coupon={coupon} locale={locale} />
+            ))}
+          </CouponsInfiniteList>
         ) : (
           <div className="card-elevated p-12">
             <EmptyState
