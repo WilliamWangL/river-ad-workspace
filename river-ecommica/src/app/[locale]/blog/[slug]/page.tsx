@@ -8,6 +8,9 @@ import { JsonLd, BASE_URL, generateBlogPostJsonLd, generateBreadcrumbJsonLd } fr
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { MarkdownRenderer } from '@/components/blog';
 import { Calendar, Eye, User, Tag } from 'lucide-react';
+import { RelatedPosts } from '@/components/blog/RelatedPosts';
+import { ShareButtons } from '@/components/layout/ShareButtons';
+import { FeedbackForm } from '@/components/layout/FeedbackForm';
 
 // next-intl 的 getTranslations 会内部调用 headers()，与 ISR 冲突
 // 使用 force-dynamic 确保 SSR 正常，数据缓存通过 API 层 revalidate 实现
@@ -83,6 +86,7 @@ export default async function BlogPostPage({ params }: Props) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'BlogDetail' });
+  const tFeedback = await getTranslations({ locale, namespace: 'Feedback' });
   const post = await fetchPostBySlug(slug);
 
   if (!post) {
@@ -149,6 +153,8 @@ export default async function BlogPostPage({ params }: Props) {
                 {post.title}
               </h1>
 
+              <ShareButtons title={post.title} variant="dark" labels={{ share: t('share') }} />
+
               <div className="flex flex-wrap items-center gap-6 text-white/80 text-sm font-medium">
                 <div className="flex items-center gap-2">
                   {post.authorAvatar ? (
@@ -198,6 +204,33 @@ export default async function BlogPostPage({ params }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Related Posts */}
+          <RelatedPosts
+            type={post.type}
+            currentPostId={post.id}
+            locale={locale}
+          />
+
+          {/* Feedback Form */}
+          <FeedbackForm
+            locale={locale}
+            sourceType="blog"
+            sourcePage={post.slug}
+            labels={{
+              title: tFeedback('title'),
+              subtitle: tFeedback('subtitle'),
+              namePlaceholder: tFeedback('namePlaceholder'),
+              emailPlaceholder: tFeedback('emailPlaceholder'),
+              messagePlaceholder: tFeedback('messagePlaceholder'),
+              submit: tFeedback('submit'),
+              submitting: tFeedback('submitting'),
+              successTitle: tFeedback('successTitle'),
+              successMessage: tFeedback('successMessage'),
+              errorTitle: tFeedback('errorTitle'),
+              errorMessage: tFeedback('errorMessage'),
+            }}
+          />
         </article>
       </main>
     </>

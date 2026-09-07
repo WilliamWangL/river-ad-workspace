@@ -166,7 +166,11 @@
     "typeTutorial": "教程",
     "typeNews": "资讯",
     "views": "{count} 次浏览",
-    "filedUnder": "分类: {type}"
+    "filedUnder": "分类: {type}",
+    "relatedPosts": "相关文章",
+    "viewMore": "查看更多",
+    "readMore": "阅读",
+    "share": "分享"
   },
   "categories": {
     "meta": {
@@ -489,6 +493,23 @@
     "verifiedWorking": "验证有效",
     "expires": "过期时间: {date}",
     "aboutThisDeal": "关于此优惠",
-    "store": "商店"
+    "store": "商店",
+    "relatedDeals": "相关优惠",
+    "viewMore": "查看更多",
+    "getDeal": "获取优惠",
+    "share": "分享"
+  },
+  "Feedback": {
+    "title": "有意见或建议？",
+    "subtitle": "帮助我们改进 — 分享您的想法、建议或报告问题。",
+    "namePlaceholder": "您的姓名",
+    "emailPlaceholder": "邮箱（选填）",
+    "messagePlaceholder": "告诉我们您的想法或报告一个问题...",
+    "submit": "提交反馈",
+    "submitting": "正在提交...",
+    "successTitle": "感谢您的反馈！",
+    "successMessage": "我们已收到您的意见。感谢您的宝贵反馈！",
+    "errorTitle": "提交失败",
+    "errorMessage": "出了点问题，请稍后再试。"
   }
 }
