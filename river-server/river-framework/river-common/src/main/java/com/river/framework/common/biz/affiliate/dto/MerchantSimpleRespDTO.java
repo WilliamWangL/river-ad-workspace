@@ -2,6 +2,8 @@ package com.river.framework.common.biz.affiliate.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 商家简单信息 DTO
  */
@@ -27,5 +29,20 @@ public class MerchantSimpleRespDTO {
      * 商家 Slug
      */
     private String slug;
+
+    /**
+     * 商家域名
+     */
+    private String domain;
+
+    /**
+     * 支持的地区（ISO 代码列表）
+     */
+    private List<String> regions;
+
+    /**
+     * 是否启用爬虫采集
+     */
+    private Boolean crawlEnabled;
 
 }

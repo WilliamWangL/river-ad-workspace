@@ -54,6 +54,9 @@ public class MerchantSaveReqVO {
     @NotNull(message = "状态不能为空")
     private Integer status;
 
+    @Schema(description = "是否启用爬虫采集（默认不爬取）", example = "false")
+    private Boolean crawlEnabled;
+
     @Schema(description = "支持的国家/地区（ISO 代码列表）", example = "[\"US\", \"UK\"]")
     private List<String> regions;
 

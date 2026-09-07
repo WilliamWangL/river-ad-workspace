@@ -26,4 +26,11 @@ public interface MerchantCommonApi {
      */
     List<MerchantSimpleRespDTO> getMerchantList(Collection<Long> ids);
 
+    /**
+     * 获取所有启用状态且有域名的商家列表（爬虫用）
+     *
+     * @return 有域名的启用商家列表
+     */
+    List<MerchantSimpleRespDTO> getActiveMerchantsWithDomain();
+
 }

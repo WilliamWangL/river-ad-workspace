@@ -50,6 +50,9 @@ public class MerchantRespVO {
     @Schema(description = "状态", example = "1")
     private Integer status;
 
+    @Schema(description = "是否启用爬虫采集", example = "false")
+    private Boolean crawlEnabled;
+
     @Schema(description = "支持的国家/地区（ISO 代码列表）")
     private List<String> regions;
 

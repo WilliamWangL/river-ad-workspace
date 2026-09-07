@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "管理后台 - Deal Response VO")
 @Data
@@ -52,11 +53,20 @@ public class DealRespVO {
     @Schema(description = "图片 URL")
     private String imageUrl;
 
+    @Schema(description = "商品图片 URL 列表（详情页多图）")
+    private List<String> imageUrls;
+
     @Schema(description = "热度分数", example = "100")
     private Integer hotScore;
 
     @Schema(description = "是否精选", example = "true")
     private Boolean featured;
+
+    @Schema(description = "跳转链接")
+    private String gotoUrl;
+
+    @Schema(description = "爬虫采集来源 URL")
+    private String sourceUrl;
 
     @Schema(description = "状态", example = "1")
     private Integer status;

@@ -53,7 +53,7 @@ export async function RelatedDeals({ categoryId, currentDealId, locale }: Relate
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {related.map(deal => (
-            <RelatedDealCard key={deal.id} deal={deal} locale={locale} t={t} />
+            <RelatedDealCard key={deal.id} deal={deal} locale={locale} labels={{ getDeal: t('getDeal') }} />
           ))}
         </div>
       </div>
@@ -61,7 +61,7 @@ export async function RelatedDeals({ categoryId, currentDealId, locale }: Relate
   );
 }
 
-function RelatedDealCard({ deal, locale, t }: { deal: Deal; locale: string; t: (key: string, opts?: Record<string, unknown>) => string }) {
+function RelatedDealCard({ deal, locale, labels }: { deal: Deal; locale: string; labels: { getDeal: string } }) {
   const merchantName = deal.merchant?.name || 'Store';
 
   return (
@@ -109,7 +109,7 @@ function RelatedDealCard({ deal, locale, t }: { deal: Deal; locale: string; t: (
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
           >
-            {t('getDeal')} <ArrowUpRight size={12} />
+            {labels.getDeal} <ArrowUpRight size={12} />
           </a>
         </div>
       </div>
