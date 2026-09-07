@@ -40,9 +40,4 @@ public class MerchantSimpleRespDTO {
      */
     private List<String> regions;
 
-    /**
-     * 是否启用爬虫采集
-     */
-    private Boolean crawlEnabled;
-
 }
