@@ -49,7 +49,13 @@ export async function RelatedPosts({ type, currentPostId, locale }: RelatedPosts
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {related.map(post => (
-            <RelatedPostCard key={post.id} post={post} locale={locale} t={t} />
+            <RelatedPostCard key={post.id} post={post} locale={locale} labels={{
+              readMore: t('readMore'),
+              typeDeal: t('typeDeal'),
+              typeReview: t('typeReview'),
+              typeTutorial: t('typeTutorial'),
+              typeNews: t('typeNews'),
+            }} />
           ))}
         </div>
       </div>
@@ -57,15 +63,23 @@ export async function RelatedPosts({ type, currentPostId, locale }: RelatedPosts
   );
 }
 
-function RelatedPostCard({ post, locale, t }: { post: BlogPost; locale: string; t: (key: string, opts?: Record<string, unknown>) => string }) {
+interface RelatedPostLabels {
+  readMore: string;
+  typeDeal: string;
+  typeReview: string;
+  typeTutorial: string;
+  typeNews: string;
+}
+
+function RelatedPostCard({ post, locale, labels }: { post: BlogPost; locale: string; labels: RelatedPostLabels }) {
   const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      deal: t('typeDeal'),
-      review: t('typeReview'),
-      tutorial: t('typeTutorial'),
-      news: t('typeNews'),
+    const typeMap: Record<string, string> = {
+      deal: labels.typeDeal,
+      review: labels.typeReview,
+      tutorial: labels.typeTutorial,
+      news: labels.typeNews,
     };
-    return labels[type] || type;
+    return typeMap[type] || type;
   };
 
   return (
@@ -116,7 +130,7 @@ function RelatedPostCard({ post, locale, t }: { post: BlogPost; locale: string; 
             href={`/${locale}/blog/${post.slug}`}
             className="text-primary font-semibold hover:underline flex items-center gap-0.5"
           >
-            {t('readMore')} <ArrowUpRight size={11} />
+            {labels.readMore} <ArrowUpRight size={11} />
           </Link>
         </div>
       </div>

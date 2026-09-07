@@ -23,6 +23,10 @@
             <groupId>com.river</groupId>
             <artifactId>river-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>river-spring-boot-starter-job</artifactId>
+        </dependency>
 
         <!-- Web 相关 -->
         <dependency>
@@ -51,6 +55,12 @@
         <dependency>
             <groupId>com.river</groupId>
             <artifactId>river-spring-boot-starter-excel</artifactId>
+        </dependency>
+
+        <!-- 爬虫相关 -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
         </dependency>
     </dependencies>
 

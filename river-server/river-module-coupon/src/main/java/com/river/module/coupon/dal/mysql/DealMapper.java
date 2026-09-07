@@ -77,4 +77,17 @@ public interface DealMapper extends BaseMapperX<DealDO> {
                 .in(DealDO::getExternalId, externalIds));
     }
 
+    /**
+     * 根据来源 URL 和商家 ID 查询 Deal（爬虫去重用）
+     *
+     * @param sourceUrl  采集来源页面 URL
+     * @param merchantId 商家 ID
+     * @return 已存在的 Deal，不存在返回 null
+     */
+    default DealDO selectBySourceUrlAndMerchantId(String sourceUrl, Long merchantId) {
+        return selectOne(new LambdaQueryWrapperX<DealDO>()
+                .eq(DealDO::getSourceUrl, sourceUrl)
+                .eq(DealDO::getMerchantId, merchantId));
+    }
+
 }
