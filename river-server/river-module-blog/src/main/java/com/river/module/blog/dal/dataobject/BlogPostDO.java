@@ -1,6 +1,5 @@
 package com.river.module.blog.dal.dataobject;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.apache.ibatis.type.Alias;
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 
 @Alias("BlogPostDO")
 @TableName("river_blog_post")
-@KeySequence("river_blog_post_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DealCard } from '@/components/deal/DealCard';
 import { StoreCard } from '@/components/store/StoreCard';
-import { AffiliateNetworks } from '@/components/home/AffiliateNetworks';
 import { CategorySection } from '@/components/home/CategorySection';
 import { fetchDeals, fetchStores, fetchCategories } from '@/lib/api';
 import { getCurrentRegion } from '@/lib/region';
@@ -34,6 +33,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('meta.title'),
     description: t('meta.description'),
+    alternates: {
+      canonical: `${BASE_URL}/${locale}`,
+      languages: {
+        'en': `${BASE_URL}/en`,
+        'zh': `${BASE_URL}/zh`,
+      },
+    },
     openGraph: {
       title: t('meta.title'),
       description: t('meta.description'),
@@ -65,6 +71,7 @@ export default async function HomePage({
   searchParams: Promise<{ region?: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const queryParams = await searchParams;
   const region = await getCurrentRegion(queryParams);
   const t = await getTranslations({locale, namespace: 'Home'});
@@ -72,14 +79,15 @@ export default async function HomePage({
   const tCategories = await getTranslations({locale, namespace: 'categories'});
 
   const regionFilter = getRegionFilter(region);
+  const regionsArray = regionFilter ? [regionFilter] : undefined;
 
   const [dealsResult, storesResult, categories] = await Promise.all([
-    fetchDeals({ featured: true, regions: regionFilter }),
-    fetchStores({ pageNo: 1, pageSize: 6, regions: regionFilter }),
-    fetchCategories({ regions: regionFilter })
+    fetchDeals({ featured: true, regions: regionsArray }),
+    fetchStores({ pageNo: 1, pageSize: 6, regions: regionsArray }),
+    fetchCategories({ region: regionFilter })
   ]);
 
-  const featuredDealsRaw = dealsResult.list.length > 0 ? dealsResult.list : (await fetchDeals({ regions: regionFilter })).list;
+  const featuredDealsRaw = dealsResult.list.length > 0 ? dealsResult.list : (await fetchDeals({ regions: regionsArray })).list;
   const featuredDeals = featuredDealsRaw.slice(0, 8);
   const popularStores = storesResult.list.slice(0, 6);
 
@@ -384,11 +392,6 @@ export default async function HomePage({
           </div>
         </div>
       </section>
-
-      {/* ============================================
-          AFFILIATE NETWORKS
-          ============================================ */}
-      <AffiliateNetworks />
 
       {/* ============================================
           CTA SECTION

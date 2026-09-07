@@ -1,13 +1,11 @@
 package com.river.module.blog.dal.dataobject;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.river.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
 
 @TableName("river_blog_tag")
-@KeySequence("river_blog_tag_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

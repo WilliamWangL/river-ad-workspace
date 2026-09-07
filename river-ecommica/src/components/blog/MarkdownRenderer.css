@@ -78,6 +78,91 @@
   padding: 0;
 }
 
+/* highlight.js GitHub Dark 主题 */
+.markdown-renderer .hljs {
+  color: #c9d1d9;
+}
+
+.markdown-renderer .hljs-comment,
+.markdown-renderer .hljs-quote {
+  color: #8b949e;
+  font-style: italic;
+}
+
+.markdown-renderer .hljs-keyword,
+.markdown-renderer .hljs-selector-tag,
+.markdown-renderer .hljs-deletion {
+  color: #ff7b72;
+}
+
+.markdown-renderer .hljs-string,
+.markdown-renderer .hljs-regexp,
+.markdown-renderer .hljs-addition,
+.markdown-renderer .hljs-attribute,
+.markdown-renderer .hljs-meta .hljs-string {
+  color: #a5d6ff;
+}
+
+.markdown-renderer .hljs-number,
+.markdown-renderer .hljs-literal,
+.markdown-renderer .hljs-bullet,
+.markdown-renderer .hljs-link {
+  color: #79c0ff;
+}
+
+.markdown-renderer .hljs-title,
+.markdown-renderer .hljs-section,
+.markdown-renderer .hljs-function .hljs-title {
+  color: #d2a8ff;
+}
+
+.markdown-renderer .hljs-built_in,
+.markdown-renderer .hljs-type,
+.markdown-renderer .hljs-class .hljs-title {
+  color: #ffa657;
+}
+
+.markdown-renderer .hljs-attr,
+.markdown-renderer .hljs-property,
+.markdown-renderer .hljs-attribute {
+  color: #79c0ff;
+}
+
+.markdown-renderer .hljs-variable,
+.markdown-renderer .hljs-template-variable,
+.markdown-renderer .hljs-name {
+  color: #ffa657;
+}
+
+.markdown-renderer .hljs-tag {
+  color: #7ee787;
+}
+
+.markdown-renderer .hljs-selector-class,
+.markdown-renderer .hljs-selector-id,
+.markdown-renderer .hljs-selector-attr,
+.markdown-renderer .hljs-selector-pseudo {
+  color: #7ee787;
+}
+
+.markdown-renderer .hljs-symbol,
+.markdown-renderer .hljs-meta {
+  color: #79c0ff;
+}
+
+.markdown-renderer .hljs-operator,
+.markdown-renderer .hljs-params {
+  color: #ff7b72;
+}
+
+.markdown-renderer .hljs-emphasis {
+  font-style: italic;
+}
+
+.markdown-renderer .hljs-strong {
+  font-weight: 700;
+}
+
 /* 提示框样式 */
 .markdown-renderer .callout {
   font-size: 0.875rem;

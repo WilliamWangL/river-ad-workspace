@@ -1,19 +1,21 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getTranslations } from 'next-intl/server';
-import { fetchStores, fetchStoreBySlug, fetchDeals, fetchOffersByMerchant } from '@/lib/api';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { fetchStores, fetchStoreBySlug, fetchDeals, fetchCoupons, fetchOffersByMerchant } from '@/lib/api';
+import { getTrackingUrl } from '@/lib/tracking';
+import { stripHtml } from '@/lib/utils';
+import { MarkdownRenderer } from '@/components/blog';
 import DealCard from '@/components/deal/DealCard';
-import OfferCard from '@/components/offer/OfferCard';
+import CouponCard from '@/components/coupon/CouponCard';
 import { Badge } from '@/components/ui/badge';
 import { JsonLd, BASE_URL, generateStoreJsonLd, generateBreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
-import { Star, ShoppingBag, Ticket, ShieldCheck, Store as StoreIcon, ArrowUpRight, Gift } from 'lucide-react';
+import { Star, ShoppingBag, Ticket, ShieldCheck, Store as StoreIcon, ArrowUpRight } from 'lucide-react';
 
-// 允许运行时动态参数（当 generateStaticParams 未返回该参数时）
+// 使用 ISR，每 5 分钟重新生成
+export const revalidate = 300;
 export const dynamicParams = true;
-export const dynamic = 'force-dynamic';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -40,6 +42,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'StoreDetail' });
   const store = await fetchStoreBySlug(slug);
 
@@ -49,12 +52,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const ogImage = store.logoUrl || '/og-image.png';
 
+  // SEO: metaTitle 优先，为空回退 i18n 默认标题
+  const pageTitle = store.metaTitle || t('meta.title', { name: store.name });
+  // SEO: metaDescription 优先，为空回退 intro/description
+  const pageDescription = store.metaDescription
+    || ((store.intro || store.description) ? stripHtml(store.intro || store.description, 160) : t('meta.description', { name: store.name }));
+
   return {
-    title: t('meta.title', { name: store.name }),
-    description: store.description || t('meta.description', { name: store.name }),
+    title: pageTitle,
+    description: pageDescription,
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/stores/${store.slug}`,
+      languages: {
+        'en': `${BASE_URL}/en/stores/${store.slug}`,
+        'zh': `${BASE_URL}/zh/stores/${store.slug}`,
+      },
+    },
     openGraph: {
-      title: t('meta.title', { name: store.name }),
-      description: store.description || t('meta.description', { name: store.name }),
+      title: pageTitle,
+      description: pageDescription,
       url: `${BASE_URL}/${locale}/stores/${store.slug}`,
       type: 'website',
       images: [
@@ -68,8 +84,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: t('meta.title', { name: store.name }),
-      description: store.description || t('meta.description', { name: store.name }),
+      title: pageTitle,
+      description: pageDescription,
       images: [ogImage],
     },
   };
@@ -77,6 +93,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StoreDetailPage({ params }: Props) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'StoreDetail' });
   const store = await fetchStoreBySlug(slug);
 
@@ -84,17 +101,18 @@ export default async function StoreDetailPage({ params }: Props) {
     notFound();
   }
 
-  // 并行获取 deals 和 offers
-  const [{ list: deals }, offers] = await Promise.all([
+  // 并行获取 deals、coupons 和 offers
+  const [{ list: deals }, { list: coupons }, offers] = await Promise.all([
     fetchDeals({ merchantId: store.id }),
+    fetchCoupons({ merchantId: store.id }),
     fetchOffersByMerchant(store.id),
   ]);
 
   // 获取第一个可用的 Offer（用于 Visit Store 按钮）
   const firstOffer = offers.length > 0 ? offers[0] : null;
-  // Visit Store URL：有可用 Offer 使用其 tracking link，否则跳转商家官网
-  const visitStoreUrl = firstOffer?.trackingLinkId
-    ? getTrackingLink(firstOffer.trackingLinkId, firstOffer.trackingUrl)
+  // Visit Store URL：有可用 Offer 使用其追踪链接，否则跳转商家官网
+  const visitStoreUrl = firstOffer?.gotoUrl
+    ? getTrackingUrl('offer', firstOffer.id, firstOffer.gotoUrl)
     : `https://${store.domain}`;
 
   const breadcrumbs = [
@@ -140,7 +158,9 @@ export default async function StoreDetailPage({ params }: Props) {
               <div className="flex-1 text-center md:text-left space-y-4">
                 <div>
                   <h1 className="text-4xl font-bold font-display text-foreground mb-2">{store.name}</h1>
-                  <p className="text-lg text-muted-foreground max-w-2xl">{store.description}</p>
+                  {(store.intro || store.description) && (
+                    <p className="text-lg text-muted-foreground max-w-2xl line-clamp-3">{stripHtml(store.intro || store.description)}</p>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-6">
@@ -213,31 +233,50 @@ export default async function StoreDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Offers Section */}
-          <div className="flex items-center justify-between mb-8 mt-12">
-            <h2 className="text-2xl font-bold font-display flex items-center gap-2">
-              <span className="w-1 h-8 bg-emerald-500 rounded-full block"></span>
-              {t('offersSectionTitle')}
-            </h2>
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              {t('offersCount', { count: offers.length })}
-            </Badge>
-          </div>
+          {/* Coupons Section */}
+          <div className="mt-14">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold font-display flex items-center gap-2">
+                <span className="w-1 h-8 bg-orange-500 rounded-full block"></span>
+                {t('couponsTitle')}
+              </h2>
+              <Badge variant="outline" className="text-sm px-3 py-1">
+                {t('couponsAvailable', { count: coupons.length })}
+              </Badge>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {offers.length > 0 ? offers.map(offer => (
-              <OfferCard key={offer.id} offer={offer} />
-            )) : (
-              <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            {coupons.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
+                {coupons.map(coupon => (
+                  <CouponCard key={coupon.id} coupon={coupon} locale={locale} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Gift size={24} className="text-gray-400" />
+                  <Ticket size={24} className="text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">{t('emptyOffersTitle')}</h3>
-                <p className="text-gray-500">{t('emptyOffersDescription')}</p>
+                <h3 className="text-lg font-medium text-gray-900">{t('noCouponsTitle')}</h3>
+                <p className="text-gray-500">{t('noCouponsDescription', { name: store.name })}</p>
               </div>
             )}
           </div>
         </div>
+
+        {/* 商家描述 - 富文本（about 为空回退 description） */}
+        {(store.about || store.description) && (
+          <section className="container mx-auto px-4 max-w-4xl py-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100">
+                <StoreIcon className="w-5 h-5 text-cyan-600" />
+              </div>
+              <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
+                {t('aboutStore', { name: store.name })}
+              </h2>
+            </div>
+            <MarkdownRenderer content={store.about || store.description} className="prose prose-lg prose-slate max-w-none" />
+          </section>
+        )}
       </main>
     </>
   );

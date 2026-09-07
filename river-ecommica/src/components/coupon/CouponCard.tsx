@@ -1,8 +1,8 @@
 import { Coupon } from '@/types';
-import { Clock, BadgeCheck } from 'lucide-react';
+import { Clock, BadgeCheck, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTranslations } from 'next-intl/server';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTrackingUrl } from '@/lib/tracking';
 import { CouponCardActions } from './CouponCardActions';
 
 interface CouponCardProps {
@@ -45,6 +45,7 @@ function getExpiryInfo(coupon: Coupon) {
 
 export default async function CouponCard({ coupon, locale }: CouponCardProps) {
   const t = await getTranslations({ locale, namespace: 'Deal' });
+  const merchantName = coupon.merchant?.name || 'Store';
   const discount = getDiscountDisplay(coupon);
   const expiry = getExpiryInfo(coupon);
 
@@ -59,33 +60,35 @@ export default async function CouponCard({ coupon, locale }: CouponCardProps) {
           {/* Merchant Info */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <a
-              href={getTrackingLink(coupon.trackingLinkId, coupon.gotoUrl)}
+              href={getTrackingUrl('coupon', coupon.id, coupon.gotoUrl)}
               target="_blank"
               rel="noopener"
               className="relative shrink-0"
             >
               <div className="w-11 h-11 rounded-xl bg-white border border-border flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105 shadow-sm">
-                {coupon.merchant.logoUrl ? (
+                {coupon.merchant?.logoUrl ? (
                   <img
                     src={coupon.merchant.logoUrl}
-                    alt={coupon.merchant.name}
+                    alt={merchantName}
                     className="w-8 h-8 object-contain"
                   />
-                ) : (
+                ) : coupon.merchant?.name ? (
                   <span className="text-base font-bold text-muted-foreground">
                     {coupon.merchant.name.charAt(0)}
                   </span>
+                ) : (
+                  <Store className="w-5 h-5 text-muted-foreground" />
                 )}
               </div>
             </a>
             <div className="min-w-0 flex-1">
               <a
-                href={getTrackingLink(coupon.trackingLinkId, coupon.gotoUrl)}
+                href={getTrackingUrl('coupon', coupon.id, coupon.gotoUrl)}
                 target="_blank"
                 rel="noopener"
                 className="font-semibold text-sm text-foreground truncate block hover:text-primary transition-colors"
               >
-                {coupon.merchant.name}
+                {merchantName}
               </a>
               <div className="flex items-center gap-2 mt-0.5">
                 {coupon.verified && (
@@ -148,8 +151,8 @@ export default async function CouponCard({ coupon, locale }: CouponCardProps) {
         {/* Client-side Actions (copy button, code reveal, etc.) */}
         <CouponCardActions
           code={coupon.code}
+          couponId={coupon.id}
           gotoUrl={coupon.gotoUrl}
-          trackingLinkId={coupon.trackingLinkId}
           getCouponText={t('getCoupon')}
           expired={expiry?.expired}
         />

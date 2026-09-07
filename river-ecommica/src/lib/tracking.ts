@@ -5,12 +5,13 @@ export function generateClickId(): string {
 }
 
 /**
- * 获取追踪链接路径
+ * 构建追踪重定向 URL
+ * 格式: /go/{type}/{id}
  * 直接走 nginx 代理到后端，不经过 Next.js 代理层
  */
-export function getTrackingLink(trackingLinkId?: string, fallbackUrl: string = '#'): string {
-  if (trackingLinkId) {
-    return `/go/${trackingLinkId}`
+export function getTrackingUrl(type: string, id: number | undefined, fallbackUrl: string = '#'): string {
+  if (id) {
+    return `/go/${type}/${id}`
   }
   return fallbackUrl
 }

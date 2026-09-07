@@ -1,4 +1,7 @@
 <configuration>
+    <!-- mediabuy 点击行日志文件路径（与 river.mediabuy.click-log-file 一致） -->
+    <springProperty scope="context" name="MEDIABUY_CLICK_LOG_FILE" source="river.mediabuy.click-log-file" defaultValue="logs/mediabuy-click.log"/>
+
     <!-- 参考 org/springframework/boot/logging/logback/defaults.xml 配置，优化 CONSOLE_LOG_PATTERN、FILE_LOG_PATTERN -->
     <!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level：级别从左显示 5 个字符宽度，%msg：日志消息，%n是换行符 -->
     <!-- CONSOLE_LOG_PATTERN 相比 FILE_LOG_PATTERN 多了 highlight、cyan 等高亮 -->
@@ -33,6 +36,27 @@
         <queueSize>512</queueSize> <!-- 更改默认的队列的深度，该值会影响性能。默认值为 256 -->
         <appender-ref ref="FILE"/>
     </appender>
+
+    <!-- mediabuy：点击行日志（每行一条 JSON，仅写入独立文件） -->
+    <appender name="MEDIABUY_CLICK_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%msg%n</pattern>
+        </encoder>
+        <file>${MEDIABUY_CLICK_LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${MEDIABUY_CLICK_LOG_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+    <appender name="MEDIABUY_CLICK_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <appender-ref ref="MEDIABUY_CLICK_FILE"/>
+    </appender>
+    <logger name="com.river.module.mediabuy.click" level="INFO" additivity="false">
+        <appender-ref ref="MEDIABUY_CLICK_ASYNC"/>
+    </logger>
 
     <!-- SkyWalking Appender：GRPC 日志收集，实现日志中心 -->
     <!--

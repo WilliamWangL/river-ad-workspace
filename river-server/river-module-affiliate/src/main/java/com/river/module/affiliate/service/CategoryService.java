@@ -11,6 +11,9 @@ import java.util.List;
  */
 public interface CategoryService {
 
+    /** 默认地区代码 */
+    String DEFAULT_REGION = "00";
+
     /**
      * 创建分类
      *
@@ -65,13 +68,13 @@ public interface CategoryService {
     List<CategoryDO> getCategoryListByParentId(Long parentId);
 
     /**
-     * 获得子分类列表（按地区过滤有数据的分类）
+     * 获得子分类列表（按地区过滤）
      *
      * @param parentId 父分类编号
-     * @param regions 地区代码列表，为空则返回所有分类
+     * @param region   地区代码，为空或找不到时回退默认地区
      * @return 子分类列表
      */
-    List<CategoryDO> getCategoryListByParentId(Long parentId, List<String> regions);
+    List<CategoryDO> getCategoryListByParentId(Long parentId, String region);
 
     /**
      * 校验分类是否存在
@@ -88,12 +91,12 @@ public interface CategoryService {
     List<CategoryDO> getCategoryTree();
 
     /**
-     * 获取分类树（按地区过滤有数据的分类）
+     * 获取分类树（按地区过滤，找不到则回退默认地区）
      *
-     * @param regions 地区代码列表，为空则返回所有分类
+     * @param region 地区代码
      * @return 分类树列表
      */
-    List<CategoryDO> getCategoryTree(List<String> regions);
+    List<CategoryDO> getCategoryTree(String region);
 
     /**
      * 根据 slug 获取分类
@@ -104,13 +107,13 @@ public interface CategoryService {
     CategoryDO getCategoryBySlug(String slug);
 
     /**
-     * 根据 slug 获取分类（按地区过滤）
+     * 根据 slug 获取分类（按地区，找不到则回退默认地区）
      *
-     * @param slug 分类标识
-     * @param regions 地区代码列表，为空则不过滤
+     * @param slug   分类标识
+     * @param region 地区代码
      * @return 分类
      */
-    CategoryDO getCategoryBySlug(String slug, List<String> regions);
+    CategoryDO getCategoryBySlug(String slug, String region);
 
     /**
      * 获取分类的祖先链路（面包屑）
@@ -119,5 +122,12 @@ public interface CategoryService {
      * @return 祖先分类列表（从根到当前）
      */
     List<CategoryDO> getCategoryAncestors(Long categoryId);
+
+    /**
+     * 获取所有可用的地区列表
+     *
+     * @return 地区代码列表
+     */
+    List<String> getAvailableRegions();
 
 }

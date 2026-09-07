@@ -29,6 +29,9 @@ public class AppCategoryRespVO {
     @Schema(description = "父分类编号", example = "0")
     private Long parentId;
 
+    @Schema(description = "地区代码", example = "US")
+    private String region;
+
     @Schema(description = "子分类列表")
     private List<AppCategoryRespVO> children;
 

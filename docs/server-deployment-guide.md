@@ -83,6 +83,7 @@ chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 ```
 
+
 ### 1.3 创建部署目录
 
 ```bash
@@ -104,7 +105,7 @@ mkdir -p /opt/river/ssl
 │   └── key.pem
 ├── admin-dist/               # Vue Admin 静态文件 (自动部署)
 └── data/
-    ├── postgres/             # PostgreSQL 数据 (自动创建)
+    ├── mysql/                # MySQL 数据 (自动创建)
     └── redis/                # Redis 数据 (自动创建)
 ```
 
@@ -124,7 +125,7 @@ mkdir -p /opt/river/ssl
 | `SERVER_USER` | SSH 用户名 | `root` |
 | `SERVER_SSH_KEY` | SSH 私钥（完整内容） | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
 | `SERVER_PORT` | SSH 端口 | `22` |
-| `POSTGRES_PASSWORD` | 数据库密码 | `your-strong-password` |
+| `MYSQL_PASSWORD` | 数据库密码 | `your-strong-password` |
 
 ### 2.2 生成 SSH 密钥（如需要）
 

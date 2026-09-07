@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchCategories } from '@/lib/api';
 import { getCurrentRegion } from '@/lib/region';
 import { getRegionFilter } from '@/lib/region-constants';
@@ -18,6 +18,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('meta.title'),
     description: t('meta.description'),
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/categories`,
+      languages: {
+        'en': `${BASE_URL}/en/categories`,
+        'zh': `${BASE_URL}/zh/categories`,
+      },
+    },
     openGraph: {
       title: t('meta.title'),
       description: t('meta.description'),
@@ -49,12 +56,13 @@ export default async function CategoriesPage({
   searchParams: Promise<{ region?: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const queryParams = await searchParams;
   const region = await getCurrentRegion(queryParams);
   const t = await getTranslations({ locale, namespace: 'categories' });
 
   const regionFilter = getRegionFilter(region);
-  const categories = await fetchCategories({ regions: regionFilter });
+  const categories = await fetchCategories({ region: regionFilter });
 
   const totalCategories = categories.length;
   const totalSubcategories = categories.reduce((acc, c) => acc + (c.children?.length || 0), 0);
@@ -124,9 +132,9 @@ export default async function CategoriesPage({
           </div>
         </section>
 
-        {/* Categories Grid */}
+        {/* Categories Grid - 显示全部分类，不受默认 maxCategories=8 限制 */}
         {categories.length > 0 ? (
-          <CategorySection categories={categories} locale={locale} />
+          <CategorySection categories={categories} locale={locale} maxCategories={categories.length} />
         ) : (
           <section className="py-16 lg:py-20 bg-background">
             <div className="container mx-auto px-4">

@@ -3,7 +3,6 @@ package com.river.module.affiliate.dal.dataobject;
 import com.river.framework.tenant.core.db.TenantBaseDO;
 import com.river.module.affiliate.enums.PayoutModelEnum;
 import com.river.module.affiliate.enums.OfferStatusEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -17,7 +16,6 @@ import java.util.List;
  * Offer/广告 DO
  */
 @TableName(value="river_affiliate_offer",autoResultMap = true)
-@KeySequence("river_affiliate_offer_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

@@ -1,16 +1,19 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchPosts, fetchPostBySlug } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { JsonLd, BASE_URL, generateBlogPostJsonLd, generateBreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { MarkdownRenderer } from '@/components/blog';
 import { Calendar, Eye, User, Tag } from 'lucide-react';
+import { RelatedPosts } from '@/components/blog/RelatedPosts';
+import { ShareButtons } from '@/components/layout/ShareButtons';
+import { FeedbackForm } from '@/components/layout/FeedbackForm';
 
-// 允许运行时动态参数（当 generateStaticParams 未返回该参数时）
-export const dynamicParams = true;
+// next-intl 的 getTranslations 会内部调用 headers()，与 ISR 冲突
+// 使用 force-dynamic 确保 SSR 正常，数据缓存通过 API 层 revalidate 实现
 export const dynamic = 'force-dynamic';
 
 type Props = {
@@ -38,6 +41,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'BlogDetail' });
   const post = await fetchPostBySlug(slug);
 
@@ -48,6 +52,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.metaTitle || post.title,
     description: post.metaDescription || post.excerpt,
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/blog/${post.slug}`,
+      languages: {
+        'en': `${BASE_URL}/en/blog/${post.slug}`,
+        'zh': `${BASE_URL}/zh/blog/${post.slug}`,
+      },
+    },
     openGraph: {
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.excerpt,
@@ -73,7 +84,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'BlogDetail' });
+  const tFeedback = await getTranslations({ locale, namespace: 'Feedback' });
   const post = await fetchPostBySlug(slug);
 
   if (!post) {
@@ -104,7 +117,7 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <>
       <Breadcrumbs items={breadcrumbs} />
-      <JsonLd data={generateBlogPostJsonLd(post)} />
+      <JsonLd data={generateBlogPostJsonLd(post, locale)} />
       <JsonLd data={generateBreadcrumbJsonLd(breadcrumbJsonLdItems)} />
       <main className="min-h-screen bg-dots-pattern pb-16">
         <div className="relative h-[400px] w-full bg-gray-900 overflow-hidden">
@@ -139,6 +152,8 @@ export default async function BlogPostPage({ params }: Props) {
               <h1 className="text-4xl md:text-5xl font-bold font-display text-white mb-6 leading-tight shadow-sm">
                 {post.title}
               </h1>
+
+              <ShareButtons title={post.title} variant="dark" labels={{ share: t('share') }} />
 
               <div className="flex flex-wrap items-center gap-6 text-white/80 text-sm font-medium">
                 <div className="flex items-center gap-2">
@@ -189,6 +204,33 @@ export default async function BlogPostPage({ params }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Related Posts */}
+          <RelatedPosts
+            type={post.type}
+            currentPostId={post.id}
+            locale={locale}
+          />
+
+          {/* Feedback Form */}
+          <FeedbackForm
+            locale={locale}
+            sourceType="blog"
+            sourcePage={post.slug}
+            labels={{
+              title: tFeedback('title'),
+              subtitle: tFeedback('subtitle'),
+              namePlaceholder: tFeedback('namePlaceholder'),
+              emailPlaceholder: tFeedback('emailPlaceholder'),
+              messagePlaceholder: tFeedback('messagePlaceholder'),
+              submit: tFeedback('submit'),
+              submitting: tFeedback('submitting'),
+              successTitle: tFeedback('successTitle'),
+              successMessage: tFeedback('successMessage'),
+              errorTitle: tFeedback('errorTitle'),
+              errorMessage: tFeedback('errorMessage'),
+            }}
+          />
         </article>
       </main>
     </>

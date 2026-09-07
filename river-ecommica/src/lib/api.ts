@@ -80,7 +80,7 @@ export async function fetchStores(params?: { pageNo?: number; pageSize?: number;
     params.regions.forEach(r => url.searchParams.append('regions', r));
   }
 
-  const res = await fetchWithTenant(url.toString(), { cache: 'no-store' });
+  const res = await fetchWithTenant(url.toString(), { next: { revalidate: 300 } });
   if (!res.ok) throw new Error('Fetch stores failed');
   const json = await res.json();
   return json.data || { total: 0, list: [] };
@@ -138,15 +138,27 @@ export async function fetchPostBySlug(slug: string): Promise<BlogPost | null> {
   return json.data ? mapPostType(json.data) : null
 }
 
-export async function fetchCategories(params?: { regions?: string[] }): Promise<Category[]> {
+export async function fetchCategories(params?: { region?: string }): Promise<Category[]> {
   const url = new URL(`${getApiBaseUrl()}/affiliate/category/tree`)
-  if (params?.regions?.length) {
-    params.regions.forEach(r => url.searchParams.append('regions', r))
+  if (params?.region) {
+    url.searchParams.set('region', params.region)
   }
   const res = await fetchWithTenant(url.toString(), { next: { revalidate: 3600 } })
   if (!res.ok) throw new Error('Fetch categories failed')
   const json = await res.json()
   return json.data || []
+}
+
+export async function fetchCategoryBySlug(slug: string, region?: string): Promise<Category | null> {
+  const url = new URL(`${getApiBaseUrl()}/affiliate/category/get-by-slug`)
+  url.searchParams.set('slug', slug)
+  if (region) {
+    url.searchParams.set('region', region)
+  }
+  const res = await fetchWithTenant(url.toString(), { next: { revalidate: 3600 } })
+  if (!res.ok) throw new Error('Fetch category failed')
+  const json = await res.json()
+  return json.data || null
 }
 
 export interface Region {

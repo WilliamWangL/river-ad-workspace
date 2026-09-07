@@ -32,6 +32,9 @@ public class CategorySaveReqVO {
     @Schema(description = "图标")
     private String icon;
 
+    @Schema(description = "地区代码，如 US、RU、00 表示默认")
+    private String region;
+
     @Schema(description = "状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "状态不能为空")
     private Integer status;

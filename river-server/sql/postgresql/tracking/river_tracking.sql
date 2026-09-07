@@ -6,6 +6,10 @@
 CREATE TABLE river_tracking_click (
     click_id            VARCHAR(26) NOT NULL,
     offer_id            BIGINT NOT NULL,
+    merchant_id         BIGINT,
+    merchant_name       VARCHAR(200),
+    coupon_id           BIGINT,
+    deal_id             BIGINT,
     campaign_id         BIGINT,
     landing_page_id     BIGINT,
     sub1                VARCHAR(200),
@@ -56,6 +60,9 @@ CREATE TABLE river_tracking_click_2026_12 PARTITION OF river_tracking_click
 
 -- 索引（会自动应用到所有分区）
 CREATE INDEX idx_tracking_click_offer ON river_tracking_click(offer_id);
+CREATE INDEX idx_tracking_click_merchant ON river_tracking_click(merchant_id);
+CREATE INDEX idx_tracking_click_coupon ON river_tracking_click(coupon_id);
+CREATE INDEX idx_tracking_click_deal ON river_tracking_click(deal_id);
 CREATE INDEX idx_tracking_click_campaign ON river_tracking_click(campaign_id);
 CREATE INDEX idx_tracking_click_time ON river_tracking_click(click_time);
 CREATE INDEX idx_tracking_click_tenant_time ON river_tracking_click(tenant_id, click_time);
@@ -98,6 +105,7 @@ COMMENT ON COLUMN river_tracking_conversion.status IS '状态: 0=待确认, 1=�
 CREATE TABLE river_tracking_link (
     id              BIGINT PRIMARY KEY,
     offer_id        BIGINT NOT NULL,
+    merchant_id     BIGINT,
     slug            VARCHAR(100) NOT NULL,
     preset_sub1     VARCHAR(200),
     preset_sub2     VARCHAR(200),

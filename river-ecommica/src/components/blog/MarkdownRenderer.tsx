@@ -1,5 +1,3 @@
-'use client';
-
 import { Children, isValidElement, ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -12,6 +10,55 @@ import './MarkdownRenderer.css';
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+}
+
+// 检测内容是否为 HTML（富文本编辑器生成）
+function isHtmlContent(content: string): boolean {
+  const trimmed = content.trim();
+  // 内容以 HTML 标签开头，或包含 HTML 块级标签
+  const startsWithTag = /^</.test(trimmed);
+  const hasBlockTags = /<(p|div|h[1-6]|table|tr|td|th|ul|ol|li|article|section|header|footer|br|img|a|span|strong|em|blockquote|pre|code|figure|figcaption|hr)\b[\s\S]*>/i.test(trimmed);
+  const hasClosingTag = /<\/[a-z][\s\S]*?>/i.test(trimmed);
+  return (startsWithTag || hasBlockTags) && hasClosingTag;
+}
+
+// 检测内容是否包含 Markdown 语法特征
+function isMarkdownContent(content: string): boolean {
+  const lines = content.split('\n');
+  for (const raw of lines) {
+    const trimmed = raw.trimStart();
+    if (/^#{1,6}\s/.test(trimmed)) return true; // 标题
+    if (/^>\s?/.test(trimmed)) return true; // 引用
+    if (/^[-*+]\s/.test(trimmed)) return true; // 无序列表
+    if (/^\d+\.\s/.test(trimmed)) return true; // 有序列表
+    if (/^\|/.test(trimmed)) return true; // 表格
+    if (/^(---|\*\*\*|___)\s*$/.test(trimmed)) return true; // 水平线
+    if (/^```/.test(trimmed)) return true; // 代码块
+  }
+  // 行内语法：粗体/斜体/删除线/代码/链接/图片
+  if (/\*\*|__|~~|`|!\[[^\]]*\]|\[[^\]]+\]\([^)]+\)/.test(content)) return true;
+  return false;
+}
+
+// 解码基础 HTML 实体
+function decodeHtmlEntities(content: string): string {
+  return content
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'");
+}
+
+// 基础 HTML 清理：移除 script/style 标签、事件处理器、javascript: 伪协议
+function sanitizeHtml(content: string): string {
+  return content
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/\s*on\w+="[^"]*"/gi, '')
+    .replace(/\s*on\w+='[^']*'/gi, '')
+    .replace(/javascript:/gi, '');
 }
 
 // 自定义提示框组件
@@ -62,8 +109,32 @@ function extractTextContent(children: ReactNode): string {
 }
 
 export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
-  // 预处理内容：将字面量 \n 转换为真正的换行符
+  if (!content) return null;
+
+  // 预处理：将字面量 \n 转换为真正的换行符
   const processedContent = content.replace(/\\n/g, '\n');
+
+  // 先解码 HTML 实体，再检测是否为 HTML（API 可能返回实体编码的 HTML）
+  const decodedContent = decodeHtmlEntities(processedContent);
+
+  // 如果内容是 HTML（富文本编辑器生成），直接渲染为 HTML
+  if (isHtmlContent(decodedContent)) {
+    return (
+      <div
+        className={`markdown-renderer ${className}`}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(decodedContent) }}
+      />
+    );
+  }
+
+  // 纯文本（不含 Markdown 语法）：按文本原样显示，避免被 Markdown 误解析
+  if (!isMarkdownContent(processedContent)) {
+    return (
+      <div className={`markdown-renderer ${className}`}>
+        <p className="whitespace-pre-wrap">{processedContent}</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`markdown-renderer ${className}`}>

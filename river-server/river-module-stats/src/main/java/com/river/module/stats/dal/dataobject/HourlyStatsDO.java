@@ -1,6 +1,5 @@
 package com.river.module.stats.dal.dataobject;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.river.framework.mybatis.core.dataobject.BaseDO;
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
  * 小时统计 DO
  */
 @TableName("river_stats_hourly")
-@KeySequence("river_stats_hourly_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

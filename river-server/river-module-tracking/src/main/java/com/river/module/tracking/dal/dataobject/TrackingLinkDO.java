@@ -1,13 +1,11 @@
 package com.river.module.tracking.dal.dataobject;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.river.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
 
 @TableName("river_tracking_link")
-@KeySequence("river_tracking_link_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -24,6 +22,9 @@ public class TrackingLinkDO extends TenantBaseDO {
 
     /** 目标实体 ID */
     private Long targetId;
+
+    /** 商家 ID（冗余字段，便于点击记录填充） */
+    private Long merchantId;
 
     /** 短链接标识 */
     private String slug;

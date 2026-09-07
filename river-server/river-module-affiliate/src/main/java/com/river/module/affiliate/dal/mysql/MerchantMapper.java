@@ -19,9 +19,9 @@ public interface MerchantMapper extends BaseMapperX<MerchantDO> {
     default PageResult<MerchantDO> selectPage(MerchantPageReqVO reqVO) {
         String regionSql = "";
         if (CollUtil.isNotEmpty(reqVO.getRegions())) {
-            // PostgreSQL 使用 string_to_array + ANY 替代 MySQL 的 FIND_IN_SET
+            // MySQL 使用 FIND_IN_SET 判断 regions 是否包含指定 region
             regionSql = "(" + reqVO.getRegions().stream()
-                    .map(region -> "string_to_array(regions, ',') @> ARRAY['" + region + "']::text[]")
+                    .map(region -> "FIND_IN_SET('" + region + "', regions) > 0")
                     .collect(Collectors.joining(" OR ")) + ")";
         }
         LambdaQueryWrapperX<MerchantDO> qry= new LambdaQueryWrapperX<MerchantDO>();

@@ -2,7 +2,6 @@ package com.river.module.system.dal.dataobject.oauth2;
 
 import com.river.framework.common.enums.UserTypeEnum;
 import com.river.framework.mybatis.core.dataobject.BaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -18,7 +17,6 @@ import java.time.LocalDateTime;
  * @author 芋道源码
  */
 @TableName(value = "system_oauth2_approve", autoResultMap = true)
-@KeySequence("system_oauth2_approve_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class OAuth2ApproveDO extends BaseDO {

@@ -1,7 +1,6 @@
 package com.river.module.affiliate.dal.dataobject;
 
 import com.river.framework.tenant.core.db.TenantBaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
@@ -11,7 +10,6 @@ import lombok.*;
  * 用于将各联盟的分类映射到本地统一分类体系
  */
 @TableName("river_affiliate_category_mapping")
-@KeySequence("river_affiliate_category_mapping_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

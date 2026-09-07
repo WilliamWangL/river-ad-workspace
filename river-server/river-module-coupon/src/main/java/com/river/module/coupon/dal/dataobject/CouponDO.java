@@ -1,7 +1,6 @@
 package com.river.module.coupon.dal.dataobject;
 
 import com.river.framework.tenant.core.db.TenantBaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @TableName(value = "river_coupon_coupon", autoResultMap = true)
-@KeySequence("river_coupon_coupon_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -39,6 +37,12 @@ public class CouponDO extends TenantBaseDO {
     private String title;
 
     private String code;
+
+    /** SEO 页面标题（为空时回退到 title） */
+    private String metaTitle;
+
+    /** SEO meta 描述（为空时回退到 terms） */
+    private String metaDescription;
 
     private Integer discountType;
 

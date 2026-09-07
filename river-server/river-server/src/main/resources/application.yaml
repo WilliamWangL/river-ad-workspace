@@ -71,8 +71,8 @@ mybatis-plus:
     db-config:
       id-type: NONE # “智能”模式，基于 IdTypeEnvironmentPostProcessor + 数据源的类型，自动适配成 AUTO、INPUT 模式。
 #      id-type: AUTO # 自增 ID，适合 MySQL 等直接自增的数据库
-#      id-type: INPUT # 用户输入 ID，适合 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库
-#      id-type: ASSIGN_ID # 分配 ID，默认使用雪花算法。注意，Oracle、PostgreSQL、Kingbase、DB2、H2 数据库时，需要去除实体类上的 @KeySequence 注解
+#      id-type: INPUT # 用户输入 ID，适合 Oracle、Kingbase、DB2、H2 等数据库
+#      id-type: ASSIGN_ID # 分配 ID，默认使用雪花算法
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
     banner: false # 关闭控制台的 Banner 打印
@@ -272,6 +272,7 @@ river:
   security:
     permit-all_urls:
       - /admin-api/mp/open/** # 微信公众号开放平台，微信回调接口，不需要登录
+      - /track/** # 媒体投放 JS 跳转，公开
   api-encrypt:
     enable: true # 是否开启 API 加密
     algorithm: AES # 加密算法，支持 AES、RSA 等
@@ -307,6 +308,10 @@ river:
     vo-type: 10 # VO 的类型，参见 CodegenVOTypeEnum 枚举类
     delete-batch-enable: true # 是否生成批量删除接口
     unit-test-enable: false # 是否生成单元测试
+  mediabuy:
+    offer-cache-seconds: 864000 # Offer 缓存 TTL：10 天（10*24*3600）
+    # mediabuy 点击行日志文件路径（logback 独立 appender）；Docker 下建议 /app/logs/mediabuy-click.log
+    click-log-file: logs/mediabuy-click.log
   tenant: # 多租户相关配置项
     enable: true
     ignore-urls:

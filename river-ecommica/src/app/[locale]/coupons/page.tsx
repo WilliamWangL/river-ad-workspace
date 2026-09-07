@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchCoupons } from '@/lib/api';
 import { getCurrentRegion } from '@/lib/region';
 import { getRegionFilter } from '@/lib/region-constants';
 import { PAGINATION } from '@/constants/pagination';
 import CouponCard from '@/components/coupon/CouponCard';
 import CouponsToolbar from '@/components/coupon/CouponsToolbar';
-import { CouponPagination } from '@/components/coupon/CouponPagination';
+import { CouponsInfiniteList } from '@/components/coupon/CouponsInfiniteList';
 import { EmptyState } from '@/components/ui/empty-state';
 import { JsonLd, BASE_URL, generateBreadcrumbJsonLd, generateItemListJsonLd } from '@/components/seo/JsonLd';
 import {
@@ -24,6 +24,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('meta.title'),
     description: t('meta.description'),
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/coupons`,
+      languages: {
+        'en': `${BASE_URL}/en/coupons`,
+        'zh': `${BASE_URL}/zh/coupons`,
+      },
+    },
     openGraph: {
       title: t('meta.title'),
       description: t('meta.description'),
@@ -52,6 +59,7 @@ export default async function CouponsPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { locale } = await props.params;
+  setRequestLocale(locale);
   const searchParams = await props.searchParams;
 
   const t = await getTranslations({ locale, namespace: 'coupons' });
@@ -63,18 +71,19 @@ export default async function CouponsPage(props: {
   const region = await getCurrentRegion({ region: typeof searchParams.region === 'string' ? searchParams.region : undefined });
 
   const regionFilter = getRegionFilter(region);
+  const regionsArray = regionFilter ? [regionFilter] : undefined;
 
   const { list: allCoupons, total } = await fetchCoupons({
     pageNo: currentPage,
     pageSize,
     verified: verifiedOnly ? true : undefined,
-    regions: regionFilter
+    regions: regionsArray
   });
 
   const displayCoupons = q
     ? allCoupons.filter(c =>
         c.code.toLowerCase().includes(q.toLowerCase()) ||
-        c.merchant.name?.toLowerCase().includes(q.toLowerCase()) ||
+        c.merchant?.name?.toLowerCase().includes(q.toLowerCase()) ||
         c.description?.toLowerCase().includes(q.toLowerCase())
       )
     : allCoupons;
@@ -84,7 +93,7 @@ export default async function CouponsPage(props: {
   threeDaysFromNow.setDate(now.getDate() + 3);
 
   // Fetch all coupons for stats (without pagination)
-  const allCouponsResult = await fetchCoupons({ verified: verifiedOnly ? true : undefined, regions: regionFilter });
+  const allCouponsResult = await fetchCoupons({ verified: verifiedOnly ? true : undefined, regions: regionsArray });
   const allCouponsForStats = allCouponsResult.list;
   const totalCoupons = total;
   const verifiedCount = allCouponsForStats.filter(c => c.verified).length;
@@ -102,7 +111,7 @@ export default async function CouponsPage(props: {
   const itemListJsonLdItems = displayCoupons
     .filter(coupon => coupon.id)
     .map(coupon => ({
-      name: `${coupon.merchant.name} - ${coupon.title || coupon.description}`,
+      name: `${coupon.merchant?.name || 'Store'} - ${coupon.title || coupon.description}`,
       url: `${BASE_URL}/${locale}/coupons#coupon-${coupon.id}`
     }));
 
@@ -191,16 +200,17 @@ export default async function CouponsPage(props: {
 
       <section className="container mx-auto px-4 py-8 md:py-12">
         {displayCoupons.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
-              {displayCoupons.map(coupon => (
-                <CouponCard key={coupon.id} coupon={coupon} locale={locale} />
-              ))}
-            </div>
-            <div className="mt-12">
-              <CouponPagination total={total} pageSize={pageSize} currentPage={currentPage} />
-            </div>
-          </>
+          <CouponsInfiniteList
+            initialCount={displayCoupons.length}
+            total={total}
+            pageSize={pageSize}
+            locale={locale}
+            verified={verifiedOnly ? true : undefined}
+          >
+            {displayCoupons.map(coupon => (
+              <CouponCard key={coupon.id} coupon={coupon} locale={locale} />
+            ))}
+          </CouponsInfiniteList>
         ) : (
           <div className="card-elevated p-12">
             <EmptyState

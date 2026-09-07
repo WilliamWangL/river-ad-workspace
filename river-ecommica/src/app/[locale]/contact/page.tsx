@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { PageHero } from '@/components/layout/PageHero';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Mail, Share2, Briefcase, HelpCircle, ArrowRight, Twitter, Facebook, Ins
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'contact' });
   return {
     title: t('meta.title'),
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'contact' });
 
   const contactCards = [

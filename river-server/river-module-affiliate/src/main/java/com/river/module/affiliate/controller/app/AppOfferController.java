@@ -4,8 +4,6 @@ import com.river.framework.common.pojo.CommonResult;
 import com.river.module.affiliate.controller.app.vo.AppOfferRespVO;
 import com.river.module.affiliate.dal.dataobject.OfferDO;
 import com.river.module.affiliate.service.OfferService;
-import com.river.framework.common.biz.tracking.TrackingLinkCommonApi;
-import com.river.framework.common.biz.tracking.dto.TrackingLinkRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,14 +24,8 @@ import static com.river.framework.common.pojo.CommonResult.success;
 @PermitAll
 public class AppOfferController {
 
-    /** Offer 的 targetType */
-    private static final int TARGET_TYPE_OFFER = 2;
-
     @Resource
     private OfferService offerService;
-
-    @Resource
-    private TrackingLinkCommonApi trackingLinkApi;
 
     @GetMapping("/list-by-merchant")
     @Operation(summary = "获取商家的 Offer 列表（按地区筛选）")
@@ -66,13 +58,7 @@ public class AppOfferController {
         vo.setCommissionValue(offer.getCommissionValue());
         vo.setCurrency(offer.getCurrency());
         vo.setRegions(offer.getRegions() != null ? offer.getRegions() : Collections.emptyList());
-
-        // 获取 tracking link 信息
-        TrackingLinkRespDTO trackingLink = trackingLinkApi.getTrackingLink(TARGET_TYPE_OFFER, offer.getId());
-        if (trackingLink != null) {
-            vo.setTrackingLinkId(trackingLink.getSlug());
-            vo.setTrackingUrl(trackingLink.getTrackingUrl());
-        }
+        vo.setGotoUrl(offer.getGotoUrl());
         return vo;
     }
 

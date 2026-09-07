@@ -6,6 +6,7 @@ import { Link, useRouter } from '@/i18n/routing';
 import { NAV_LINKS } from '@/config/navigation';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { RegionSelector } from '@/components/layout/RegionSelector';
+import { useRegionData } from '@/components/providers/useRegionData';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Menu, Search, X, ShoppingBag, ChevronRight, Flame, Store, Ticket, BookOpen, LayoutGrid } from 'lucide-react';
@@ -18,14 +19,10 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   '/blog': BookOpen,
 };
 
-interface HeaderProps {
-  currentRegion?: string
-  regions?: { code: string; name: string }[]
-}
-
-export function Header({ currentRegion = 'GLOBAL', regions = [] }: HeaderProps) {
+export function Header() {
     const t = useTranslations('Common');
     const router = useRouter();
+    const { currentRegion, regions, loading } = useRegionData();
     const searchInputRef = useRef<HTMLInputElement>(null);
     const mobileSearchInputRef = useRef<HTMLInputElement>(null);
     const [mounted, setMounted] = useState(false);
@@ -248,7 +245,7 @@ export function Header({ currentRegion = 'GLOBAL', regions = [] }: HeaderProps) 
                         <span className="sr-only">{isSearchOpen ? 'Close search' : t('search')}</span>
                     </Button>
 
-                    {regions.length > 0 && (
+                    {!loading && regions.length > 0 && (
                       <RegionSelector currentRegion={currentRegion} regions={regions} />
                     )}
 

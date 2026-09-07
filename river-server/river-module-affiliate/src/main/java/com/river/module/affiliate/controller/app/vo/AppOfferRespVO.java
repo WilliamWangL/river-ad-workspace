@@ -34,10 +34,7 @@ public class AppOfferRespVO {
     @Schema(description = "支持地区", example = "[\"US\", \"UK\"]")
     private List<String> regions;
 
-    @Schema(description = "追踪链接 ID (slug)", example = "offer-amazon-shopping-123")
-    private String trackingLinkId;
-
-    @Schema(description = "追踪链接 URL", example = "https://api.example.com/go/offer-amazon-shopping-123")
-    private String trackingUrl;
+    @Schema(description = "跳转链接", example = "https://www.amazon.com/dp/B0123456")
+    private String gotoUrl;
 
 }

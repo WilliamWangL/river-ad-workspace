@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchStores } from '@/lib/api';
 import { getCurrentRegion } from '@/lib/region';
 import { getRegionFilter } from '@/lib/region-constants';
@@ -25,6 +25,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('meta.title'),
     description: t('meta.description'),
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/stores`,
+      languages: {
+        'en': `${BASE_URL}/en/stores`,
+        'zh': `${BASE_URL}/zh/stores`,
+      },
+    },
     openGraph: {
       title: t('meta.title'),
       description: t('meta.description'),
@@ -56,6 +63,7 @@ export default async function StoresPage({
   searchParams: Promise<{ q?: string; page?: string; region?: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const queryParams = await searchParams;
   const searchQuery = queryParams.q?.trim() || '';
   const currentPage = parseInt(queryParams.page || String(PAGINATION.DEFAULT_PAGE), 10);
@@ -64,12 +72,13 @@ export default async function StoresPage({
   const t = await getTranslations({ locale, namespace: 'stores' });
 
   const regionFilter = getRegionFilter(region);
+  const regionsArray = regionFilter ? [regionFilter] : undefined;
 
   const storesResult = await fetchStores({
     pageNo: currentPage,
     pageSize,
     name: searchQuery || undefined,
-    regions: regionFilter
+    regions: regionsArray
   });
   const stores = storesResult.list || [];
   const total = storesResult.total || 0;

@@ -38,6 +38,9 @@
       <el-form-item label="图标" prop="icon">
         <el-input v-model="formData.icon" placeholder="请输入图标类名或 URL" />
       </el-form-item>
+      <el-form-item label="地区" prop="region">
+        <el-input v-model="formData.region" placeholder="如 US、RU、00（默认）" />
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" placeholder="请选择状态" class="!w-full">
           <el-option
@@ -80,6 +83,7 @@ const formData = ref({
   level: 1,
   sort: 0,
   icon: '',
+  region: '00',
   status: 0
 })
 const formRules = reactive({
@@ -151,6 +155,7 @@ const resetForm = () => {
     level: 1,
     sort: 0,
     icon: '',
+    region: '00',
     status: 0
   }
   formRef.value?.resetFields()

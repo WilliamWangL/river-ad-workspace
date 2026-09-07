@@ -2,7 +2,6 @@ package com.river.module.system.dal.dataobject.sms;
 
 import com.river.framework.mybatis.core.dataobject.BaseDO;
 import com.river.framework.tenant.core.aop.TenantIgnore;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
  * @author 芋道源码
  */
 @TableName("system_sms_code")
-@KeySequence("system_sms_code_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

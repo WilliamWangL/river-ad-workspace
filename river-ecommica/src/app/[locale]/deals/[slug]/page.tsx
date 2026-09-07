@@ -2,17 +2,22 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchDeals, fetchDealBySlug } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { JsonLd, BASE_URL, generateDealJsonLd, generateBreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { CheckCircle, Clock, ShieldCheck, ExternalLink, Store, Tag } from 'lucide-react';
-import { getTrackingLink } from '@/lib/tracking';
+import { getTrackingUrl } from '@/lib/tracking';
+import { MarkdownRenderer } from '@/components/blog';
+import { stripHtml } from '@/lib/utils';
+import { RelatedDeals } from '@/components/deal/RelatedDeals';
+import { FeedbackForm } from '@/components/layout/FeedbackForm';
+import { ShareButtons } from '@/components/layout/ShareButtons';
 
-// 允许运行时动态参数（当 generateStaticParams 未返回该参数时）
+// 使用 ISR，每 5 分钟重新生成
+export const revalidate = 300;
 export const dynamicParams = true;
-export const dynamic = 'force-dynamic';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -39,6 +44,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'DealDetail' });
   const deal = await fetchDealBySlug(slug);
 
@@ -46,15 +52,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: t('meta.notFound') };
   }
 
-  const description = deal.description || t('meta.description', { percent: deal.discountPercent, store: deal.merchant.name });
+  // SEO: metaTitle 优先，为空回退默认标题；metaDescription 优先，为空回退 description（去除 HTML 标签，避免 meta 中出现标签）
+  const merchantName = deal.merchant?.name;
+  const pageTitle = deal.metaTitle || (merchantName ? `${deal.title} - ${merchantName}` : deal.title);
+  const pageDescription = deal.metaDescription || (deal.description ? stripHtml(deal.description, 160) : '') || t('meta.description', { percent: deal.discountPercent, store: merchantName || '' });
   const ogImage = deal.imageUrl || '/og-image.png';
 
   return {
-    title: `${deal.title} - ${deal.merchant.name}`,
-    description,
+    title: pageTitle,
+    description: pageDescription,
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/deals/${deal.slug}`,
+      languages: {
+        'en': `${BASE_URL}/en/deals/${deal.slug}`,
+        'zh': `${BASE_URL}/zh/deals/${deal.slug}`,
+      },
+    },
     openGraph: {
-      title: `${deal.title} - ${deal.merchant.name}`,
-      description,
+      title: pageTitle,
+      description: pageDescription,
       url: `${BASE_URL}/${locale}/deals/${deal.slug}`,
       type: 'article',
       images: [
@@ -68,8 +84,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${deal.title} - ${deal.merchant.name}`,
-      description,
+      title: pageTitle,
+      description: pageDescription,
       images: [ogImage],
     },
   };
@@ -77,14 +93,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DealDetailPage({ params }: Props) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'DealDetail' });
+  const tFeedback = await getTranslations({ locale, namespace: 'Feedback' });
   const deal = await fetchDealBySlug(slug);
 
   if (!deal) {
     notFound();
   }
 
-  const trackingUrl = getTrackingLink(deal.trackingLinkId, deal.gotoUrl);
+  const trackingUrl = getTrackingUrl('deal', deal.id, deal.gotoUrl);
 
   const breadcrumbs = [
     { label: t('breadcrumbHome'), href: '/' },
@@ -157,17 +175,25 @@ export default async function DealDetailPage({ params }: Props) {
 
               <div className="lg:col-span-7 space-y-6">
                 <div>
-                  <Link 
-                    href={`/${locale}/stores/${deal.merchant.slug}`}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-3 group"
-                  >
-                    <Store size={16} className="group-hover:text-primary" />
-                    {deal.merchant.name}
-                  </Link>
-                  
+                  {deal.merchant ? (
+                    <Link
+                      href={`/${locale}/stores/${deal.merchant.slug}`}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-3 group"
+                    >
+                      <Store size={16} className="group-hover:text-primary" />
+                      {deal.merchant.name}
+                    </Link>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
+                      <Store size={16} />
+                      {t('store')}
+                    </div>
+                  )}
                   <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-foreground mb-4 leading-tight">
                     {deal.title}
                   </h1>
+
+                  <ShareButtons title={deal.title} labels={{ share: t('share') }} />
 
                   {(deal.originalPrice > 0 || deal.dealPrice > 0) && (
                     <div className="flex items-baseline gap-3 mb-6">
@@ -210,24 +236,42 @@ export default async function DealDetailPage({ params }: Props) {
                   </div>
                 </div>
 
-                <div className="prose prose-gray max-w-none">
+                <div>
                   <h3 className="text-lg font-bold font-display mb-2">{t('aboutThisDeal')}</h3>
-                  <p className="text-gray-600 leading-relaxed">{deal.description}</p>
-                </div>
-
-                <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-500 border border-gray-100">
-                  <p className="font-medium mb-1 text-gray-700">{t('termsTitle')}</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>{t('termSupplies')}</li>
-                    <li>{t('termPrices')}</li>
-                    <li>{t('termDetails')}</li>
-                  </ul>
+                  <MarkdownRenderer content={deal.description} className="prose prose-gray max-w-none" />
                 </div>
 
               </div>
             </div>
           </div>
         </div>
+
+        {/* Related Deals */}
+        <RelatedDeals
+          categoryId={deal.categoryId}
+          currentDealId={deal.id}
+          locale={locale}
+        />
+
+        {/* Feedback Form */}
+        <FeedbackForm
+          locale={locale}
+          sourceType="deal"
+          sourcePage={deal.slug}
+          labels={{
+            title: tFeedback('title'),
+            subtitle: tFeedback('subtitle'),
+            namePlaceholder: tFeedback('namePlaceholder'),
+            emailPlaceholder: tFeedback('emailPlaceholder'),
+            messagePlaceholder: tFeedback('messagePlaceholder'),
+            submit: tFeedback('submit'),
+            submitting: tFeedback('submitting'),
+            successTitle: tFeedback('successTitle'),
+            successMessage: tFeedback('successMessage'),
+            errorTitle: tFeedback('errorTitle'),
+            errorMessage: tFeedback('errorMessage'),
+          }}
+        />
       </main>
     </>
   );

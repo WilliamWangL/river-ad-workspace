@@ -3,7 +3,6 @@ package com.river.module.affiliate.dal.dataobject;
 import com.river.framework.tenant.core.db.TenantBaseDO;
 import com.river.module.affiliate.enums.NetworkStatusEnum;
 import com.river.module.affiliate.enums.NetworkTypeEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
@@ -12,7 +11,6 @@ import lombok.*;
  * 联盟网络 DO
  */
 @TableName("river_affiliate_network")
-@KeySequence("river_affiliate_network_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

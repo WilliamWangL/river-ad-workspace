@@ -17,9 +17,9 @@ public interface CouponMapper extends BaseMapperX<CouponDO> {
     default PageResult<CouponDO> selectPage(CouponPageReqVO reqVO) {
         String regionSql = "";
         if (CollUtil.isNotEmpty(reqVO.getRegions())) {
-            // PostgreSQL 使用 string_to_array + ANY 替代 MySQL 的 FIND_IN_SET
+            // MySQL 使用 FIND_IN_SET 判断 regions 是否包含指定 region
             regionSql = "(" + reqVO.getRegions().stream()
-                    .map(region -> "string_to_array(regions, ',') @> ARRAY['" + region + "']::text[]")
+                    .map(region -> "FIND_IN_SET('" + region + "', regions) > 0")
                     .collect(Collectors.joining(" OR ")) + ")";
         }
         LambdaQueryWrapperX<CouponDO> qry = new LambdaQueryWrapperX<CouponDO>()
@@ -34,9 +34,9 @@ public interface CouponMapper extends BaseMapperX<CouponDO> {
         if (!regionSql.isEmpty()) {
             qry.apply(regionSql);
         }
-        // PostgreSQL 使用 string_to_array + @> 操作符检查 category_ids 是否包含指定的 categoryId
+        // MySQL 使用 FIND_IN_SET 检查 category_ids 是否包含指定的 categoryId
         if (reqVO.getCategoryId() != null) {
-            qry.apply("string_to_array(category_ids, ',') @> ARRAY[{0}]::text[]",
+            qry.apply("FIND_IN_SET({0}, category_ids) > 0",
                     String.valueOf(reqVO.getCategoryId()));
         }
         return selectPage(reqVO, qry);

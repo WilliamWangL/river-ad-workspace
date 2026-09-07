@@ -3,7 +3,6 @@ package com.river.module.system.dal.dataobject.notify;
 import com.river.framework.common.enums.UserTypeEnum;
 import com.river.framework.mybatis.core.dataobject.BaseDO;
 import com.river.module.system.dal.dataobject.mail.MailTemplateDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -20,7 +19,6 @@ import java.util.Map;
  * @author xrcoder
  */
 @TableName(value = "system_notify_message", autoResultMap = true)
-@KeySequence("system_notify_message_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

@@ -1,0 +1,9 @@
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+INSERT INTO `system_oauth2_client` (`id`, `client_id`, `secret`, `name`, `logo`, `description`, `status`, `access_token_validity_seconds`, `refresh_token_validity_seconds`, `redirect_uris`, `authorized_grant_types`, `scopes`, `auto_approve_scopes`, `authorities`, `resource_ids`, `additional_information`, `creator`, `create_time`, `updater`, `update_time`, `deleted`) VALUES
+(1, 'default', 'admin123', '芋道源码', 'http://test.river.iocoder.cn/20250502/sort2_1746189740718.png', '我是描述', 0, '1800', '2592000', '["https://www.iocoder.cn","https://doc.iocoder.cn"]', '["password","authorization_code","implicit","refresh_token","client_credentials"]', '["user.read","user.write"]', '[]', '["user.read","user.write"]', '[]', '{}', 1, '2022-05-11 21:47:12', 1, '2025-08-21 10:04:50', 0),
+('40', 'test', 'test2', 'biubiu', 'http://test.river.iocoder.cn/xx/20250502/ed07110a37464b5299f8bd7c67ad65c7_1746187077009.jpg', '啦啦啦啦', 0, '1800', '43200', '["https://www.iocoder.cn"]', '["password","authorization_code","implicit"]', '["user_info","projects"]', '["user_info"]', '[]', '[]', '{}', 1, '2022-05-12 00:28:20', 1, '2025-05-02 19:58:08', 0),
+('41', 'river-sso-demo-by-code', 'test', '基于授权码模式，如何实现 SSO 单点登录？', 'http://test.river.iocoder.cn/it/20250502/sign_1746181948685.png', NULL, 0, '1800', '43200', '["http://127.0.0.1:18080"]', '["authorization_code","refresh_token"]', '["user.read","user.write"]', '[]', '[]', '[]', NULL, 1, '2022-09-29 13:28:31', 1, '2025-05-02 18:32:30', 0),
+('42', 'river-sso-demo-by-password', 'test', '基于密码模式，如何实现 SSO 单点登录？', 'http://test.river.iocoder.cn/20251025/images (3)_1761360515810.jpeg', NULL, 0, '1800', '43200', '["http://127.0.0.1:18080"]', '["password","refresh_token"]', '["user.read","user.write"]', '[]', '[]', '[]', NULL, 1, '2022-10-04 17:40:16', 1, '2025-10-25 10:49:40', 0);
+

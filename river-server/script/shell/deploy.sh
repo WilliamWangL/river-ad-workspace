@@ -4,6 +4,8 @@ set -e
 DATE=$(date +%Y%m%d%H%M)
 # 基础路径
 BASE_PATH=/work/projects/river-server
+# 应用与 mediabuy 点击行日志目录（映射到宿主机该目录即可）
+LOG_DIR=${LOG_DIR:-$BASE_PATH/logs}
 # 编译后 jar 的地址。部署时，Jenkins 会上传 jar 包到该目录下
 SOURCE_PATH=$BASE_PATH/build
 # 服务名称。同时约定部署服务的 jar 包名字也为它。
@@ -92,14 +94,20 @@ function stop() {
 
 # 启动：启动后端项目
 function start() {
+    mkdir -p "$LOG_DIR" "$HEAP_ERROR_PATH"
     # 开启启动前，打印启动参数
     echo "[start] 开始启动 $BASE_PATH/$SERVER_NAME"
     echo "[start] JAVA_OPS: $JAVA_OPS"
     echo "[start] JAVA_AGENT: $JAVA_AGENT"
     echo "[start] PROFILES: $PROFILES_ACTIVE"
+    echo "[start] LOG_DIR: $LOG_DIR"
 
-    # 开始启动
-    BUILD_ID=dontKillMe nohup java -server $JAVA_OPS $JAVA_AGENT -jar $BASE_PATH/$SERVER_NAME.jar --spring.profiles.active=$PROFILES_ACTIVE &
+    # 开始启动（日志落盘到宿主机 LOG_DIR：主日志 + mediabuy 点击行日志）
+    BUILD_ID=dontKillMe nohup java -server $JAVA_OPS $JAVA_AGENT -jar $BASE_PATH/$SERVER_NAME.jar \
+        --spring.profiles.active=$PROFILES_ACTIVE \
+        --logging.file.name="$LOG_DIR/${SERVER_NAME}.log" \
+        --river.mediabuy.click-log-file="$LOG_DIR/mediabuy-click.log" \
+        >"$LOG_DIR/nohup.out" 2>&1 &
     echo "[start] 启动 $BASE_PATH/$SERVER_NAME 完成"
 }
 
@@ -127,18 +135,18 @@ function healthCheck() {
         # 健康检查未通过，则异常退出 shell 脚本，不继续部署。
         if [ ! "$result" == "200" ]; then
             echo "[healthCheck] 健康检查不通过，可能部署失败。查看日志，自行判断是否启动成功";
-            tail -n 10 nohup.out
+            tail -n 10 "$LOG_DIR/nohup.out"
             exit 1;
         # 健康检查通过，打印最后 10 行日志，可能部署的人想看下日志。
         else
-            tail -n 10 nohup.out
+            tail -n 10 "$LOG_DIR/nohup.out"
         fi
     # 如果未配置健康检查，则 sleep 120 秒，人工看日志是否部署成功。
     else
         echo "[healthCheck] HEALTH_CHECK_URL 未配置，开始 sleep 120 秒";
         sleep 120
         echo "[healthCheck] sleep 120 秒完成，查看日志，自行判断是否启动成功";
-        tail -n 50 nohup.out
+        tail -n 50 "$LOG_DIR/nohup.out"
     fi
 }
 

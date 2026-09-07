@@ -2,6 +2,7 @@
 
 > **Parent Document**: This is the root configuration. Subprojects inherit these universal conventions.
 
+
 本文件为 River 广告平台 Monorepo 的开发指南，供 AI Agent 使用。
 
 ## 项目结构

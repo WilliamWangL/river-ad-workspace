@@ -1,11 +1,12 @@
 import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageHero } from '@/components/layout/PageHero';
 import { LegalPageLayout } from '@/components/layout/LegalPageLayout';
 import { BASE_URL } from '@/components/seo/JsonLd';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'legal' });
   return {
     title: t('terms.meta.title'),
@@ -35,6 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function TermsOfServicePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'legal' });
 
   const sections = [

@@ -20,14 +20,14 @@ export function isGlobalRegion(region: string | null | undefined): boolean {
 
 /**
  * 获取用于 API 请求的地区过滤参数
- * - 全球区域返回 undefined（不过滤）
- * - 特定区域返回 [region] 数组
+ * - 全球区域返回 undefined（后端回退到默认地区 '00'）
+ * - 特定区域返回单个 region 字符串
  */
-export function getRegionFilter(region: string | null | undefined): string[] | undefined {
+export function getRegionFilter(region: string | null | undefined): string | undefined {
   if (isGlobalRegion(region)) {
     return undefined
   }
-  return [region!.toUpperCase()]
+  return region!.toUpperCase()
 }
 
 /**

@@ -32,6 +32,15 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="地区" prop="region">
+        <el-input
+          v-model="queryParams.region"
+          placeholder="如 US、RU、00"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-160px"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -70,6 +79,12 @@
       </el-table-column>
       <el-table-column label="排序" align="center" prop="sort" width="80" />
       <el-table-column label="图标" align="center" prop="icon" width="100" />
+      <el-table-column label="地区" align="center" prop="region" width="100">
+        <template #default="scope">
+          <el-tag v-if="scope.row.region === '00'" type="info">默认</el-tag>
+          <el-tag v-else type="primary">{{ scope.row.region }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -120,7 +135,8 @@ const loading = ref(true) // 列表的加载中
 const list = ref<CategoryVO[]>([]) // 列表的数据
 const queryParams = reactive({
   name: undefined,
-  status: undefined
+  status: undefined,
+  region: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 

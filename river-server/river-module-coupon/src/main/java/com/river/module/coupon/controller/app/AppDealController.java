@@ -2,8 +2,6 @@ package com.river.module.coupon.controller.app;
 
 import com.river.framework.common.biz.affiliate.MerchantCommonApi;
 import com.river.framework.common.biz.affiliate.dto.MerchantSimpleRespDTO;
-import com.river.framework.common.biz.tracking.TrackingLinkCommonApi;
-import com.river.framework.common.biz.tracking.dto.TrackingLinkRespDTO;
 import com.river.framework.common.pojo.CommonResult;
 import com.river.framework.common.pojo.PageResult;
 import com.river.framework.common.util.collection.CollectionUtils;
@@ -35,16 +33,11 @@ import static com.river.framework.common.pojo.CommonResult.success;
 @PermitAll
 public class AppDealController {
 
-    private static final int TARGET_TYPE_DEAL = 3;
-
     @Resource
     private DealService dealService;
 
     @Resource
     private MerchantCommonApi merchantApi;
-
-    @Resource
-    private TrackingLinkCommonApi trackingLinkApi;
 
     @GetMapping("/page")
     @Operation(summary = "获取 Deal 分页")
@@ -72,11 +65,6 @@ public class AppDealController {
             vo.setMerchantName(merchant.getName());
             vo.setMerchantLogo(merchant.getLogoUrl());
         }
-        // 填充追踪链接 ID（使用 slug）
-        TrackingLinkRespDTO trackingLink = trackingLinkApi.getTrackingLink(TARGET_TYPE_DEAL, deal.getId());
-        if (trackingLink != null) {
-            vo.setTrackingLinkId(trackingLink.getSlug());
-        }
         return success(vo);
     }
 
@@ -96,10 +84,6 @@ public class AppDealController {
         List<MerchantSimpleRespDTO> merchants = merchantApi.getMerchantList(merchantIds);
         Map<Long, MerchantSimpleRespDTO> merchantMap = CollectionUtils.convertMap(merchants, MerchantSimpleRespDTO::getId);
 
-        // 批量获取追踪链接，避免 N+1 问题
-        List<Long> dealIds = deals.stream().map(DealDO::getId).toList();
-        Map<Long, TrackingLinkRespDTO> trackingLinkMap = trackingLinkApi.getTrackingLinks(TARGET_TYPE_DEAL, dealIds);
-
         // 转换结果
         return deals.stream().map(deal -> {
             AppDealRespVO vo = BeanUtils.toBean(deal, AppDealRespVO.class);
@@ -108,11 +92,6 @@ public class AppDealController {
                 vo.setMerchant(BeanUtils.toBean(merchant, AppDealMerchantRespVO.class));
                 vo.setMerchantName(merchant.getName());
                 vo.setMerchantLogo(merchant.getLogoUrl());
-            }
-            // 填充追踪链接 ID（使用 slug）
-            TrackingLinkRespDTO trackingLink = trackingLinkMap.get(deal.getId());
-            if (trackingLink != null) {
-                vo.setTrackingLinkId(trackingLink.getSlug());
             }
             return vo;
         }).toList();

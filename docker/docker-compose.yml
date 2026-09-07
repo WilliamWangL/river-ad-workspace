@@ -1,17 +1,18 @@
 version: '3.8'
 #docker-compose up -d
 services:
-  postgres:
-    image: postgres:17
-    container_name: river-postgres
+  mysql:
+    image: mysql:8.0
+    container_name: river-mysql
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: river
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: river
+      TZ: Asia/Shanghai
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - /Users/apple/river-docker/postgres:/var/lib/postgresql/data
+      - /Users/apple/river-docker/mysql:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
 
   redis:
@@ -23,14 +24,11 @@ services:
       - /Users/apple/river-docker/redis:/data
     restart: unless-stopped
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: river-pgadmin
+  adminer:
+    image: adminer
+    container_name: river-adminer
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      ADMINER_DEFAULT_SERVER: mysql
     ports:
-      - "5050:80"
-    volumes:
-      - /Users/apple/river-docker/pgadmin:/var/lib/pgadmin
+      - "5050:8080"
     restart: unless-stopped

@@ -91,10 +91,16 @@
       </el-table-column>
       <el-table-column label="目标ID" prop="targetId" width="100" />
       <el-table-column label="商家ID" prop="merchantId" width="100" />
+      <el-table-column label="商家名称" prop="merchantName" width="140">
+        <template #default="scope">
+          <span v-if="scope.row.merchantName">{{ scope.row.merchantName }}</span>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="IP地址" prop="ip" width="140" />
       <el-table-column label="国家" prop="country" width="80">
         <template #default="scope">
-          <span v-if="scope.row.country">{{ scope.row.country }}</span>
+          <span v-if="scope.row.country" class="font-mono text-xs">{{ scope.row.country }}</span>
           <span v-else class="text-gray-400">-</span>
         </template>
       </el-table-column>
@@ -151,6 +157,21 @@
       <el-descriptions-item label="商家ID">
         {{ currentDetail.merchantId || '-' }}
       </el-descriptions-item>
+      <el-descriptions-item label="商家名称">
+        {{ currentDetail.merchantName || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="Deal ID">
+        {{ currentDetail.dealId || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="优惠券ID">
+        {{ currentDetail.couponId || '-' }}
+      </el-descriptions-item>
+      <el-descriptions-item label="跳转 URL" :span="2">
+        <span v-if="currentDetail.gotoUrl" class="break-all text-xs">
+          <el-link type="primary" :href="currentDetail.gotoUrl" target="_blank">{{ currentDetail.gotoUrl }}</el-link>
+        </span>
+        <span v-else>-</span>
+      </el-descriptions-item>
       <el-descriptions-item label="Campaign">
         {{ currentDetail.campaignId ? getCampaignName(currentDetail.campaignId) : '-' }}
       </el-descriptions-item>
@@ -158,7 +179,7 @@
         {{ currentDetail.landingPageId || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="IP地址">{{ currentDetail.ip || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="国家代码">
+      <el-descriptions-item label="国家">
         {{ currentDetail.country || '-' }}
       </el-descriptions-item>
       <el-descriptions-item label="设备类型">
@@ -215,6 +236,8 @@ const queryParams = reactive({
   targetType: undefined as number | undefined,
   targetId: undefined as number | undefined,
   merchantId: undefined as number | undefined,
+  couponId: undefined as number | undefined,
+  dealId: undefined as number | undefined,
   clickId: undefined,
   clickTime: undefined
 })

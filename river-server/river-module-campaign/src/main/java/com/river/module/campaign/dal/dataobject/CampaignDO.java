@@ -1,6 +1,5 @@
 package com.river.module.campaign.dal.dataobject;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.river.framework.tenant.core.db.TenantBaseDO;
@@ -9,7 +8,6 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @TableName("river_campaign_campaign")
-@KeySequence("river_campaign_campaign_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

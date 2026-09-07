@@ -74,6 +74,10 @@ export interface MerchantVO {
   domain: string
   logoUrl: string
   description: string
+  /** 商家简介（短文本，为空回退 description） */
+  intro?: string
+  /** 商家描述（长富文本，为空回退 description） */
+  about?: string
   rating: number
   status: number
   regions: string
@@ -129,6 +133,7 @@ export interface CategoryVO {
   level: number
   sort: number
   icon: string
+  region: string
   status: number
   createTime: Date
 }
@@ -157,6 +162,11 @@ export const CategoryApi = {
   // 删除分类
   deleteCategory: async (id: number) => {
     return await request.delete({ url: `/affiliate/category/delete?id=` + id })
+  },
+
+  // 获取可用地区列表
+  getAvailableRegions: async () => {
+    return await request.get({ url: `/affiliate/category/regions` })
   }
 }
 

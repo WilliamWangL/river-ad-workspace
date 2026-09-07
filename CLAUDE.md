@@ -10,7 +10,7 @@ River 广告平台是一个广告联盟管理系统 monorepo，包含三个子�
 
 | 项目 | 技术栈 | 说明 |
 |------|--------|------|
-| **river-server** | Java 17 + Spring Boot 3.5 + PostgreSQL 17 | 后端 API 服务 |
+| **river-server** | Java 17 + Spring Boot 3.5 + MySQL 8.0 | 后端 API 服务 |
 | **river-ui-admin** | Vue 3 + Element Plus + TypeScript + Vite 5 | 管理后台 |
 | **river-ecommica** | Next.js 16 + React 19 + Tailwind CSS 4 | 优惠聚合站点 (deals.ecommica.com) |
 

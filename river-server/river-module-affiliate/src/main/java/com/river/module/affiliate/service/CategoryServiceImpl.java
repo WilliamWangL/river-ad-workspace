@@ -2,22 +2,16 @@ package com.river.module.affiliate.service;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.river.framework.common.enums.CommonStatusEnum;
-import com.river.framework.mybatis.core.query.LambdaQueryWrapperX;
 import com.river.module.affiliate.controller.admin.category.vo.CategoryListReqVO;
 import com.river.module.affiliate.dal.dataobject.CategoryDO;
 import com.river.module.affiliate.dal.mysql.CategoryMapper;
-import com.river.module.coupon.dal.dataobject.DealDO;
-import com.river.module.coupon.dal.mysql.DealMapper;
-import com.river.module.coupon.dal.dataobject.CouponDO;
-import com.river.module.coupon.dal.mysql.CouponMapper;
-import com.river.module.coupon.enums.CouponStatusEnum;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.river.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -30,16 +24,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Resource
     private CategoryMapper categoryMapper;
 
-    @Resource
-    private DealMapper dealMapper;
-
-    @Resource
-    private CouponMapper couponMapper;
-
     @Override
     public Long createCategory(CategoryDO category) {
         validateParentCategory(category.getParentId());
-        validateCategorySlugUnique(null, category.getSlug());
+        // 设置默认 region
+        if (StrUtil.isBlank(category.getRegion())) {
+            category.setRegion(DEFAULT_REGION);
+        }
+        validateCategorySlugUnique(null, category.getSlug(), category.getRegion());
         categoryMapper.insert(category);
         return category.getId();
     }
@@ -48,7 +40,10 @@ public class CategoryServiceImpl implements CategoryService {
     public void updateCategory(CategoryDO category) {
         validateCategoryExists(category.getId());
         validateParentCategory(category.getParentId());
-        validateCategorySlugUnique(category.getId(), category.getSlug());
+        if (StrUtil.isBlank(category.getRegion())) {
+            category.setRegion(DEFAULT_REGION);
+        }
+        validateCategorySlugUnique(category.getId(), category.getSlug(), category.getRegion());
         categoryMapper.updateById(category);
     }
 
@@ -82,14 +77,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDO> getCategoryListByParentId(Long parentId, List<String> regions) {
-        if (CollUtil.isEmpty(regions)) {
-            return getCategoryListByParentId(parentId);
-        }
-        Set<Long> categoryIdsWithData = getCategoryIdsWithDataIncludingAncestors(regions);
-        return categoryMapper.selectList(CategoryDO::getParentId, parentId).stream()
-                .filter(cat -> categoryIdsWithData.contains(cat.getId()))
-                .collect(Collectors.toList());
+    public List<CategoryDO> getCategoryListByParentId(Long parentId, String region) {
+        String effectiveRegion = resolveRegion(region);
+        return categoryMapper.selectListByParentIdAndRegion(parentId, effectiveRegion);
     }
 
     @Override
@@ -108,11 +98,11 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void validateCategorySlugUnique(Long id, String slug) {
+    private void validateCategorySlugUnique(Long id, String slug, String region) {
         if (StrUtil.isBlank(slug)) {
             return;
         }
-        CategoryDO category = categoryMapper.selectOne(CategoryDO::getSlug, slug);
+        CategoryDO category = categoryMapper.selectBySlugAndRegion(slug, region);
         if (category == null) {
             return;
         }
@@ -127,14 +117,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDO> getCategoryTree(List<String> regions) {
-        if (CollUtil.isEmpty(regions)) {
-            return getCategoryTree();
-        }
-        Set<Long> categoryIdsWithData = getCategoryIdsWithDataIncludingAncestors(regions);
-        return categoryMapper.selectList().stream()
-                .filter(cat -> categoryIdsWithData.contains(cat.getId()))
-                .collect(Collectors.toList());
+    public List<CategoryDO> getCategoryTree(String region) {
+        String effectiveRegion = resolveRegion(region);
+        return categoryMapper.selectListByRegion(effectiveRegion);
     }
 
     @Override
@@ -143,13 +128,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDO getCategoryBySlug(String slug, List<String> regions) {
-        CategoryDO category = getCategoryBySlug(slug);
-        if (category == null || CollUtil.isEmpty(regions)) {
-            return category;
+    public CategoryDO getCategoryBySlug(String slug, String region) {
+        if (StrUtil.isBlank(slug)) {
+            return null;
         }
-        Set<Long> categoryIdsWithData = getCategoryIdsWithDataIncludingAncestors(regions);
-        return categoryIdsWithData.contains(category.getId()) ? category : null;
+        String effectiveRegion = resolveRegion(region);
+        // 先查目标地区
+        CategoryDO category = categoryMapper.selectBySlugAndRegion(slug, effectiveRegion);
+        // 找不到则回退默认地区
+        if (category == null && !DEFAULT_REGION.equals(effectiveRegion)) {
+            category = categoryMapper.selectBySlugAndRegion(slug, DEFAULT_REGION);
+        }
+        // 仍找不到则跨地区兜底，避免其他地区分类链接被判定 404
+        if (category == null) {
+            category = categoryMapper.selectFirstBySlug(slug);
+        }
+        return category;
     }
 
     @Override
@@ -165,93 +159,30 @@ public class CategoryServiceImpl implements CategoryService {
         return ancestors;
     }
 
-    /**
-     * 获取有数据的分类 ID 集合（包含祖先分类）
-     * 若子分类有数据，其所有祖先分类都会被包含
-     *
-     * @param regions 地区列表，空则查询所有地区
-     * @return 有数据的分类 ID 集合（含祖先）
-     */
-    private Set<Long> getCategoryIdsWithDataIncludingAncestors(List<String> regions) {
-        // 1. 获取所有有效的 Deals（未过期 + 启用 + 地区匹配）
-        LambdaQueryWrapperX<DealDO> dealWrapper = new LambdaQueryWrapperX<DealDO>()
-                .eq(DealDO::getStatus, CommonStatusEnum.ENABLE.getStatus());
-        dealWrapper.and(w -> w.isNull(DealDO::getEndTime).or().gt(DealDO::getEndTime, LocalDateTime.now()));
-        if (CollUtil.isNotEmpty(regions)) {
-            dealWrapper.and(w -> {
-                w.and(sub -> sub.isNull(DealDO::getRegions).or().apply("string_to_array(regions, ',') @> ARRAY['00']::text[]"));
-                for (String region : regions) {
-                    w.or().apply("string_to_array(regions, ',') @> ARRAY[{0}]::text[]", region);
-                }
-            });
-        }
-        List<DealDO> validDeals = dealMapper.selectList(dealWrapper);
-
-        // 2. 获取所有有效的 Coupons（未过期 + 激活 + 地区匹配）
-        LambdaQueryWrapperX<CouponDO> couponWrapper = new LambdaQueryWrapperX<CouponDO>()
-                .eq(CouponDO::getStatus, CouponStatusEnum.ACTIVE.getCode());
-        couponWrapper.and(w -> w.isNull(CouponDO::getEndTime).or().gt(CouponDO::getEndTime, LocalDateTime.now()));
-        if (CollUtil.isNotEmpty(regions)) {
-            couponWrapper.and(w -> {
-                w.and(sub -> sub.isNull(CouponDO::getRegions).or().apply("string_to_array(regions, ',') @> ARRAY['00']::text[]"));
-                for (String region : regions) {
-                    w.or().apply("string_to_array(regions, ',') @> ARRAY[{0}]::text[]", region);
-                }
-            });
-        }
-        List<CouponDO> validCoupons = couponMapper.selectList(couponWrapper);
-
-        // 3. 解析 category_ids 字段，获取所有有数据的分类 ID
-        Set<Long> dataCategoryIds = new HashSet<>();
-        for (DealDO deal : validDeals) {
-            parseAndAddCategoryIds(dataCategoryIds, deal.getCategoryIds());
-        }
-        for (CouponDO coupon : validCoupons) {
-            parseAndAddCategoryIds(dataCategoryIds, coupon.getCategoryIds());
-        }
-
-        if (CollUtil.isEmpty(dataCategoryIds)) {
-            return Collections.emptySet();
-        }
-
-        // 4. 添加所有祖先分类 ID
-        Set<Long> result = new HashSet<>(dataCategoryIds);
-        for (Long categoryId : dataCategoryIds) {
-            addAncestorIds(result, categoryId);
-        }
-        return result;
+    @Override
+    public List<String> getAvailableRegions() {
+        return categoryMapper.selectDistinctRegions().stream()
+                .map(CategoryDO::getRegion)
+                .filter(StrUtil::isNotBlank)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**
-     * 解析逗号分隔的 category_ids 字符串，并添加到集合中
+     * 解析地区代码：为空则返回默认地区，
+     * 如果指定地区没有分类数据，回退到默认地区
      */
-    private void parseAndAddCategoryIds(Set<Long> categoryIds, String categoryIdsStr) {
-        if (StrUtil.isBlank(categoryIdsStr)) {
-            return;
+    private String resolveRegion(String region) {
+        if (StrUtil.isBlank(region)) {
+            return DEFAULT_REGION;
         }
-        String[] ids = categoryIdsStr.split(",");
-        for (String id : ids) {
-            String trimmed = id.trim();
-            if (StrUtil.isNotBlank(trimmed)) {
-                try {
-                    categoryIds.add(Long.parseLong(trimmed));
-                } catch (NumberFormatException ignored) {
-                }
-            }
+        // 如果指定地区有数据，使用指定地区
+        Long count = categoryMapper.selectCountByRegion(region);
+        if (count != null && count > 0) {
+            return region;
         }
-    }
-
-    private void addAncestorIds(Set<Long> result, Long categoryId) {
-        CategoryDO current = categoryMapper.selectById(categoryId);
-        while (current != null && !Objects.equals(current.getParentId(), 0L)) {
-            Long parentId = current.getParentId();
-            if (parentId != null && parentId != 0L) {
-                result.add(parentId);
-                current = categoryMapper.selectById(parentId);
-            } else {
-                break;
-            }
-        }
+        // 否则回退默认地区
+        return DEFAULT_REGION;
     }
 
 }

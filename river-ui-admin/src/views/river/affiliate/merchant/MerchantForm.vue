@@ -84,7 +84,23 @@
           v-model="formData.description"
           type="textarea"
           :rows="3"
-          placeholder="请输入商家描述"
+          placeholder="联盟同步的原始描述，作为简介/描述的回退值"
+        />
+      </el-form-item>
+      <el-form-item label="商家简介" prop="intro">
+        <el-input
+          v-model="formData.intro"
+          type="textarea"
+          :rows="2"
+          placeholder="短文本，用于详情页头部摘要，为空时回退到描述"
+        />
+      </el-form-item>
+      <el-form-item label="商家描述" prop="about">
+        <el-input
+          v-model="formData.about"
+          type="textarea"
+          :rows="6"
+          placeholder="支持 Markdown/HTML 富文本，用于详情页底部，为空时回退到描述"
         />
       </el-form-item>
       <el-form-item label="支持地区" prop="regions">
@@ -142,6 +158,8 @@ const formData = ref({
   domain: '',
   logoUrl: '',
   description: '',
+  intro: '',
+  about: '',
   rating: 0,
   status: 0,
   regions: '',
@@ -220,6 +238,8 @@ const resetForm = () => {
     domain: '',
     logoUrl: '',
     description: '',
+    intro: '',
+    about: '',
     rating: 0,
     status: 0,
     regions: '',

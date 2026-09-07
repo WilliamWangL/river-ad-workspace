@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,11 +36,10 @@ public class AppCategoryController {
 
     @GetMapping("/tree")
     @Operation(summary = "获取分类树")
-    @Parameter(name = "regions", description = "地区代码列表（逗号分隔），为空则返回所有分类")
+    @Parameter(name = "region", description = "地区代码（如 US、RU），为空则返回默认地区分类")
     public CommonResult<List<AppCategoryRespVO>> getCategoryTree(
-            @RequestParam(required = false) String regions) {
-        List<String> regionList = parseRegions(regions);
-        List<CategoryDO> categories = categoryService.getCategoryTree(regionList);
+            @RequestParam(required = false) String region) {
+        List<CategoryDO> categories = categoryService.getCategoryTree(region);
         List<AppCategoryRespVO> tree = buildTree(categories);
         return success(tree);
     }
@@ -50,12 +47,11 @@ public class AppCategoryController {
     @GetMapping("/list")
     @Operation(summary = "获取分类列表")
     @Parameter(name = "parentId", description = "父分类编号", example = "0")
-    @Parameter(name = "regions", description = "地区代码列表（逗号分隔），为空则返回所有分类")
+    @Parameter(name = "region", description = "地区代码（如 US、RU），为空则返回默认地区分类")
     public CommonResult<List<AppCategoryRespVO>> getCategoryList(
             @RequestParam(required = false, defaultValue = "0") Long parentId,
-            @RequestParam(required = false) String regions) {
-        List<String> regionList = parseRegions(regions);
-        List<CategoryDO> categories = categoryService.getCategoryListByParentId(parentId, regionList);
+            @RequestParam(required = false) String region) {
+        List<CategoryDO> categories = categoryService.getCategoryListByParentId(parentId, region);
         List<AppCategoryRespVO> result = categories.stream()
                 .map(this::convertToAppVO)
                 .collect(Collectors.toList());
@@ -65,29 +61,25 @@ public class AppCategoryController {
     @GetMapping("/get-by-slug")
     @Operation(summary = "根据 slug 获取分类详情")
     @Parameter(name = "slug", description = "分类标识", required = true, example = "electronics")
-    @Parameter(name = "regions", description = "地区代码列表（逗号分隔），为空则不过滤")
+    @Parameter(name = "region", description = "地区代码（如 US、RU），为空则返回默认地区分类")
     public CommonResult<AppCategoryRespVO> getCategoryBySlug(
             @RequestParam @NotBlank String slug,
-            @RequestParam(required = false) String regions) {
-        List<String> regionList = parseRegions(regions);
-        CategoryDO category = categoryService.getCategoryBySlug(slug, regionList);
+            @RequestParam(required = false) String region) {
+        CategoryDO category = categoryService.getCategoryBySlug(slug, region);
         if (category == null) {
             return success(null);
         }
         AppCategoryRespVO vo = convertToAppVO(category);
-        List<CategoryDO> children = categoryService.getCategoryListByParentId(category.getId(), regionList);
+        // 使用分类自身地区查子分类，兼容跨地区兜底命中的分类
+        List<CategoryDO> children = categoryService.getCategoryListByParentId(category.getId(), category.getRegion());
         vo.setChildren(children.stream().map(this::convertToAppVO).collect(Collectors.toList()));
         return success(vo);
     }
 
-    private List<String> parseRegions(String regions) {
-        if (StrUtil.isBlank(regions)) {
-            return Collections.emptyList();
-        }
-        return Arrays.stream(regions.split(","))
-                .map(String::trim)
-                .filter(StrUtil::isNotBlank)
-                .collect(Collectors.toList());
+    @GetMapping("/regions")
+    @Operation(summary = "获取可用的地区列表")
+    public CommonResult<List<String>> getAvailableRegions() {
+        return success(categoryService.getAvailableRegions());
     }
 
     private List<AppCategoryRespVO> buildTree(List<CategoryDO> categories) {
@@ -118,6 +110,7 @@ public class AppCategoryController {
                 .icon(category.getIcon())
                 .level(category.getLevel())
                 .parentId(category.getParentId())
+                .region(category.getRegion())
                 .build();
     }
 

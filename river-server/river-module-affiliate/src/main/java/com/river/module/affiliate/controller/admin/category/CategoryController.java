@@ -69,4 +69,11 @@ public class CategoryController {
         List<CategoryDO> list = categoryService.getCategoryList(listReqVO);
         return success(BeanUtils.toBean(list, CategoryRespVO.class));
     }
+
+    @GetMapping("/regions")
+    @Operation(summary = "获取可用的地区列表")
+    @PreAuthorize("@ss.hasPermission('affiliate:category:query')")
+    public CommonResult<List<String>> getAvailableRegions() {
+        return success(categoryService.getAvailableRegions());
+    }
 }

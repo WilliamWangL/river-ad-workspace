@@ -1,6 +1,6 @@
 # CLAUDE.md - River Server
 
-后端 API 服务，基于 Spring Boot 3.5 + Java 17 + PostgreSQL 17。
+后端 API 服务，基于 Spring Boot 3.5 + Java 17 + MySQL 8.0。
 
 ## 常用命令
 

@@ -1,9 +1,9 @@
 import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
+import {getMessages, setRequestLocale} from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { getRegionData } from '@/components/providers/RegionProvider';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import "@/app/globals.css";
 import { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google';
@@ -54,6 +54,9 @@ export const metadata: Metadata = {
       'zh': `${BASE_URL}/zh`,
     },
   },
+  other: {
+    'mitgo-verification': '8ece394d-b3b0-47fa-9650-b6dac6eaa396',
+  },
 };
 
 export default async function LocaleLayout({
@@ -69,18 +72,21 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  // 告诉 next-intl 当前 locale，避免 getTranslations 调用 headers()
+  setRequestLocale(locale);
+
   const messages = await getMessages();
-  const { currentRegion, regions } = await getRegionData();
 
   return (
     <html lang={locale} className={`${plusJakarta.variable} ${spaceGrotesk.variable}`}>
       <body className="font-sans">
+        <GoogleAnalytics />
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground">
           Skip to main content
         </a>
         <NextIntlClientProvider messages={messages}>
           <div className="min-h-screen flex flex-col">
-            <Header currentRegion={currentRegion} regions={regions} />
+            <Header />
             <main id="main-content" className="flex-grow">
                {children}
             </main>

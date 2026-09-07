@@ -16,6 +16,12 @@ public class AppCouponRespVO {
     @Schema(description = "优惠码", requiredMode = Schema.RequiredMode.REQUIRED, example = "SAVE20")
     private String code;
 
+    @Schema(description = "SEO 页面标题（为空回退 title）", example = "20% Off Nike Coupon Code 2026")
+    private String metaTitle;
+
+    @Schema(description = "SEO meta 描述（为空回退 terms）", example = "Save 20% on your order with Nike coupon code SAVE20")
+    private String metaDescription;
+
     @Schema(description = "优惠描述", example = "Save 20% on your order")
     private String description;
 
@@ -42,9 +48,6 @@ public class AppCouponRespVO {
 
     @Schema(description = "是否已验证", example = "true")
     private Boolean verified;
-
-    @Schema(description = "追踪链接ID", example = "abc123")
-    private String trackingLinkId;
 
     @Schema(description = "跳转链接", example = "https://www.amazon.com/dp/B0123456")
     private String gotoUrl;

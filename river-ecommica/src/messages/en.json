@@ -166,7 +166,11 @@
     "typeTutorial": "Tutorial",
     "typeNews": "News",
     "views": "{count} views",
-    "filedUnder": "Filed under: {type}"
+    "filedUnder": "Filed under: {type}",
+    "relatedPosts": "Related Articles",
+    "viewMore": "View More",
+    "readMore": "Read",
+    "share": "Share"
   },
   "categories": {
     "meta": {
@@ -454,7 +458,12 @@
     "offersSectionTitle": "Affiliate Programs",
     "offersCount": "{count} Programs",
     "emptyOffersTitle": "No programs yet",
-    "emptyOffersDescription": "No affiliate programs available at the moment"
+    "emptyOffersDescription": "No affiliate programs available at the moment",
+    "aboutStore": "About {name}",
+    "couponsTitle": "Coupons",
+    "couponsAvailable": "{count} coupons available",
+    "noCouponsTitle": "No coupons available",
+    "noCouponsDescription": "There are no coupons for {name} at the moment."
   },
   "DealDetail": {
     "meta": {
@@ -472,10 +481,24 @@
     "verifiedWorking": "Verified Working",
     "expires": "Expires: {date}",
     "aboutThisDeal": "About this deal",
-    "termsTitle": "Terms & Conditions:",
-    "termSupplies": "Offer valid while supplies last.",
-    "termPrices": "Prices and availability subject to change without notice.",
-    "termDetails": "See merchant website for full details."
+    "store": "Store",
+    "relatedDeals": "Related Deals",
+    "viewMore": "View More",
+    "getDeal": "Get Deal",
+    "share": "Share"
+  },
+  "Feedback": {
+    "title": "Have Feedback?",
+    "subtitle": "Help us improve — share your thoughts, suggestions, or report an issue.",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Email (optional)",
+    "messagePlaceholder": "Tell us what you think or report a problem...",
+    "submit": "Send Feedback",
+    "submitting": "Sending...",
+    "successTitle": "Thank You!",
+    "successMessage": "Your feedback has been received. We appreciate your input!",
+    "errorTitle": "Submission Failed",
+    "errorMessage": "Something went wrong. Please try again later."
   },
   "Offer": {
     "type": {

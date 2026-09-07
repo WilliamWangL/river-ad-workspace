@@ -3,7 +3,6 @@ package com.river.module.system.dal.dataobject.mail;
 import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.mybatis.core.dataobject.BaseDO;
 import com.river.framework.tenant.core.aop.TenantIgnore;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
@@ -19,7 +18,6 @@ import java.util.List;
  * @since 2022-03-21
  */
 @TableName(value = "system_mail_template", autoResultMap = true)
-@KeySequence("system_mail_template_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TenantIgnore

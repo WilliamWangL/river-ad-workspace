@@ -29,6 +29,7 @@ COPY river-module-coupon/pom.xml river-module-coupon/
 COPY river-module-blog/pom.xml river-module-blog/
 COPY river-module-campaign/pom.xml river-module-campaign/
 COPY river-module-stats/pom.xml river-module-stats/
+COPY river-module-mediabuy/pom.xml river-module-mediabuy/
 COPY river-server/pom.xml river-server/
 
 # 下载依赖（仅当 pom.xml 变化时重新执行）
@@ -46,6 +47,8 @@ RUN --mount=type=cache,target=/root/.m2/repository \
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=builder /build/river-server/target/river-server.jar app.jar
+
+RUN mkdir -p /app/logs
 
 ENV TZ=Asia/Shanghai
 ENV JAVA_OPTS="-Xms512m -Xmx512m -Djava.security.egd=file:/dev/./urandom"

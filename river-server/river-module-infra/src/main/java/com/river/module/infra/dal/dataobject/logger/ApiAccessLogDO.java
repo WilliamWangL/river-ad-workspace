@@ -4,7 +4,6 @@ import com.river.framework.apilog.core.enums.OperateTypeEnum;
 import com.river.framework.common.enums.UserTypeEnum;
 import com.river.framework.common.pojo.CommonResult;
 import com.river.framework.mybatis.core.dataobject.BaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
@@ -17,7 +16,6 @@ import java.time.LocalDateTime;
  * @author 芋道源码
  */
 @TableName("infra_api_access_log")
-@KeySequence(value = "infra_api_access_log_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

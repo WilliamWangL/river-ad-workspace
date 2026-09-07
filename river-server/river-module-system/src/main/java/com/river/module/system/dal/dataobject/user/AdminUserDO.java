@@ -3,7 +3,6 @@ package com.river.module.system.dal.dataobject.user;
 import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.tenant.core.db.TenantBaseDO;
 import com.river.module.system.enums.common.SexEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -20,7 +19,6 @@ import java.util.Set;
  * @author 芋道源码
  */
 @TableName(value = "system_users", autoResultMap = true) // 由于 SQL Server 的 system_user 是关键字，所以使用 system_users
-@KeySequence("system_users_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

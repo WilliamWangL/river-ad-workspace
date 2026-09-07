@@ -1,26 +1,12 @@
 version: '3.8'
 
+# 生产编排：数据库、Redis、后端、站点、Nginx。
+# 日志：river-server 应用日志与 mediabuy 点击行日志挂载到宿主机 ./data/server-logs -> 容器 /app/logs
+# 端口：可通过环境变量绑定宿主机地址（默认 127.0.0.1 仅本机；设为 0.0.0.0 对外暴露）
+#   RIVER_SERVER_BIND、RIVER_ECOMMICA_BIND、RIVER_HTTP_BIND、RIVER_HTTPS_BIND
+
 services:
-  postgres:
-    image: postgres:17
-    container_name: river-postgres
-    restart: always
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      - POSTGRES_DB=${POSTGRES_DB:-river}
-      - TZ=Asia/Shanghai
-    ports:
-      - "127.0.0.1:5432:5432"
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - river-network
+  # MySQL 使用宿主机已有的实例（非容器），river-server 通过 host-gateway 连接
 
   redis:
     image: redis:7-alpine
@@ -41,16 +27,19 @@ services:
     container_name: river-server
     restart: always
     ports:
-      - "127.0.0.1:48080:48080"  # 暴露给宿主机 Nginx 调用
+      - "${RIVER_SERVER_BIND:-127.0.0.1}:48080:48080"
+    volumes:
+      - ./data/server-logs:/app/logs
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - TZ=Asia/Shanghai
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB:-river}
+      - MYSQL_HOST=host.docker.internal
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DB=${MYSQL_DB:-river}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -67,7 +56,7 @@ services:
     container_name: river-ecommica
     restart: always
     ports:
-      - "127.0.0.1:3000:3000"    # 假设前端容器内部端口是3000，暴露给宿主机
+      - "${RIVER_ECOMMICA_BIND:-127.0.0.1}:3000:3000"
     environment:
       - NODE_ENV=production
       - INTERNAL_API_URL=http://river-server:48080/app-api
@@ -77,7 +66,24 @@ services:
     networks:
       - river-network
 
-# 删除了原来的 nginx 服务块
+  nginx:
+    image: nginx:alpine
+    container_name: river-nginx
+    restart: always
+    ports:
+      - "${RIVER_HTTP_BIND:-0.0.0.0}:80:80"
+      - "${RIVER_HTTPS_BIND:-0.0.0.0}:443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./admin-dist:/opt/share/nginx:ro
+    depends_on:
+      river-server:
+        condition: service_healthy
+      river-ecommica:
+        condition: service_started
+    networks:
+      - river-network
 
 networks:
   river-network:

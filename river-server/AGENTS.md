@@ -52,13 +52,13 @@
 
 ### 常用命令
 
-#### PostgreSQL 连接
+#### MySQL 连接
 
-**连接:** psql -h localhost -U postgres -d river
-**常用命令:** \dt 列表, \d table 结构, \x on 展开
+**连接:** mysql -h localhost -P 3306 -u root -p river
+**常用命令:** SHOW TABLES; DESC table_name; SELECT * FROM table_name LIMIT 10;
 **数据库配置**（见 `application-local.yaml`）：
-- URL: `jdbc:postgresql://localhost:5432/river?prepareThreshold=0`
-- 用户名/密码: `postgres` / `123456`
+- URL: `jdbc:mysql://localhost:3306/river?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&useSSL=false`
+- 用户名/密码: `root` / `123456`
 
 #### 后端服务
 cd river-server

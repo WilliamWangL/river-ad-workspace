@@ -1,10 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
-import { fetchDeals, fetchCoupons, fetchCategories } from '@/lib/api';
-import { getCurrentRegion } from '@/lib/region';
-import { getRegionFilter } from '@/lib/region-constants';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { fetchDeals, fetchCoupons, fetchCategories, fetchCategoryBySlug } from '@/lib/api';
+import { getRegionFilter, DEFAULT_REGION } from '@/lib/region-constants';
 import { Category } from '@/types';
 import DealCard from '@/components/deal/DealCard';
 import CouponCard from '@/components/coupon/CouponCard';
@@ -26,8 +25,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 
-// 允许运行时动态参数（当 generateStaticParams 未返回该参数时）
-export const dynamicParams = true;
+// 使用动态渲染，因为分类页面需要获取实时数据
 export const dynamic = 'force-dynamic';
 
 const iconMap: Record<string, LucideIcon> = {
@@ -93,9 +91,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'CategoryDetail' });
   const categories = await fetchCategories();
-  const category = findCategoryBySlug(categories, slug);
+  // 地区树里找不到时通过 get-by-slug 兜底（支持跨地区），避免误返回 Not Found 元信息
+  const category = findCategoryBySlug(categories, slug) || await fetchCategoryBySlug(slug);
 
   if (!category) {
     return { title: t('meta.notFound') };
@@ -105,6 +105,13 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   return {
     title: t('meta.title', { name: category.name }),
     description: t('meta.description', { name: categoryNameLower }),
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/category/${category.slug}`,
+      languages: {
+        'en': `${BASE_URL}/en/category/${category.slug}`,
+        'zh': `${BASE_URL}/zh/category/${category.slug}`,
+      },
+    },
     openGraph: {
       title: t('meta.title', { name: category.name }),
       description: t('meta.description', { name: categoryNameLower }),
@@ -130,30 +137,40 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const queryParams = await searchParams;
-  const region = await getCurrentRegion(queryParams);
+  // 使用 searchParams 中的 region 或默认值，避免使用 headers()/cookies()（与 ISR 冲突）
+  const region = queryParams?.region || DEFAULT_REGION;
   const t = await getTranslations({ locale, namespace: 'CategoryDetail' });
 
   const regionFilter = getRegionFilter(region);
+  const regionsArray = regionFilter ? [regionFilter] : undefined;
 
   // First fetch categories to find the category by slug
-  const categories = await fetchCategories({ regions: regionFilter });
-  const category = findCategoryBySlug(categories, slug);
+  const categories = await fetchCategories({ region: regionFilter });
+  // 当前地区树里找不到时，通过 get-by-slug 兜底（后端支持跨地区回退），
+  // 避免其他地区分类链接命中带 noindex 的 404 页
+  const category = findCategoryBySlug(categories, slug)
+    || await fetchCategoryBySlug(slug, regionFilter);
 
   if (!category) {
     notFound();
   }
 
+  // 兜底命中的分类可能属于其他地区，用分类自身地区查询内容更准确
+  const categoryRegion = category.region && category.region !== '00' ? category.region : undefined;
+  const effectiveRegions = regionsArray ?? (categoryRegion ? [categoryRegion] : undefined);
+
   // Then fetch deals and coupons filtered by categoryId
   const [dealsResult, couponsResult] = await Promise.all([
     fetchDeals({
       categoryId: category.id,
-      regions: regionFilter,
+      regions: effectiveRegions,
       pageSize: 8
     }),
     fetchCoupons({
       categoryId: category.id,
-      regions: regionFilter,
+      regions: effectiveRegions,
       pageSize: 6
     }),
   ]);
@@ -164,8 +181,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const IconComponent = iconMap[category.icon || 'Tag'] || Tag;
 
   const parentCategory = findParentCategory(categories, slug);
-  const isSubcategory = parentCategory?.slug !== slug;
-  const subcategories = isSubcategory ? [] : (parentCategory?.children || []);
+  const isSubcategory = parentCategory != null && parentCategory.slug !== slug;
+  // 兜底命中时分类不在当前地区树中，直接使用接口返回的 children
+  const subcategories = isSubcategory ? [] : (parentCategory?.children || category.children || []);
 
   const breadcrumbs = [
     { label: t('breadcrumbHome'), href: '/' },
@@ -189,7 +207,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const couponItemList = coupons
     .filter(coupon => coupon.id)
     .map(coupon => ({
-      name: `${coupon.merchant.name} - ${coupon.title || coupon.description}`,
+      name: `${coupon.merchant?.name || 'Store'} - ${coupon.title || coupon.description}`,
       url: `${BASE_URL}/${locale}/coupons#coupon-${coupon.id}`
     }));
 

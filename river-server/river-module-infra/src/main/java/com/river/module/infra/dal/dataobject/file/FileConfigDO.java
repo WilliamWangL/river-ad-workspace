@@ -11,7 +11,6 @@ import com.river.module.infra.framework.file.core.client.local.LocalFileClientCo
 import com.river.module.infra.framework.file.core.client.s3.S3FileClientConfig;
 import com.river.module.infra.framework.file.core.client.sftp.SftpFileClientConfig;
 import com.river.module.infra.framework.file.core.enums.FileStorageEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.AbstractJsonTypeHandler;
@@ -26,7 +25,6 @@ import java.lang.reflect.Field;
  * @author 芋道源码
  */
 @TableName(value = "infra_file_config", autoResultMap = true)
-@KeySequence("infra_file_config_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

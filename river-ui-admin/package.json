@@ -156,5 +156,13 @@
   "engines": {
     "node": ">= 16.0.0",
     "pnpm": ">=8.6.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }

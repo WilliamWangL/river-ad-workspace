@@ -15,4 +15,7 @@ public class CategoryListReqVO {
 
     @Schema(description = "父分类 ID")
     private Long parentId;
+
+    @Schema(description = "地区代码")
+    private String region;
 }

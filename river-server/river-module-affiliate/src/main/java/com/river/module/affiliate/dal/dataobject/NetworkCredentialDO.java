@@ -2,7 +2,6 @@ package com.river.module.affiliate.dal.dataobject;
 
 import com.river.framework.tenant.core.db.TenantBaseDO;
 import com.river.module.affiliate.enums.AuthTypeEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
  * 联盟网络凭证 DO
  */
 @TableName("river_affiliate_network_credential")
-@KeySequence("river_affiliate_network_credential_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

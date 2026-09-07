@@ -47,16 +47,10 @@ spring:
       primary: master
       datasource:
         master:
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://db.iebevsofotovxvtuqieo.supabase.co:5432/postgres?prepareThreshold=0
-          username: postgres
-          password: Qq@154855716
-        slave:
-          lazy: true
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://db.iebevsofotovxvtuqieo.supabase.co:5432/postgres?prepareThreshold=0
-          username: postgres
-          password: Qq@154855716
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/${MYSQL_DB:river}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+          username: ${MYSQL_USER:root}
+          password: ${MYSQL_PASSWORD:123456}
 
   # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
   data:

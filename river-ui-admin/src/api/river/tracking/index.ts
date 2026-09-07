@@ -7,6 +7,10 @@ export interface ClickVO {
   targetType: number
   targetId: number
   merchantId: number
+  merchantName: string
+  couponId: number
+  dealId: number
+  gotoUrl: string
   campaignId: number
   landingPageId: number
   sub1: string
@@ -40,6 +44,8 @@ export interface ClickPageReqVO {
   targetType?: number
   targetId?: number
   merchantId?: number
+  couponId?: number
+  dealId?: number
   campaignId?: number
   sub1?: string
   ip?: string
@@ -84,6 +90,7 @@ export interface TrackingLinkVO {
   id: number
   targetType: number
   targetId: number
+  merchantId?: number
   slug: string
   presetSub1: string
   presetSub2: string

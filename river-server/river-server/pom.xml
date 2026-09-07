@@ -61,6 +61,11 @@
             <artifactId>river-module-affiliate</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>river-module-mediabuy</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- 会员中心。默认注释，保证编译速度 -->
 <!--        <dependency>-->
 <!--            <groupId>com.river</groupId>-->
@@ -157,10 +162,10 @@
             <artifactId>river-spring-boot-starter-protection</artifactId>
         </dependency>
 
-        <!-- PostgreSQL 驱动 -->
+        <!-- MySQL 8 驱动 -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
     </dependencies>

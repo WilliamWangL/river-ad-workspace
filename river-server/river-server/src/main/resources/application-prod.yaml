@@ -46,16 +46,10 @@ spring:
       primary: master
       datasource:
         master:
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://postgres:5432/${POSTGRES_DB:river}?prepareThreshold=0
-          username: ${POSTGRES_USER:postgres}
-          password: ${POSTGRES_PASSWORD}
-        slave:
-          lazy: true
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://postgres:5432/${POSTGRES_DB:river}?prepareThreshold=0
-          username: ${POSTGRES_USER:postgres}
-          password: ${POSTGRES_PASSWORD}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/${MYSQL_DB:river}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+          username: ${MYSQL_USER:root}
+          password: ${MYSQL_PASSWORD}
 
   # Redis 配置
   data:
@@ -142,6 +136,8 @@ river:
   access-log:
     enable: true
   demo: false
+  mediabuy:
+    click-log-file: /app/logs/mediabuy-click.log
   wxa-code:
     env-version: release # 小程序版本: 正式版为 "release"
   wxa-subscribe-message:

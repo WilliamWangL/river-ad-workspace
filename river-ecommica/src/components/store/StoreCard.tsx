@@ -2,7 +2,7 @@ import { Store } from "@/types"
 import Link from "next/link"
 import Image from "next/image"
 import { Star, ArrowUpRight, Tag, Ticket } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, stripHtml } from "@/lib/utils"
 
 export function StoreCard({ store, locale = 'en' }: { store: Store; locale?: string }) {
   const rating = store.rating || 0;
@@ -78,10 +78,10 @@ export function StoreCard({ store, locale = 'en' }: { store: Store; locale?: str
           </div>
 
           {/* Description if available */}
-          {store.description && (
+          {(store.intro || store.description) && (
             <div className="mt-4">
               <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                {store.description}
+                {stripHtml(store.intro || store.description)}
               </p>
             </div>
           )}

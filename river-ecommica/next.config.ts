@@ -48,6 +48,26 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '*.samsclubimages.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i5.samsclubimages.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.walmartimages.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.tripcdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ak-d.tripcdn.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'cdn.admitad.com',
         pathname: '/**',
       },
@@ -66,6 +86,16 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.admitad-connect.com',
         pathname: '/**',
       },
+       {
+        protocol: 'http',
+        hostname: 'tripcdn.com',
+        pathname: '/**',
+      },
+       {
+        protocol: 'https',
+        hostname: 'down-mx.img.susercontent.com',
+        pathname: '/**',
+      }
     ],
   },
 };

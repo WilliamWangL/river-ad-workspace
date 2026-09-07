@@ -17,6 +17,7 @@
         <module>river-module-infra</module>
         <module>river-module-affiliate</module>
         <module>river-module-tracking</module>
+        <module>river-module-mediabuy</module>
         <module>river-module-coupon</module>
         <module>river-module-blog</module>
         <module>river-module-campaign</module>

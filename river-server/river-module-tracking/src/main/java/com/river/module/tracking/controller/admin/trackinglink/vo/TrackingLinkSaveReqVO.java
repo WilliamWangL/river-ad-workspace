@@ -20,6 +20,9 @@ public class TrackingLinkSaveReqVO {
     @NotNull(message = "目标 ID 不能为空")
     private Long targetId;
 
+    @Schema(description = "商家 ID（冗余字段）", example = "1")
+    private Long merchantId;
+
     @Schema(description = "链接 Slug", requiredMode = Schema.RequiredMode.REQUIRED, example = "my-link")
     @NotBlank(message = "链接 Slug 不能为空")
     private String slug;

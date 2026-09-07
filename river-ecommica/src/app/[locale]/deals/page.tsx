@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchDeals } from '@/lib/api';
 import { getCurrentRegion } from '@/lib/region';
 import { getRegionFilter } from '@/lib/region-constants';
 import { PAGINATION } from '@/constants/pagination';
 import DealCard from '@/components/deal/DealCard';
 import { DealsSearchBar } from '@/components/deal/DealsSearchBar';
-import { DealPagination } from '@/components/deal/DealPagination';
+import { DealsInfiniteList } from '@/components/deal/DealsInfiniteList';
 import { EmptyState } from '@/components/ui/empty-state';
 import { JsonLd, BASE_URL, generateBreadcrumbJsonLd, generateItemListJsonLd } from '@/components/seo/JsonLd';
 import {
@@ -24,6 +24,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('meta.title'),
     description: t('meta.description'),
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/deals`,
+      languages: {
+        'en': `${BASE_URL}/en/deals`,
+        'zh': `${BASE_URL}/zh/deals`,
+      },
+    },
     openGraph: {
       title: t('meta.title'),
       description: t('meta.description'),
@@ -55,6 +62,7 @@ export default async function DealsPage({
   searchParams: Promise<{ q?: string; page?: string; region?: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const queryParams = await searchParams;
   const searchQuery = queryParams.q?.trim() || '';
   const currentPage = parseInt(queryParams.page || String(PAGINATION.DEFAULT_PAGE), 10);
@@ -63,11 +71,12 @@ export default async function DealsPage({
   const t = await getTranslations({ locale, namespace: 'deals' });
 
   const regionFilter = getRegionFilter(region);
+  const regionsArray = regionFilter ? [regionFilter] : undefined;
 
   const dealsResult = await fetchDeals({
     pageNo: currentPage,
     pageSize,
-    regions: regionFilter
+    regions: regionsArray
   });
   const allDeals = dealsResult.list || [];
   const total = dealsResult.total || 0;
@@ -178,16 +187,16 @@ export default async function DealsPage({
       {/* Deals Grid */}
       <section className="container mx-auto px-4 py-8 md:py-12">
         {deals.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-              {deals.map(deal => (
-                <DealCard key={deal.id} deal={deal} locale={locale} />
-              ))}
-            </div>
-            <div className="mt-12">
-              <DealPagination total={total} pageSize={pageSize} currentPage={currentPage} />
-            </div>
-          </>
+          <DealsInfiniteList
+            initialCount={deals.length}
+            total={total}
+            pageSize={pageSize}
+            locale={locale}
+          >
+            {deals.map(deal => (
+              <DealCard key={deal.id} deal={deal} locale={locale} />
+            ))}
+          </DealsInfiniteList>
         ) : (
           <div className="card-elevated p-12">
             <EmptyState

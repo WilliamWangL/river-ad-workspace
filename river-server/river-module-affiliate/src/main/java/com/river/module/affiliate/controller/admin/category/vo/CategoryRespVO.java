@@ -30,6 +30,9 @@ public class CategoryRespVO {
     @Schema(description = "图标")
     private String icon;
 
+    @Schema(description = "地区代码")
+    private String region;
+
     @Schema(description = "状态", example = "1")
     private Integer status;
 

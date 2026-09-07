@@ -1,4 +1,5 @@
 import { Deal, Store, BlogPost, Coupon } from '@/types';
+import { stripHtml } from '@/lib/utils';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://deals.ecommica.com';
 
@@ -7,16 +8,18 @@ export function generateDealJsonLd(deal: Deal) {
     '@context': 'https://schema.org',
     '@type': 'Offer',
     name: deal.title,
-    description: deal.description,
+    description: stripHtml(deal.description, 160) || undefined,
     url: `${BASE_URL}/deals/${deal.slug}`,
     priceCurrency: 'USD',
     price: deal.dealPrice || 0,
     priceValidUntil: deal.endTime,
     availability: 'https://schema.org/InStock',
-    seller: {
-      '@type': 'Organization',
-      name: deal.merchant.name,
-    },
+    ...(deal.merchant?.name && {
+      seller: {
+        '@type': 'Organization',
+        name: deal.merchant.name,
+      },
+    }),
     ...(deal.discountPercent > 0 && {
       discount: `${deal.discountPercent}%`,
     }),
@@ -28,7 +31,7 @@ export function generateStoreJsonLd(store: Store) {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: store.name,
-    description: store.description,
+    description: stripHtml(store.description, 160) || undefined,
     url: `${BASE_URL}/stores/${store.slug}`,
     logo: store.logoUrl || undefined,
     ...(store.rating && {
@@ -41,13 +44,13 @@ export function generateStoreJsonLd(store: Store) {
   };
 }
 
-export function generateBlogPostJsonLd(post: BlogPost) {
+export function generateBlogPostJsonLd(post: BlogPost, locale: string = 'en') {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
     description: post.excerpt,
-    url: `${BASE_URL}/blog/${post.slug}`,
+    url: `${BASE_URL}/${locale}/blog/${post.slug}`,
     image: post.coverImage || undefined,
     datePublished: post.publishedAt,
     author: {
@@ -75,11 +78,12 @@ function getDiscountText(discountType: number, discountValue: number): string {
 
 export function generateCouponJsonLd(coupon: Coupon) {
   const discountText = getDiscountText(coupon.discountType, coupon.discountValue);
+  const merchantName = coupon.merchant?.name || 'Store';
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Offer',
-    name: `${coupon.merchant.name} - ${discountText}`,
+    name: `${merchantName} - ${discountText}`,
     description: coupon.description,
     priceCurrency: 'USD',
     price: 0,
@@ -87,7 +91,7 @@ export function generateCouponJsonLd(coupon: Coupon) {
     availability: 'https://schema.org/InStock',
     seller: {
       '@type': 'Organization',
-      name: coupon.merchant.name,
+      name: merchantName,
     },
     ...(coupon.code && {
       'schema:discountCode': coupon.code,

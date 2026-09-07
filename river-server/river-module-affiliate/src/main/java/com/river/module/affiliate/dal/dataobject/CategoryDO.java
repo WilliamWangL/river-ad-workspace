@@ -1,7 +1,6 @@
 package com.river.module.affiliate.dal.dataobject;
 
 import com.river.framework.tenant.core.db.TenantBaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
@@ -10,7 +9,6 @@ import lombok.*;
  * 分类 DO
  */
 @TableName("river_affiliate_category")
-@KeySequence("river_affiliate_category_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -39,6 +37,9 @@ public class CategoryDO extends TenantBaseDO {
 
     /** 图标 */
     private String icon;
+
+    /** 地区代码，如 US、RU、00 表示默认 */
+    private String region;
 
     /** 状态：0-停用，1-启用 */
     private Integer status;

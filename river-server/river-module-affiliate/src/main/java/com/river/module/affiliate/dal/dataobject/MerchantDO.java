@@ -1,7 +1,6 @@
 package com.river.module.affiliate.dal.dataobject;
 
 import com.river.framework.tenant.core.db.TenantBaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -15,7 +14,6 @@ import java.util.List;
  * 商家/广告主 DO
  */
 @TableName(value = "river_affiliate_merchant", autoResultMap = true)
-@KeySequence("river_affiliate_merchant_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -45,8 +43,20 @@ public class MerchantDO extends TenantBaseDO {
     /** Logo URL */
     private String logoUrl;
 
-    /** 商家描述 */
+    /** 商家描述（联盟同步的原始描述，作为简介/详情的回退值） */
     private String description;
+
+    /** 商家简介（短文本，用于详情页头部摘要，为空时回退到 description） */
+    private String intro;
+
+    /** 商家描述（长富文本，用于详情页底部，为空时回退到 description） */
+    private String about;
+
+    /** SEO 页面标题（为空时回退到 name） */
+    private String metaTitle;
+
+    /** SEO meta 描述（为空时回退到 intro/description） */
+    private String metaDescription;
 
     /** 商家评级（1-5） */
     private BigDecimal rating;
