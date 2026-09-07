@@ -496,7 +496,7 @@ public class GenericMerchantScraper implements MerchantSiteScraper {
                 if (node.isObject() && "Product".equalsIgnoreCase(
                         node.has("@type") ? node.get("@type").asText() : "")) {
                     if (node.has("description")) {
-                        String desc = node.get("description").asText();
+                        desc = node.get("description").asText();
                         if (desc != null && desc.length() > 20) return desc;
                     }
                 }
