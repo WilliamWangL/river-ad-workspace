@@ -2,9 +2,7 @@ package com.river.module.affiliate.api.merchant;
 
 import com.river.framework.common.biz.affiliate.MerchantCommonApi;
 import com.river.framework.common.biz.affiliate.dto.MerchantSimpleRespDTO;
-import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.common.util.object.BeanUtils;
-import com.river.framework.mybatis.core.query.LambdaQueryWrapperX;
 import com.river.module.affiliate.dal.dataobject.MerchantDO;
 import com.river.module.affiliate.dal.mysql.MerchantMapper;
 import jakarta.annotation.Resource;
@@ -34,17 +32,6 @@ public class MerchantApiImpl implements MerchantCommonApi {
             return List.of();
         }
         List<MerchantDO> merchants = merchantMapper.selectBatchIds(ids);
-        return BeanUtils.toBean(merchants, MerchantSimpleRespDTO.class);
-    }
-
-    @Override
-    public List<MerchantSimpleRespDTO> getActiveMerchantsWithDomain() {
-        List<MerchantDO> merchants = merchantMapper.selectList(
-                new LambdaQueryWrapperX<MerchantDO>()
-                        .eq(MerchantDO::getStatus, CommonStatusEnum.ENABLE.getStatus())
-                        .eq(MerchantDO::getCrawlEnabled, true)
-                        .isNotNull(MerchantDO::getDomain)
-                        .ne(MerchantDO::getDomain, ""));
         return BeanUtils.toBean(merchants, MerchantSimpleRespDTO.class);
     }
 
