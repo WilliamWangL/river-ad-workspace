@@ -1,7 +1,9 @@
+'use client';
+
 import { Deal } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { Sparkles, Crown, ArrowUpRight, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTrackingUrl } from '@/lib/tracking';
@@ -12,8 +14,8 @@ interface DealCardProps {
   locale: string;
 }
 
-export async function DealCard({ deal, locale }: DealCardProps) {
-  const t = await getTranslations({ locale, namespace: 'Deal' });
+export default function DealCard({ deal, locale }: DealCardProps) {
+  const t = useTranslations('Deal');
   const merchantName = deal.merchant?.name || 'Store';
   const hasDiscount = deal.discountPercent > 0;
   const discountHigh = deal.discountPercent >= 50;
@@ -162,5 +164,3 @@ export async function DealCard({ deal, locale }: DealCardProps) {
     </article>
   );
 }
-
-export default DealCard;

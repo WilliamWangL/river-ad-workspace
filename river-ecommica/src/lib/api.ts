@@ -33,6 +33,13 @@ const POST_TYPE_MAP: Record<number, BlogPost['type']> = {
   4: 'news'
 }
 
+const POST_TYPE_REVERSE_MAP: Record<BlogPost['type'], number> = {
+  deal: 1,
+  review: 2,
+  tutorial: 3,
+  news: 4
+}
+
 function mapPostType(post: Record<string, unknown>): BlogPost {
   return {
     ...post,
@@ -112,9 +119,9 @@ export async function fetchCoupons(params?: { merchantId?: number; verified?: bo
   return json.data || { total: 0, list: [] }
 }
 
-export async function fetchPosts(params?: { type?: string; featured?: boolean; pageNo?: number; pageSize?: number }): Promise<PageResult<BlogPost>> {
+export async function fetchPosts(params?: { type?: BlogPost['type']; featured?: boolean; pageNo?: number; pageSize?: number }): Promise<PageResult<BlogPost>> {
   const url = new URL(`${getApiBaseUrl()}/blog/post/page`)
-  if (params?.type) url.searchParams.set('type', params.type)
+  if (params?.type) url.searchParams.set('type', String(POST_TYPE_REVERSE_MAP[params.type]))
   if (params?.featured !== undefined) url.searchParams.set('featured', String(params.featured))
   if (params?.pageNo) url.searchParams.set('pageNo', String(params.pageNo))
   if (params?.pageSize) url.searchParams.set('pageSize', String(params.pageSize))
