@@ -53,9 +53,6 @@ public class DealRespVO {
     @Schema(description = "图片 URL")
     private String imageUrl;
 
-    @Schema(description = "商品图片 URL 列表（详情页多图）")
-    private List<String> imageUrls;
-
     @Schema(description = "热度分数", example = "100")
     private Integer hotScore;
 
@@ -64,9 +61,6 @@ public class DealRespVO {
 
     @Schema(description = "跳转链接")
     private String gotoUrl;
-
-    @Schema(description = "爬虫采集来源 URL")
-    private String sourceUrl;
 
     @Schema(description = "状态", example = "1")
     private Integer status;

@@ -64,9 +64,6 @@ public class MerchantDO extends TenantBaseDO {
     /** 状态：0-停用，1-启用 */
     private Integer status;
 
-    /** 是否启用爬虫采集（0=不爬取，1=爬取） */
-    private Boolean crawlEnabled;
-
     /** 支持的国家/地区（ISO 代码列表） */
     @TableField(typeHandler = StringListTypeHandler.class)
     private List<String> regions;

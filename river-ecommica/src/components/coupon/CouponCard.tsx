@@ -1,7 +1,9 @@
+'use client';
+
 import { Coupon } from '@/types';
 import { Clock, BadgeCheck, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getTrackingUrl } from '@/lib/tracking';
 import { CouponCardActions } from './CouponCardActions';
 
@@ -43,8 +45,8 @@ function getExpiryInfo(coupon: Coupon) {
   };
 }
 
-export default async function CouponCard({ coupon, locale }: CouponCardProps) {
-  const t = await getTranslations({ locale, namespace: 'Deal' });
+export default function CouponCard({ coupon, locale }: CouponCardProps) {
+  const t = useTranslations('Deal');
   const merchantName = coupon.merchant?.name || 'Store';
   const discount = getDiscountDisplay(coupon);
   const expiry = getExpiryInfo(coupon);

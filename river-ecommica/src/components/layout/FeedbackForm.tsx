@@ -71,7 +71,7 @@ export function FeedbackForm({ sourceType, sourcePage, labels }: FeedbackFormPro
   if (status === 'success') {
     return (
       <section className="mt-16">
-        <div className="max-w-xl mx-auto text-center p-8 bg-white rounded-2xl border border-green-100 shadow-sm">
+        <div className="max-w-4xl mx-auto text-center p-8 bg-white rounded-2xl border border-green-100 shadow-sm">
           <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
           <h3 className="text-xl font-bold font-display text-foreground mb-2">{labels.successTitle}</h3>
           <p className="text-muted-foreground">{labels.successMessage}</p>
@@ -88,7 +88,7 @@ export function FeedbackForm({ sourceType, sourcePage, labels }: FeedbackFormPro
 
   return (
     <section className="mt-16">
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold font-display text-foreground mb-2">
             {labels.title}
@@ -98,7 +98,7 @@ export function FeedbackForm({ sourceType, sourcePage, labels }: FeedbackFormPro
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-border/60 shadow-sm p-6 space-y-4"
+          className="bg-white rounded-2xl border border-border/60 shadow-sm p-8 space-y-5"
         >
           {status === 'error' && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-red-700 text-sm">

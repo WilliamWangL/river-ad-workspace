@@ -59,10 +59,6 @@ public class DealDO extends TenantBaseDO {
 
     private String imageUrl;
 
-    /** 商品图片 URL 列表（详情页多图） */
-    @TableField(typeHandler = StringListTypeHandler.class)
-    private List<String> imageUrls;
-
     /** 适用地区（ISO 代码列表） */
     @TableField(typeHandler = StringListTypeHandler.class)
     private List<String> regions;
@@ -72,9 +68,6 @@ public class DealDO extends TenantBaseDO {
 
     /** 跳转链接 */
     private String gotoUrl;
-
-    /** 爬虫采集来源页面 URL */
-    private String sourceUrl;
 
     /** 是否独家 */
     private Boolean exclusive;
