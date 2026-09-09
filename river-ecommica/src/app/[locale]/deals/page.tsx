@@ -1,12 +1,14 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchDeals } from '@/lib/api';
+import { fetchDeals, fetchCategories } from '@/lib/api';
 import { getCurrentRegion } from '@/lib/region';
 import { getRegionFilter } from '@/lib/region-constants';
 import { PAGINATION } from '@/constants/pagination';
+import { Category } from '@/types';
 import DealCard from '@/components/deal/DealCard';
 import { DealsSearchBar } from '@/components/deal/DealsSearchBar';
+import { DealCategoryFilter } from '@/components/deal/DealCategoryFilter';
 import { DealsInfiniteList } from '@/components/deal/DealsInfiniteList';
 import { EmptyState } from '@/components/ui/empty-state';
 import { JsonLd, BASE_URL, generateBreadcrumbJsonLd, generateItemListJsonLd } from '@/components/seo/JsonLd';
@@ -16,6 +18,18 @@ import {
   Clock,
   Zap
 } from 'lucide-react';
+
+/** 在分类树中递归查找指定 slug 的分类 */
+function findCategoryBySlug(categories: Category[], slug: string): Category | null {
+  for (const cat of categories) {
+    if (cat.slug === slug) return cat;
+    if (cat.children) {
+      const found = findCategoryBySlug(cat.children, slug);
+      if (found) return found;
+    }
+  }
+  return null;
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -59,7 +73,7 @@ export default async function DealsPage({
   searchParams
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; page?: string; region?: string }>
+  searchParams: Promise<{ q?: string; page?: string; region?: string; category?: string }>
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -73,10 +87,21 @@ export default async function DealsPage({
   const regionFilter = getRegionFilter(region);
   const regionsArray = regionFilter ? [regionFilter] : undefined;
 
+  // 并行获取 categories 和初始 deals
+  const categories = await fetchCategories({ region: regionFilter });
+
+  // 解析 URL 中的分类参数，获取 categoryId
+  const selectedCategorySlug = queryParams.category || '';
+  const selectedCategory = selectedCategorySlug
+    ? findCategoryBySlug(categories, selectedCategorySlug)
+    : null;
+  const categoryId = selectedCategory?.id;
+
   const dealsResult = await fetchDeals({
     pageNo: currentPage,
     pageSize,
-    regions: regionsArray
+    regions: regionsArray,
+    categoryId,
   });
   const allDeals = dealsResult.list || [];
   const total = dealsResult.total || 0;
@@ -174,12 +199,17 @@ export default async function DealsPage({
 
       {/* Toolbar */}
       <div className="sticky top-14 sm:top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
-        <div className="container mx-auto px-4 py-3">
-          <Suspense fallback={<div className="h-11 bg-muted animate-pulse rounded-xl max-w-md" />}>
-            <DealsSearchBar
-              placeholder={t('searchPlaceholder')}
-              className="max-w-md"
-            />
+        <div className="container mx-auto px-4 py-3 space-y-0">
+          <div className="flex items-center gap-3">
+            <Suspense fallback={<div className="h-11 bg-muted animate-pulse rounded-xl max-w-md flex-1" />}>
+              <DealsSearchBar
+                placeholder={t('searchPlaceholder')}
+                className="max-w-md"
+              />
+            </Suspense>
+          </div>
+          <Suspense fallback={<div className="h-10 bg-muted/30 animate-pulse rounded-xl mt-2" />}>
+            <DealCategoryFilter categories={categories} locale={locale} />
           </Suspense>
         </div>
       </div>
@@ -192,6 +222,7 @@ export default async function DealsPage({
             total={total}
             pageSize={pageSize}
             locale={locale}
+            categoryId={categoryId}
           >
             {deals.map(deal => (
               <DealCard key={deal.id} deal={deal} locale={locale} />

@@ -106,7 +106,11 @@
     "statAvgSavings": "Avg Savings",
     "searchPlaceholder": "Search deals...",
     "emptyTitle": "No deals found",
-    "emptyDescription": "We couldn't find any deals matching your criteria. Try adjusting your search or check back later."
+    "emptyDescription": "We couldn't find any deals matching your criteria. Try adjusting your search or check back later.",
+    "categoryFilter": {
+      "all": "All Categories",
+      "allSubcategories": "All"
+    }
   },
   "coupons": {
     "meta": {

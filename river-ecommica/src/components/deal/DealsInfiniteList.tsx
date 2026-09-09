@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, ReactNode } from 'react';
+import { useState, useCallback, useEffect, ReactNode } from 'react';
 import { Deal } from '@/types';
 import DealCard from '@/components/deal/DealCard';
 import { InfiniteScrollSentinel } from '@/components/ui/InfiniteScrollSentinel';
@@ -13,6 +13,7 @@ interface DealsInfiniteListProps {
   total: number;
   pageSize: number;
   locale: string;
+  categoryId?: number;
   children: ReactNode;
 }
 
@@ -21,12 +22,20 @@ export function DealsInfiniteList({
   total,
   pageSize,
   locale,
+  categoryId,
   children,
 }: DealsInfiniteListProps) {
   const [newItems, setNewItems] = useState<ReactNode[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialCount < total);
+
+  // 分类切换时重置分页状态
+  useEffect(() => {
+    setNewItems([]);
+    setPage(1);
+    setHasMore(initialCount < total);
+  }, [categoryId, initialCount, total]);
 
   const loadMore = useCallback(async () => {
     if (loading) return;
@@ -37,6 +46,9 @@ export function DealsInfiniteList({
       const url = new URL(`${API_BASE}/coupon/deal/page`, window.location.origin);
       url.searchParams.set('pageNo', String(nextPage));
       url.searchParams.set('pageSize', String(pageSize));
+      if (categoryId) {
+        url.searchParams.set('categoryId', String(categoryId));
+      }
 
       const res = await fetch(url.toString(), {
         headers: { 'tenant-id': TENANT_ID },
@@ -61,7 +73,7 @@ export function DealsInfiniteList({
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, locale, loading, initialCount, newItems.length, total]);
+  }, [page, pageSize, locale, loading, initialCount, newItems.length, total, categoryId]);
 
   return (
     <InfiniteScrollSentinel

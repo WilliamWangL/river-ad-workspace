@@ -106,7 +106,11 @@
     "statAvgSavings": "平均折扣",
     "searchPlaceholder": "搜索优惠...",
     "emptyTitle": "未找到优惠",
-    "emptyDescription": "我们找不到符合条件的优惠。请尝试调整搜索条件或稍后再试。"
+    "emptyDescription": "我们找不到符合条件的优惠。请尝试调整搜索条件或稍后再试。",
+    "categoryFilter": {
+      "all": "全部分类",
+      "allSubcategories": "全部"
+    }
   },
   "coupons": {
     "meta": {
