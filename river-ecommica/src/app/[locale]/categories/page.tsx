@@ -64,6 +64,11 @@ export default async function CategoriesPage({
   const regionFilter = getRegionFilter(region);
   const categories = await fetchCategories({ region: regionFilter });
 
+  // 按排名排序（sort 越小越靠前），排名靠前的品类优先展示
+  const sortedCategories = [...categories].sort(
+    (a, b) => (a.sort ?? 0) - (b.sort ?? 0)
+  );
+
   const totalCategories = categories.length;
   const totalSubcategories = categories.reduce((acc, c) => acc + (c.children?.length || 0), 0);
 
@@ -133,8 +138,8 @@ export default async function CategoriesPage({
         </section>
 
         {/* Categories Grid - 显示全部分类，不受默认 maxCategories=8 限制 */}
-        {categories.length > 0 ? (
-          <CategorySection categories={categories} locale={locale} maxCategories={categories.length} />
+        {sortedCategories.length > 0 ? (
+          <CategorySection categories={sortedCategories} locale={locale} maxCategories={sortedCategories.length} />
         ) : (
           <section className="py-16 lg:py-20 bg-background">
             <div className="container mx-auto px-4">

@@ -30,8 +30,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="排序" prop="sort">
+          <el-form-item label="排名" prop="sort">
             <el-input-number v-model="formData.sort" :min="0" class="!w-full" />
+            <div class="text-12px text-gray-400 mt-4px">数字越小越靠前，首页优先展示排名靠前的品类</div>
           </el-form-item>
         </el-col>
       </el-row>

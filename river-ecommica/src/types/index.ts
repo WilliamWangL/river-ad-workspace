@@ -104,6 +104,8 @@ export interface Category {
   slug: string;
   icon: string;
   level?: number;
+  /** 排名，数字越小越靠前（首页优先展示排名靠前的品类） */
+  sort?: number;
   parentId?: number;
   region?: string;
   children?: Category[];

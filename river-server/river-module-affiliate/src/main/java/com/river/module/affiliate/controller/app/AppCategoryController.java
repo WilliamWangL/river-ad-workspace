@@ -109,6 +109,7 @@ public class AppCategoryController {
                 .slug(category.getSlug())
                 .icon(category.getIcon())
                 .level(category.getLevel())
+                .sort(category.getSort())
                 .parentId(category.getParentId())
                 .region(category.getRegion())
                 .build();

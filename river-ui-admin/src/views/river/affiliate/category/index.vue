@@ -77,7 +77,12 @@
           <el-tag v-else type="info">三级</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="排序" align="center" prop="sort" width="80" />
+      <el-table-column label="排名" align="center" prop="sort" width="80">
+        <template #default="scope">
+          <el-tag v-if="scope.row.sort != null && scope.row.sort > 0" type="warning" effect="plain">#{{ scope.row.sort }}</el-tag>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="图标" align="center" prop="icon" width="100" />
       <el-table-column label="地区" align="center" prop="region" width="100">
         <template #default="scope">

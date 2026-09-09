@@ -26,6 +26,9 @@ public class AppCategoryRespVO {
     @Schema(description = "层级", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer level;
 
+    @Schema(description = "排名（数字越小越靠前，首页优先展示）", example = "1")
+    private Integer sort;
+
     @Schema(description = "父分类编号", example = "0")
     private Long parentId;
 
