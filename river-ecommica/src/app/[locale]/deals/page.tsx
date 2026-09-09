@@ -89,9 +89,9 @@ export default async function DealsPage({
       )
     : allDeals;
 
-  const now = new Date();
   const totalDeals = total;
-  const activeDeals = deals.filter(d => !d.endTime || new Date(d.endTime) > now).length;
+  // 后端只返回状态为 ENABLE 的 deal，total 即活跃数
+  const activeDeals = totalDeals;
   const avgDiscount = totalDeals > 0
     ? Math.round(allDeals.reduce((acc, d) => acc + (d.discountPercent || 0), 0) / Math.max(1, allDeals.length))
     : 0;

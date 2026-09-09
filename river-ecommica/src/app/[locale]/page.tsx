@@ -90,6 +90,10 @@ export default async function HomePage({
   const featuredDealsRaw = dealsResult.list.length > 0 ? dealsResult.list : (await fetchDeals({ regions: regionsArray })).list;
   const featuredDeals = featuredDealsRaw.slice(0, 8);
   const popularStores = storesResult.list.slice(0, 6);
+  // 按排名排序（sort 越小越靠前），排名靠前的品类优先展示
+  const sortedCategories = [...categories].sort(
+    (a, b) => (a.sort ?? 0) - (b.sort ?? 0)
+  );
 
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-primary/20 selection:text-primary">
@@ -182,8 +186,8 @@ export default async function HomePage({
       {/* ============================================
           CATEGORY SECTION
           ============================================ */}
-      {categories.length > 0 ? (
-        <CategorySection categories={categories} locale={locale} showViewAll />
+      {sortedCategories.length > 0 ? (
+        <CategorySection categories={sortedCategories} locale={locale} showViewAll />
       ) : (
         <section className="py-12 lg:py-16 bg-background">
           <div className="container mx-auto px-4">
