@@ -1,6 +1,7 @@
 package com.river.module.coupon.dal.mysql;
 
 import cn.hutool.core.collection.CollUtil;
+import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.common.pojo.PageResult;
 import com.river.framework.mybatis.core.mapper.BaseMapperX;
 import com.river.framework.mybatis.core.query.LambdaQueryWrapperX;
@@ -47,7 +48,8 @@ public interface DealMapper extends BaseMapperX<DealDO> {
 
     default Long selectCountByMerchantId(Long merchantId) {
         return selectCount(new LambdaQueryWrapperX<DealDO>()
-                .eq(DealDO::getMerchantId, merchantId));
+                .eq(DealDO::getMerchantId, merchantId)
+                .eq(DealDO::getStatus, CommonStatusEnum.ENABLE.getStatus()));
     }
 
     /**

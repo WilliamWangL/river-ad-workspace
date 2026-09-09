@@ -1,5 +1,6 @@
 package com.river.module.coupon.controller.app;
 
+import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.common.biz.affiliate.MerchantCommonApi;
 import com.river.framework.common.biz.affiliate.dto.MerchantSimpleRespDTO;
 import com.river.framework.common.pojo.CommonResult;
@@ -42,7 +43,8 @@ public class AppCouponController {
     @Operation(summary = "获取优惠券分页")
     public CommonResult<PageResult<AppCouponRespVO>> getCouponPage(
             @Valid AppCouponPageReqVO pageReqVO) {
-        CouponPageReqVO adminPageReqVO = BeanUtils.toBean(pageReqVO, CouponPageReqVO.class);
+        CouponPageReqVO adminPageReqVO = BeanUtils.toBean(pageReqVO, CouponPageReqVO.class,
+                info -> info.setStatus(CommonStatusEnum.ENABLE.getStatus()));
         PageResult<CouponDO> pageResult = couponService.getCouponPage(adminPageReqVO);
 
         List<AppCouponRespVO> result = convertToAppVOList(pageResult.getList());
