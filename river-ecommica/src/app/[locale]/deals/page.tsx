@@ -87,8 +87,11 @@ export default async function DealsPage({
   const regionFilter = getRegionFilter(region);
   const regionsArray = regionFilter ? [regionFilter] : undefined;
 
-  // 并行获取 categories 和初始 deals
-  const categories = await fetchCategories({ region: regionFilter });
+  // 并行获取 categories 和 deals
+  const [categories, initialDealsResult] = await Promise.all([
+    fetchCategories({ region: regionFilter }),
+    fetchDeals({ pageNo: currentPage, pageSize, regions: regionsArray }),
+  ]);
 
   // 解析 URL 中的分类参数，获取 categoryId
   const selectedCategorySlug = queryParams.category || '';
@@ -97,12 +100,10 @@ export default async function DealsPage({
     : null;
   const categoryId = selectedCategory?.id;
 
-  const dealsResult = await fetchDeals({
-    pageNo: currentPage,
-    pageSize,
-    regions: regionsArray,
-    categoryId,
-  });
+  // 如果有分类筛选，重新获取（首次 fetch 未携带 categoryId）
+  const dealsResult = categoryId
+    ? await fetchDeals({ pageNo: currentPage, pageSize, regions: regionsArray, categoryId })
+    : initialDealsResult;
   const allDeals = dealsResult.list || [];
   const total = dealsResult.total || 0;
 
@@ -209,7 +210,7 @@ export default async function DealsPage({
             </Suspense>
           </div>
           <Suspense fallback={<div className="h-10 bg-muted/30 animate-pulse rounded-xl mt-2" />}>
-            <DealCategoryFilter categories={categories} locale={locale} />
+            <DealCategoryFilter categories={categories} />
           </Suspense>
         </div>
       </div>

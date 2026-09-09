@@ -32,7 +32,6 @@ const IconMap: Record<string, LucideIcon> = {
 
 interface DealCategoryFilterProps {
   categories: Category[];
-  locale: string;
 }
 
 /**
@@ -49,7 +48,7 @@ function findCategoryBySlug(categories: Category[], slug: string): Category | nu
   return null;
 }
 
-export function DealCategoryFilter({ categories, locale }: DealCategoryFilterProps) {
+export function DealCategoryFilter({ categories }: DealCategoryFilterProps) {
   const t = useTranslations('deals');
   const router = useRouter();
   const searchParams = useSearchParams();

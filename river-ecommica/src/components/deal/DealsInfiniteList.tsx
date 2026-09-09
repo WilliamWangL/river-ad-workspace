@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, ReactNode } from 'react';
+import { useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 import { Deal } from '@/types';
 import DealCard from '@/components/deal/DealCard';
 import { InfiniteScrollSentinel } from '@/components/ui/InfiniteScrollSentinel';
@@ -29,16 +29,22 @@ export function DealsInfiniteList({
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialCount < total);
+  const abortRef = useRef<AbortController | null>(null);
 
-  // 分类切换时重置分页状态
+  // 分类切换时重置分页状态并中止旧请求
   useEffect(() => {
+    abortRef.current?.abort();
     setNewItems([]);
     setPage(1);
+    setLoading(false);
     setHasMore(initialCount < total);
   }, [categoryId, initialCount, total]);
 
   const loadMore = useCallback(async () => {
     if (loading) return;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setLoading(true);
 
     try {
@@ -52,6 +58,7 @@ export function DealsInfiniteList({
 
       const res = await fetch(url.toString(), {
         headers: { 'tenant-id': TENANT_ID },
+        signal: controller.signal,
       });
       const json = await res.json();
       const deals: Deal[] = json.data?.list || [];
@@ -68,10 +75,13 @@ export function DealsInfiniteList({
       if (loaded >= total || deals.length === 0) {
         setHasMore(false);
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       setHasMore(false);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, [page, pageSize, locale, loading, initialCount, newItems.length, total, categoryId]);
 
