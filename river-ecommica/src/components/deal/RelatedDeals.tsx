@@ -90,8 +90,14 @@ function RelatedDealCard({ deal, locale, labels }: { deal: Deal; locale: string;
       {/* Info */}
       <div className="p-4 flex flex-col flex-1">
         <p className="text-xs text-muted-foreground font-medium mb-1 truncate">{merchantName}</p>
+        {/* Title - stretched link makes the whole card clickable */}
         <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 mb-3 group-hover:text-primary transition-colors min-h-[2.5rem]">
-          <Link href={`/${locale}/deals/${deal.slug}`}>{deal.title}</Link>
+          <Link
+            href={`/${locale}/deals/${deal.slug}`}
+            className="after:absolute after:inset-0 after:content-['']"
+          >
+            {deal.title}
+          </Link>
         </h3>
 
         <div className="mt-auto flex items-center justify-between">
@@ -103,11 +109,12 @@ function RelatedDealCard({ deal, locale, labels }: { deal: Deal; locale: string;
               <span className="text-xs text-muted-foreground line-through">${deal.originalPrice}</span>
             )}
           </div>
+          {/* relative 使其位于整卡链接的拉伸层之上，保持独立点击 */}
           <a
             href={getTrackingUrl('deal', deal.id, deal.gotoUrl)}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            className="relative flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
           >
             {labels.getDeal} <ArrowUpRight size={12} />
           </a>
