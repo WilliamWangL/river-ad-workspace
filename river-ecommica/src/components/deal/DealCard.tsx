@@ -32,13 +32,13 @@ export default function DealCard({ deal, locale }: DealCardProps) {
     <article className="group relative card-interactive h-full flex flex-col overflow-hidden">
       {/* Deal Image Section */}
       {deal.imageUrl ? (
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/60">
           <Image
             src={deal.imageUrl}
             alt={deal.title}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
             unoptimized
           />
           {/* Gradient overlay for readability */}
