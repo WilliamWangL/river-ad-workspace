@@ -17,5 +17,7 @@ public interface ErrorCodeConstants {
     // ========== Deal 1-022-001-000 ==========
     ErrorCode DEAL_NOT_EXISTS = new ErrorCode(1_022_001_001, "Deal 不存在");
     ErrorCode DEAL_EXPIRED = new ErrorCode(1_022_001_002, "Deal 已过期");
+    ErrorCode DEAL_SLUG_DUPLICATE = new ErrorCode(1_022_001_003, "Deal Slug 已存在");
+    ErrorCode DEAL_NETWORK_EXTERNAL_DUPLICATE = new ErrorCode(1_022_001_004, "Deal 联盟网络外部 ID 已存在");
 
 }
