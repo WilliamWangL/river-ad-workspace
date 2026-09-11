@@ -10,7 +10,7 @@ export function generateDealJsonLd(deal: Deal) {
     name: deal.title,
     description: stripHtml(deal.description, 160) || undefined,
     url: `${BASE_URL}/deals/${deal.slug}`,
-    priceCurrency: 'USD',
+    priceCurrency: deal.merchant?.currency || 'USD',
     price: deal.dealPrice || 0,
     priceValidUntil: deal.endTime,
     availability: 'https://schema.org/InStock',
@@ -65,19 +65,20 @@ export function generateBlogPostJsonLd(post: BlogPost, locale: string = 'en') {
   };
 }
 
-function getDiscountText(discountType: number, discountValue: number): string {
+function getDiscountText(discountType: number, discountValue: number, currencyCode: string): string {
   switch (discountType) {
     case 1:
       return `${discountValue}% off`;
     case 2:
-      return `$${discountValue} off`;
+      return `${currencyCode === 'USD' ? '$' : currencyCode}${discountValue} off`;
     default:
       return 'Free shipping';
   }
 }
 
 export function generateCouponJsonLd(coupon: Coupon) {
-  const discountText = getDiscountText(coupon.discountType, coupon.discountValue);
+  const currencyCode = coupon.merchant?.currency || 'USD';
+  const discountText = getDiscountText(coupon.discountType, coupon.discountValue, currencyCode);
   const merchantName = coupon.merchant?.name || 'Store';
 
   return {
@@ -85,7 +86,7 @@ export function generateCouponJsonLd(coupon: Coupon) {
     '@type': 'Offer',
     name: `${merchantName} - ${discountText}`,
     description: coupon.description,
-    priceCurrency: 'USD',
+    priceCurrency: coupon.merchant?.currency || 'USD',
     price: 0,
     priceValidUntil: coupon.endTime,
     availability: 'https://schema.org/InStock',

@@ -46,6 +46,9 @@ public class AppMerchantRespVO {
     @Schema(description = "支持地区", example = "[\"US\", \"UK\"]")
     private List<String> regions;
 
+    @Schema(description = "货币代码（ISO 4217）", example = "USD")
+    private String currency;
+
     @Schema(description = "Deal 数量", example = "120")
     private Integer dealCount;
 

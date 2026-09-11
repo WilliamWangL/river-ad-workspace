@@ -79,6 +79,8 @@ export interface MerchantVO {
   /** 商家描述（长富文本，为空回退 description） */
   about?: string
   rating: number
+  /** 货币代码（ISO 4217，如 USD、EUR、GBP、CNY、RUB），默认 USD */
+  currency?: string
   status: number
   regions: string
   categoryIds: string

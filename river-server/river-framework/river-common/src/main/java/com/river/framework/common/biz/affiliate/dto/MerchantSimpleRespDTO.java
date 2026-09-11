@@ -40,4 +40,9 @@ public class MerchantSimpleRespDTO {
      */
     private List<String> regions;
 
+    /**
+     * 货币代码（ISO 4217，如 USD、EUR、GBP、CNY、RUB）
+     */
+    private String currency;
+
 }
