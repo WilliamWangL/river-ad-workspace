@@ -244,21 +244,25 @@ export default function DealCard({ deal, locale }: DealCardProps) {
 
       {/* Bottom Section - Title & CTA */}
       <div className="p-5 pt-4 flex flex-col flex-1">
-        {/* Title */}
+        {/* Title - stretched link makes the whole card clickable */}
         <h3 className="font-semibold text-base text-foreground leading-snug line-clamp-2 mb-4 min-h-[3rem] group-hover:text-primary transition-colors">
-          <Link href={`/${locale}/deals/${deal.slug}`} className="hover-underline">
+          <Link
+            href={`/${locale}/deals/${deal.slug}`}
+            className="hover-underline after:absolute after:inset-0 after:content-['']"
+          >
             {deal.title}
           </Link>
         </h3>
 
         <div className="mt-auto">
-          {/* CTA Button - 使用原生 <a> 标签避免 Next.js Link 的 prefetch 行为 */}
+          {/* CTA Button - 使用原生 <a> 标签避免 Next.js Link 的 prefetch 行为；
+              relative 使其位于整卡链接的拉伸层之上，保持独立点击 */}
           <a
             href={getTrackingUrl('deal', deal.id, deal.gotoUrl)}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              'flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl',
+              'relative flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl',
               'bg-muted text-foreground font-semibold text-sm',
               'transition-all duration-300',
               'group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-lg group-hover:shadow-primary/20',
