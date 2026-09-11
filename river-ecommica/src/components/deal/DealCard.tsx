@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Sparkles, Crown, ArrowUpRight, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTrackingUrl } from '@/lib/tracking';
+import { getCurrencySymbol } from '@/lib/currency';
 import { CountdownTimer } from './CountdownTimer';
 
 interface DealCardProps {
@@ -17,6 +18,7 @@ interface DealCardProps {
 export default function DealCard({ deal, locale }: DealCardProps) {
   const t = useTranslations('Deal');
   const merchantName = deal.merchant?.name || 'Store';
+  const currencySymbol = getCurrencySymbol(deal.merchant?.currency);
   const hasDiscount = deal.discountPercent > 0;
   const discountHigh = deal.discountPercent >= 50;
 
@@ -181,11 +183,11 @@ export default function DealCard({ deal, locale }: DealCardProps) {
                 ) : deal.dealPrice > 0 ? (
                   <>
                     <span className="text-3xl font-bold text-foreground font-display">
-                      ${deal.dealPrice}
+                      {currencySymbol}{deal.dealPrice}
                     </span>
                     {deal.originalPrice > 0 && (
                       <span className="text-sm text-muted-foreground line-through">
-                        ${deal.originalPrice}
+                        {currencySymbol}{deal.originalPrice}
                       </span>
                     )}
                   </>
@@ -230,11 +232,11 @@ export default function DealCard({ deal, locale }: DealCardProps) {
           ) : deal.dealPrice > 0 ? (
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl font-bold text-foreground font-display">
-                ${deal.dealPrice}
+                {currencySymbol}{deal.dealPrice}
               </span>
               {deal.originalPrice > 0 && (
                 <span className="text-xs text-muted-foreground line-through">
-                  ${deal.originalPrice}
+                  {currencySymbol}{deal.originalPrice}
                 </span>
               )}
             </div>

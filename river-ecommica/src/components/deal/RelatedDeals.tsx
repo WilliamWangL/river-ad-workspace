@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { ArrowUpRight, Tag } from 'lucide-react';
 import { getTrackingUrl } from '@/lib/tracking';
+import { getCurrencySymbol } from '@/lib/currency';
 
 interface RelatedDealsProps {
   categoryId?: number;
@@ -63,6 +64,7 @@ export async function RelatedDeals({ categoryId, currentDealId, locale }: Relate
 
 function RelatedDealCard({ deal, locale, labels }: { deal: Deal; locale: string; labels: { getDeal: string } }) {
   const merchantName = deal.merchant?.name || 'Store';
+  const currencySymbol = getCurrencySymbol(deal.merchant?.currency);
 
   return (
     <article className="group relative bg-white rounded-2xl border border-border/60 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col">
@@ -103,10 +105,10 @@ function RelatedDealCard({ deal, locale, labels }: { deal: Deal; locale: string;
         <div className="mt-auto flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
             {deal.dealPrice > 0 && (
-              <span className="text-lg font-bold text-primary">${deal.dealPrice}</span>
+              <span className="text-lg font-bold text-primary">{currencySymbol}{deal.dealPrice}</span>
             )}
             {deal.originalPrice > 0 && (
-              <span className="text-xs text-muted-foreground line-through">${deal.originalPrice}</span>
+              <span className="text-xs text-muted-foreground line-through">{currencySymbol}{deal.originalPrice}</span>
             )}
           </div>
           {/* relative 使其位于整卡链接的拉伸层之上，保持独立点击 */}

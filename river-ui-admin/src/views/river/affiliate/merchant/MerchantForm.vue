@@ -64,6 +64,39 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
+          <el-form-item label="货币代码" prop="currency">
+            <el-select v-model="formData.currency" placeholder="请选择货币" class="!w-full" filterable allow-create>
+              <el-option label="USD - 美元 ($)" value="USD" />
+              <el-option label="EUR - 欧元 (€)" value="EUR" />
+              <el-option label="GBP - 英鎍 (£)" value="GBP" />
+              <el-option label="CNY - 人民币 (¥)" value="CNY" />
+              <el-option label="JPY - 日元 (¥)" value="JPY" />
+              <el-option label="KRW - 韩元 (₩)" value="KRW" />
+              <el-option label="RUB - 卢布 (₽)" value="RUB" />
+              <el-option label="INR - 印度卢比 (₹)" value="INR" />
+              <el-option label="BRL - 巴西雷亚尔 (R$)" value="BRL" />
+              <el-option label="CAD - 加元 (C$)" value="CAD" />
+              <el-option label="AUD - 澳元 (A$)" value="AUD" />
+              <el-option label="HKD - 港币 (HK$)" value="HKD" />
+              <el-option label="TWD - 新台币 (NT$)" value="TWD" />
+              <el-option label="SGD - 新加坡元 (S$)" value="SGD" />
+              <el-option label="MXN - 墨西哥比索 (MX$)" value="MXN" />
+              <el-option label="CHF - 瑞士法郎" value="CHF" />
+              <el-option label="SEK - 瑞典克朗 (kr)" value="SEK" />
+              <el-option label="THB - 泰铢 (฿)" value="THB" />
+              <el-option label="TRY - 土耳其里拉 (₺)" value="TRY" />
+              <el-option label="AED - 阿联酋迪拉姆" value="AED" />
+              <el-option label="ZAR - 南非兰特 (R)" value="ZAR" />
+              <el-option label="PHP - 菲律宾比索 (₱)" value="PHP" />
+              <el-option label="MYR - 马来西亚林吉特 (RM)" value="MYR" />
+              <el-option label="IDR - 印尼盾 (Rp)" value="IDR" />
+              <el-option label="VND - 越南盾 (₫)" value="VND" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="12">
           <el-form-item label="默认 Offer" prop="defaultOfferId">
             <el-select v-model="formData.defaultOfferId" placeholder="请选择默认 Offer（用于 Visit Store 追踪）" class="!w-full" clearable>
               <el-option
@@ -161,6 +194,7 @@ const formData = ref({
   intro: '',
   about: '',
   rating: 0,
+  currency: 'USD',
   status: 0,
   regions: '',
   categoryIds: '',
@@ -241,6 +275,7 @@ const resetForm = () => {
     intro: '',
     about: '',
     rating: 0,
+    currency: 'USD',
     status: 0,
     regions: '',
     categoryIds: '',

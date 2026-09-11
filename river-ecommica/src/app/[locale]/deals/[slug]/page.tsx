@@ -11,6 +11,7 @@ import { CheckCircle, Clock, ShieldCheck, ExternalLink, Store, Tag } from 'lucid
 import { getTrackingUrl } from '@/lib/tracking';
 import { MarkdownRenderer } from '@/components/blog';
 import { stripHtml } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/currency';
 import { RelatedDeals } from '@/components/deal/RelatedDeals';
 import { FeedbackForm } from '@/components/layout/FeedbackForm';
 import { ShareButtons } from '@/components/layout/ShareButtons';
@@ -103,6 +104,7 @@ export default async function DealDetailPage({ params }: Props) {
   }
 
   const trackingUrl = getTrackingUrl('deal', deal.id, deal.gotoUrl);
+  const currencySymbol = getCurrencySymbol(deal.merchant?.currency);
 
   const breadcrumbs = [
     { label: t('breadcrumbHome'), href: '/' },
@@ -199,12 +201,12 @@ export default async function DealDetailPage({ params }: Props) {
                     <div className="flex items-baseline gap-3 mb-6">
                       {deal.dealPrice > 0 && (
                         <span className="text-4xl font-bold text-gradient-savings">
-                          ${deal.dealPrice}
+                          {currencySymbol}{deal.dealPrice}
                         </span>
                       )}
                       {deal.originalPrice > 0 && (
                         <span className="text-xl text-muted-foreground line-through decoration-2 decoration-red-200">
-                          ${deal.originalPrice}
+                          {currencySymbol}{deal.originalPrice}
                         </span>
                       )}
                     </div>

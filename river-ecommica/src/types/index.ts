@@ -3,6 +3,8 @@ export interface MerchantSimple {
   name: string;
   slug: string;
   logoUrl: string;
+  /** 货币代码（ISO 4217），默认 USD */
+  currency?: string;
 }
 
 export interface Deal {

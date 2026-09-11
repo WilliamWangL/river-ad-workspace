@@ -5,6 +5,7 @@ import { Clock, BadgeCheck, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { getTrackingUrl } from '@/lib/tracking';
+import { getCurrencySymbol } from '@/lib/currency';
 import { CouponCardActions } from './CouponCardActions';
 
 interface CouponCardProps {
@@ -12,14 +13,14 @@ interface CouponCardProps {
   locale: string;
 }
 
-function getDiscountDisplay(coupon: Coupon) {
+function getDiscountDisplay(coupon: Coupon, currencySymbol: string) {
   const { discountType, discountValue } = coupon;
 
   if (discountType === 1) {
     return { value: discountValue, suffix: '%', label: 'OFF' };
   }
   if (discountType === 2) {
-    return { prefix: '$', value: discountValue, label: 'OFF' };
+    return { prefix: currencySymbol, value: discountValue, label: 'OFF' };
   }
   if (discountType === 3) {
     return { value: 'FREE', label: 'SHIPPING' };
@@ -48,7 +49,8 @@ function getExpiryInfo(coupon: Coupon) {
 export default function CouponCard({ coupon, locale }: CouponCardProps) {
   const t = useTranslations('Deal');
   const merchantName = coupon.merchant?.name || 'Store';
-  const discount = getDiscountDisplay(coupon);
+  const currencySymbol = getCurrencySymbol(coupon.merchant?.currency);
+  const discount = getDiscountDisplay(coupon, currencySymbol);
   const expiry = getExpiryInfo(coupon);
 
   return (
@@ -145,7 +147,7 @@ export default function CouponCard({ coupon, locale }: CouponCardProps) {
           <div className="text-xs text-muted-foreground mb-4">
             Min. order:{' '}
             <span className="font-medium text-foreground">
-              ${coupon.minPurchase}
+              {currencySymbol}{coupon.minPurchase}
             </span>
           </div>
         )}

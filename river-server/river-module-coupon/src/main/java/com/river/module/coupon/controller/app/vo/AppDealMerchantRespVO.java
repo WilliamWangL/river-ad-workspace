@@ -19,4 +19,7 @@ public class AppDealMerchantRespVO {
     @Schema(description = "Logo URL", example = "https://example.com/logo.png")
     private String logoUrl;
 
+    @Schema(description = "货币代码（ISO 4217）", example = "USD")
+    private String currency;
+
 }

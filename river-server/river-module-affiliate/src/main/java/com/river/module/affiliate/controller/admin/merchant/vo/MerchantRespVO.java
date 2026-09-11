@@ -47,6 +47,9 @@ public class MerchantRespVO {
     @Schema(description = "商家评级（1-5）", example = "4.5")
     private BigDecimal rating;
 
+    @Schema(description = "货币代码（ISO 4217，如 USD、EUR、GBP、CNY、RUB）", example = "USD")
+    private String currency;
+
     @Schema(description = "状态", example = "1")
     private Integer status;
 

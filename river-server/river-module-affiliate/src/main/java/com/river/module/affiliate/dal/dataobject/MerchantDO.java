@@ -61,6 +61,9 @@ public class MerchantDO extends TenantBaseDO {
     /** 商家评级（1-5） */
     private BigDecimal rating;
 
+    /** 货币代码（ISO 4217，如 USD、EUR、GBP、CNY、RUB），默认 USD */
+    private String currency;
+
     /** 状态：0-停用，1-启用 */
     private Integer status;
 
