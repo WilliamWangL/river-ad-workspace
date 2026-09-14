@@ -24,78 +24,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ui-avatars.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-      },
-      {
-        protocol: 'https',
-        hostname: 'api.dicebear.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.pexels.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.samsclubimages.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i5.samsclubimages.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.walmartimages.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.tripcdn.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'ak-d.tripcdn.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.admitad.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.admitad-connect.com',
-        pathname: '/**',
+        hostname: '**',
       },
       {
         protocol: 'http',
-        hostname: 'cdn.admitad.com',
-        pathname: '/**',
+        hostname: '**',
       },
-      {
-        protocol: 'http',
-        hostname: 'cdn.admitad-connect.com',
-        pathname: '/**',
-      },
-       {
-        protocol: 'http',
-        hostname: 'tripcdn.com',
-        pathname: '/**',
-      },
-       {
-        protocol: 'https',
-        hostname: 'down-mx.img.susercontent.com',
-        pathname: '/**',
-      }
     ],
   },
 };
