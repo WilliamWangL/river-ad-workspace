@@ -1,5 +1,6 @@
 package com.river.module.affiliate.service.region;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.river.module.affiliate.controller.app.region.vo.RegionRespVO;
 import com.river.module.affiliate.dal.mysql.MerchantMapper;
 import com.river.module.affiliate.dal.dataobject.MerchantDO;
@@ -88,7 +89,7 @@ public class RegionServiceImpl implements RegionService {
      */
     private void collectRegionsFromMerchant(Set<String> regionCodes) {
         try {
-            List<MerchantDO> list = merchantMapper.selectList(null);
+            List<MerchantDO> list = merchantMapper.selectList(selectDistinctRegions());
             for (MerchantDO merchant : list) {
                 if (merchant != null && merchant.getRegions() != null) {
                     regionCodes.addAll(merchant.getRegions());
@@ -104,7 +105,7 @@ public class RegionServiceImpl implements RegionService {
      */
     private void collectRegionsFromDeal(Set<String> regionCodes) {
         try {
-            List<DealDO> list = dealMapper.selectList(null);
+            List<DealDO> list = dealMapper.selectList(selectDistinctRegions());
             for (DealDO deal : list) {
                 if (deal != null && deal.getRegions() != null) {
                     regionCodes.addAll(deal.getRegions());
@@ -120,7 +121,7 @@ public class RegionServiceImpl implements RegionService {
      */
     private void collectRegionsFromCoupon(Set<String> regionCodes) {
         try {
-            List<CouponDO> list = couponMapper.selectList(null);
+            List<CouponDO> list = couponMapper.selectList(selectDistinctRegions());
             for (CouponDO coupon : list) {
                 if (coupon != null && coupon.getRegions() != null) {
                     regionCodes.addAll(coupon.getRegions());
@@ -129,5 +130,14 @@ public class RegionServiceImpl implements RegionService {
         } catch (Exception e) {
             log.warn("Failed to collect regions from coupon table", e);
         }
+    }
+
+    /**
+     * 构建 DB 端去重的 regions 查询，避免大表全字段全量加载导致 OOM
+     */
+    private <T> QueryWrapper<T> selectDistinctRegions() {
+        QueryWrapper<T> wrapper = new QueryWrapper<>();
+        wrapper.select("DISTINCT regions");
+        return wrapper;
     }
 }
