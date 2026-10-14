@@ -17,9 +17,10 @@
 -- 需先执行本迁移再部署对应版本服务。
 -- =====================================================================
 
--- 1. deal 表窄覆盖索引（count 点查用）
+-- 1. deal 表窄覆盖索引（count/内层过滤点查用，含 merchant_id
+--    以覆盖最常见的「分类 + 商家」组合，避免逐条回读宽行）
 ALTER TABLE river_coupon_deal
-    ADD KEY idx_deal_id_filters (id, tenant_id, status, deleted);
+    ADD KEY idx_deal_id_filters (id, tenant_id, status, deleted, merchant_id);
 
 -- 2. deal_category 表覆盖索引替换（扫描时带出 deal_id）
 ALTER TABLE river_coupon_deal_category
