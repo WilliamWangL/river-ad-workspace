@@ -34,10 +34,12 @@ public interface DealMapper extends BaseMapperX<DealDO> {
         if (!regionSql.isEmpty()) {
             qry.apply(regionSql);
         }
-        // MySQL 使用 FIND_IN_SET 检查 category_ids 是否包含指定的 categoryId
+        // 分类过滤走 river_coupon_deal_category 关联表（索引查询），
+        // 替代 FIND_IN_SET(category_ids) 的全表扫描
         if (reqVO.getCategoryId() != null) {
-            qry.apply("FIND_IN_SET({0}, category_ids) > 0",
-                    String.valueOf(reqVO.getCategoryId()));
+            qry.apply("EXISTS (SELECT 1 FROM river_coupon_deal_category dc "
+                    + "WHERE dc.deal_id = river_coupon_deal.id AND dc.category_id = {0} AND dc.deleted = 0)",
+                    reqVO.getCategoryId());
         }
         return selectPage(reqVO, qry);
     }

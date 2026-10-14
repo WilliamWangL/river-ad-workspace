@@ -1,15 +1,18 @@
 package com.river.module.coupon.service;
 
+import cn.hutool.core.util.NumberUtil;
 import com.river.framework.common.enums.CommonStatusEnum;
 import com.river.framework.common.pojo.PageResult;
 import com.river.module.coupon.controller.admin.deal.vo.DealPageReqVO;
 import com.river.module.coupon.dal.dataobject.DealDO;
+import com.river.module.coupon.dal.mysql.DealCategoryMapper;
 import com.river.module.coupon.dal.mysql.DealMapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.river.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -22,6 +25,9 @@ public class DealServiceImpl implements DealService {
     @Resource
     private DealMapper dealMapper;
 
+    @Resource
+    private DealCategoryMapper dealCategoryMapper;
+
     @Override
     public Long createDeal(DealDO deal) {
         if (deal.getSlug() == null || deal.getSlug().isBlank()) {
@@ -30,6 +36,7 @@ public class DealServiceImpl implements DealService {
         validateSlugUnique(null, deal.getSlug());
         validateNetworkExternalIdUnique(null, deal.getNetworkId(), deal.getExternalId());
         dealMapper.insert(deal);
+        dealCategoryMapper.replaceDealCategories(deal.getId(), parseCategoryIds(deal.getCategoryIds()));
         return deal.getId();
     }
 
@@ -41,12 +48,17 @@ public class DealServiceImpl implements DealService {
         }
         validateNetworkExternalIdUnique(deal.getId(), deal.getNetworkId(), deal.getExternalId());
         dealMapper.updateById(deal);
+        // 仅当显式传入 categoryIds 时同步关联表（部分更新不覆盖既有分类）
+        if (deal.getCategoryIds() != null) {
+            dealCategoryMapper.replaceDealCategories(deal.getId(), parseCategoryIds(deal.getCategoryIds()));
+        }
     }
 
     @Override
     public void deleteDeal(Long id) {
         validateDealExists(id);
         dealMapper.deleteById(id);
+        dealCategoryMapper.replaceDealCategories(id, List.of());
     }
 
     @Override
@@ -94,6 +106,21 @@ public class DealServiceImpl implements DealService {
         if (existing != null && !existing.getId().equals(id)) {
             throw exception(DEAL_NETWORK_EXTERNAL_DUPLICATE);
         }
+    }
+
+    /**
+     * 将逗号分隔的 categoryIds 解析为去重的分类 ID 列表
+     */
+    private List<Long> parseCategoryIds(String categoryIds) {
+        if (categoryIds == null || categoryIds.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(categoryIds.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty() && NumberUtil.isLong(s))
+                .map(Long::valueOf)
+                .distinct()
+                .toList();
     }
 
     /**
