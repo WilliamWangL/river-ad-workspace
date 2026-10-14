@@ -48,6 +48,16 @@ function findCategoryBySlug(categories: Category[], slug: string): Category | nu
   return null;
 }
 
+/**
+ * 在顶级分类数组中查找目标分类的父分类
+ */
+function findParentCategory(categories: Category[], target: Category): Category | null {
+  for (const cat of categories) {
+    if (cat.children?.some((child: Category) => child.id === target.id)) return cat;
+  }
+  return null;
+}
+
 export function DealCategoryFilter({ categories }: DealCategoryFilterProps) {
   const t = useTranslations('deals');
   const router = useRouter();
@@ -56,7 +66,10 @@ export function DealCategoryFilter({ categories }: DealCategoryFilterProps) {
 
   const currentSlug = searchParams.get('category') || '';
   const selectedCategory = currentSlug ? findCategoryBySlug(categories, currentSlug) : null;
-  const subcategories = selectedCategory?.children || [];
+  // 选中子分类时回退到父级：保持子分类 pills 显示、一级 pill 高亮父级
+  const parentCategory = selectedCategory ? findParentCategory(categories, selectedCategory) : null;
+  const activeTop = parentCategory || selectedCategory;
+  const subcategories = activeTop?.children || [];
 
   const handleCategoryClick = (slug: string | null) => {
     startTransition(() => {
@@ -95,7 +108,7 @@ export function DealCategoryFilter({ categories }: DealCategoryFilterProps) {
         {/* 各一级分类 */}
         {categories.map((cat) => {
           const Icon = IconMap[cat.icon || ''] || Tag;
-          const isActive = currentSlug === cat.slug;
+          const isActive = activeTop?.slug === cat.slug;
           return (
             <button
               key={cat.id}
@@ -120,11 +133,11 @@ export function DealCategoryFilter({ categories }: DealCategoryFilterProps) {
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5 -mx-1 px-1">
           {/* All subcategories — 指向父分类 */}
           <button
-            onClick={() => handleCategoryClick(selectedCategory!.slug)}
+            onClick={() => handleCategoryClick(activeTop!.slug)}
             className={cn(
               'inline-flex items-center gap-1 shrink-0 px-3 py-1.5 rounded-full text-xs font-medium',
               'transition-all duration-200',
-              currentSlug === selectedCategory!.slug
+              currentSlug === activeTop!.slug
                 ? 'bg-primary/10 text-primary border border-primary/20'
                 : 'bg-background text-muted-foreground border border-border/50 hover:border-primary/30 hover:text-primary'
             )}

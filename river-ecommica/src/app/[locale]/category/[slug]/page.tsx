@@ -181,9 +181,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const IconComponent = iconMap[category.icon || 'Tag'] || Tag;
 
   const parentCategory = findParentCategory(categories, slug);
-  const isSubcategory = parentCategory != null && parentCategory.slug !== slug;
+  // 子分类页仍展示父级的子分类 pills（当前项高亮），便于在兄弟分类间切换；
   // 兜底命中时分类不在当前地区树中，直接使用接口返回的 children
-  const subcategories = isSubcategory ? [] : (parentCategory?.children || category.children || []);
+  const subcategories = parentCategory?.children || category.children || [];
 
   const breadcrumbs = [
     { label: t('breadcrumbHome'), href: '/' },
@@ -273,15 +273,23 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           {/* Subcategories */}
           {subcategories.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-8">
-              {subcategories.map(sub => (
-                <Link
-                  key={sub.id}
-                  href={`/${locale}/category/${sub.slug}`}
-                  className="group px-4 py-2 bg-card/80 backdrop-blur-sm hover:bg-primary/10 border border-border/60 hover:border-primary/30 rounded-full text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200"
-                >
-                  {sub.name}
-                </Link>
-              ))}
+              {subcategories.map(sub => {
+                const isCurrent = sub.slug === slug;
+                return (
+                  <Link
+                    key={sub.id}
+                    href={`/${locale}/category/${sub.slug}`}
+                    aria-current={isCurrent ? 'page' : undefined}
+                    className={
+                      isCurrent
+                        ? 'px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-sm font-medium text-primary transition-all duration-200'
+                        : 'group px-4 py-2 bg-card/80 backdrop-blur-sm hover:bg-primary/10 border border-border/60 hover:border-primary/30 rounded-full text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200'
+                    }
+                  >
+                    {sub.name}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
