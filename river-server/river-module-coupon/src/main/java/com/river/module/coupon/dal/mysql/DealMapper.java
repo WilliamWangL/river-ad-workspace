@@ -59,7 +59,8 @@ public interface DealMapper extends BaseMapperX<DealDO> {
         // 计划不稳定（实测退化为关联表驱动 + deal 宽行全量回表 + filesort，单次 4s+）。
         // 改为显式 JOIN + 索引提示锁定确定性计划：
         //   count：dc 覆盖索引扫描 -> deal 窄覆盖索引 (id, tenant_id, status, deleted) 单行点查
-        //   page ：deal 索引倒序扫描 -> dc 唯一键 (deal_id, category_id) 点查，满足 LIMIT 即早停
+        //   page ：内层 dc 覆盖索引按 deal_id 倒序流式扫描 + 窄索引过滤、满足 LIMIT 早停，
+        //          外层仅对最终 page size 行回表取宽行（大小分类与深分页均稳定毫秒级）
         Long total = selectCountByCategory(reqVO);
         if (total == null || total == 0L) {
             return PageResult.empty();
@@ -77,10 +78,13 @@ public interface DealMapper extends BaseMapperX<DealDO> {
     Long selectCountByCategory(@Param("reqVO") DealPageReqVO reqVO);
 
     @Select("<script>"
-            + "SELECT d.* FROM river_coupon_deal d "
-            + "STRAIGHT_JOIN river_coupon_deal_category dc ON dc.deal_id = d.id "
+            + "SELECT d.* FROM ("
+            + "SELECT dc.deal_id FROM river_coupon_deal_category dc "
+            + "STRAIGHT_JOIN river_coupon_deal d USE INDEX (idx_deal_id_filters) ON d.id = dc.deal_id "
             + "WHERE 1 = 1" + CATEGORY_CONDITIONS
-            + " ORDER BY d.id DESC LIMIT #{offset}, #{size}"
+            + " ORDER BY dc.deal_id DESC LIMIT #{offset}, #{size}"
+            + ") page JOIN river_coupon_deal d ON d.id = page.deal_id "
+            + "ORDER BY d.id DESC"
             + "</script>")
     List<DealDO> selectPageListByCategory(@Param("reqVO") DealPageReqVO reqVO,
                                            @Param("offset") Integer offset,
