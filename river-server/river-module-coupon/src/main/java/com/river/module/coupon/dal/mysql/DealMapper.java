@@ -2,6 +2,7 @@ package com.river.module.coupon.dal.mysql;
 
 import cn.hutool.core.collection.CollUtil;
 import com.river.framework.common.enums.CommonStatusEnum;
+import com.river.framework.common.pojo.PageParam;
 import com.river.framework.common.pojo.PageResult;
 import com.river.framework.mybatis.core.mapper.BaseMapperX;
 import com.river.framework.mybatis.core.query.LambdaQueryWrapperX;
@@ -98,6 +99,18 @@ public interface DealMapper extends BaseMapperX<DealDO> {
         return selectCount(new LambdaQueryWrapperX<DealDO>()
                 .eq(DealDO::getMerchantId, merchantId)
                 .eq(DealDO::getStatus, CommonStatusEnum.ENABLE.getStatus()));
+    }
+
+    /**
+     * sitemap 轻量分页：只取 id/slug/update_time 三列，避免 description 等
+     * LONGTEXT 字段随分片全量传输（80 万行下全字段查询会拖垮 JVM 与网络）。
+     * 主键升序保证分片边界稳定。
+     */
+    default PageResult<DealDO> selectSitemapPage(PageParam pageParam) {
+        return selectPage(pageParam, new LambdaQueryWrapperX<DealDO>()
+                .select(DealDO::getId, DealDO::getSlug, DealDO::getUpdateTime)
+                .eq(DealDO::getStatus, CommonStatusEnum.ENABLE.getStatus())
+                .orderByAsc(DealDO::getId));
     }
 
     /**

@@ -2,8 +2,12 @@ package com.river.module.coupon.service;
 
 import cn.hutool.core.util.NumberUtil;
 import com.river.framework.common.enums.CommonStatusEnum;
+import com.river.framework.common.pojo.PageParam;
 import com.river.framework.common.pojo.PageResult;
+import com.river.framework.common.util.object.BeanUtils;
+import com.river.framework.mybatis.core.query.LambdaQueryWrapperX;
 import com.river.module.coupon.controller.admin.deal.vo.DealPageReqVO;
+import com.river.module.coupon.controller.app.vo.AppDealSitemapRespVO;
 import com.river.module.coupon.dal.dataobject.DealDO;
 import com.river.module.coupon.dal.mysql.DealCategoryMapper;
 import com.river.module.coupon.dal.mysql.DealMapper;
@@ -74,6 +78,22 @@ public class DealServiceImpl implements DealService {
     @Override
     public PageResult<DealDO> getDealPage(DealPageReqVO pageReqVO) {
         return dealMapper.selectPage(pageReqVO);
+    }
+
+    @Override
+    public Long getSitemapDealCount() {
+        return dealMapper.selectCount(new LambdaQueryWrapperX<DealDO>()
+                .eq(DealDO::getStatus, CommonStatusEnum.ENABLE.getStatus()));
+    }
+
+    @Override
+    public PageResult<AppDealSitemapRespVO> getSitemapDealPage(Integer pageNo, Integer pageSize) {
+        PageParam pageParam = new PageParam();
+        pageParam.setPageNo(pageNo);
+        pageParam.setPageSize(pageSize);
+        PageResult<DealDO> pageResult = dealMapper.selectSitemapPage(pageParam);
+        return new PageResult<>(BeanUtils.toBean(pageResult.getList(), AppDealSitemapRespVO.class),
+                pageResult.getTotal());
     }
 
     @Override

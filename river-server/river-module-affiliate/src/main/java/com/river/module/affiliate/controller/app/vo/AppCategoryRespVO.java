@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -34,6 +35,9 @@ public class AppCategoryRespVO {
 
     @Schema(description = "地区代码", example = "US")
     private String region;
+
+    @Schema(description = "更新时间")
+    private LocalDateTime updateTime;
 
     @Schema(description = "子分类列表")
     private List<AppCategoryRespVO> children;

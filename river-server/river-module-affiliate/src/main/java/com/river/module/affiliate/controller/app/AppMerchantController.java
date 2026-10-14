@@ -121,6 +121,7 @@ public class AppMerchantController {
             Long couponCount = couponCounts.getOrDefault(merchant.getId(), 0L);
             vo.setDealCount(dealCount.intValue());
             vo.setCouponCount(couponCount.intValue());
+            vo.setUpdateTime(merchant.getUpdateTime());
 
             return vo;
         }).toList();

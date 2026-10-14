@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Schema(description = "用户 App - 商家 Response VO")
@@ -54,5 +55,8 @@ public class AppMerchantRespVO {
 
     @Schema(description = "优惠券数量", example = "50")
     private Integer couponCount;
+
+    @Schema(description = "更新时间")
+    private LocalDateTime updateTime;
 
 }

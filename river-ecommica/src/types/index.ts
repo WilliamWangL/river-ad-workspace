@@ -50,6 +50,8 @@ export interface Store {
   dealCount: number;
   couponCount: number;
   regions?: string[];
+  /** 更新时间（sitemap lastmod） */
+  updateTime?: string;
 }
 
 export interface Offer {
@@ -110,5 +112,14 @@ export interface Category {
   sort?: number;
   parentId?: number;
   region?: string;
+  /** 更新时间（sitemap lastmod） */
+  updateTime?: string;
   children?: Category[];
+}
+
+/** sitemap 轻量 deal 数据（仅含生成 sitemap 所需字段） */
+export interface SitemapDeal {
+  id: number;
+  slug: string;
+  updateTime: string;
 }

@@ -112,6 +112,7 @@ public class AppCategoryController {
                 .sort(category.getSort())
                 .parentId(category.getParentId())
                 .region(category.getRegion())
+                .updateTime(category.getUpdateTime())
                 .build();
     }
 

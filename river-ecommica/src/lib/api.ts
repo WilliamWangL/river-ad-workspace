@@ -1,4 +1,4 @@
-import { Deal, Store, Coupon, BlogPost, Category, Offer } from '@/types'
+import { Deal, Store, Coupon, BlogPost, Category, Offer, SitemapDeal } from '@/types'
 
 // 服务端内部 API URL（Docker 内部网络）
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || 'http://localhost:48080/app-api'
@@ -71,6 +71,27 @@ export async function fetchDealBySlug(slug: string): Promise<Deal | null> {
   if (!res.ok) throw new Error('Fetch deal failed')
   const json = await res.json()
   return json.data || null
+}
+
+/** sitemap 用：ENABLE 状态 deal 总数（用于计算分片数量） */
+export async function fetchDealSitemapCount(): Promise<number> {
+  const res = await fetchWithTenant(`${getApiBaseUrl()}/coupon/deal/sitemap-count`, {
+    next: { revalidate: 1800 },
+  })
+  if (!res.ok) throw new Error('Fetch deal sitemap count failed')
+  const json = await res.json()
+  return json.data || 0
+}
+
+/** sitemap 用：轻量 deal 分页（仅 slug/updateTime，按 id 升序） */
+export async function fetchDealSitemapPage(pageNo: number, pageSize: number): Promise<PageResult<SitemapDeal>> {
+  const res = await fetchWithTenant(
+    `${getApiBaseUrl()}/coupon/deal/sitemap-page?pageNo=${pageNo}&pageSize=${pageSize}`,
+    { next: { revalidate: 21600 } },
+  )
+  if (!res.ok) throw new Error('Fetch deal sitemap page failed')
+  const json = await res.json()
+  return json.data || { total: 0, list: [] }
 }
 
 export interface PageResult<T> {

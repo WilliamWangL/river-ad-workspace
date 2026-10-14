@@ -11,6 +11,7 @@ import com.river.module.coupon.controller.admin.deal.vo.DealPageReqVO;
 import com.river.module.coupon.controller.app.vo.AppDealPageReqVO;
 import com.river.module.coupon.controller.app.vo.AppDealMerchantRespVO;
 import com.river.module.coupon.controller.app.vo.AppDealRespVO;
+import com.river.module.coupon.controller.app.vo.AppDealSitemapRespVO;
 import com.river.module.coupon.dal.dataobject.DealDO;
 import com.river.module.coupon.service.DealService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +51,25 @@ public class AppDealController {
 
         List<AppDealRespVO> result = convertToAppVOList(pageResult.getList());
         return success(new PageResult<>(result, pageResult.getTotal()));
+    }
+
+    @GetMapping("/sitemap-count")
+    @Operation(summary = "获取 Sitemap Deal 总数（ENABLE 状态）")
+    @PermitAll
+    public CommonResult<Long> getSitemapDealCount() {
+        return success(dealService.getSitemapDealCount());
+    }
+
+    @GetMapping("/sitemap-page")
+    @Operation(summary = "获取 Sitemap Deal 轻量分页（仅 slug 与更新时间，按 id 升序）")
+    @PermitAll
+    public CommonResult<PageResult<AppDealSitemapRespVO>> getSitemapDealPage(
+            @RequestParam(value = "pageNo", defaultValue = "1", required = false) Integer pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "5000", required = false) Integer pageSize) {
+        // 单次上限防止滥用（50k 行轻量字段约 5MB 响应）
+        int cappedSize = Math.min(Math.max(pageSize != null ? pageSize : 5000, 1), 50000);
+        int safePageNo = Math.max(pageNo != null ? pageNo : 1, 1);
+        return success(dealService.getSitemapDealPage(safePageNo, cappedSize));
     }
 
     @GetMapping("/get-by-slug")
