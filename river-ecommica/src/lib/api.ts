@@ -65,8 +65,9 @@ export async function fetchDeals(params?: { merchantId?: number; featured?: bool
 }
 
 export async function fetchDealBySlug(slug: string): Promise<Deal | null> {
+  // 详情页为 force-dynamic 动态渲染，禁用 fetch data cache，避免按 slug 落盘缓存条目
   const res = await fetchWithTenant(`${getApiBaseUrl()}/coupon/deal/get-by-slug?slug=${encodeURIComponent(slug)}`, {
-    next: { revalidate: 300 },
+    cache: 'no-store',
   })
   if (!res.ok) throw new Error('Fetch deal failed')
   const json = await res.json()

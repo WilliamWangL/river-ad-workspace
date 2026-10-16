@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchDeals, fetchDealBySlug } from '@/lib/api';
+import { fetchDealBySlug } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { JsonLd, BASE_URL, generateDealJsonLd, generateBreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -16,32 +16,14 @@ import { RelatedDeals } from '@/components/deal/RelatedDeals';
 import { FeedbackForm } from '@/components/layout/FeedbackForm';
 import { ShareButtons } from '@/components/layout/ShareButtons';
 
-// 使用 ISR，每 5 分钟重新生成
-export const revalidate = 300;
-export const dynamicParams = true;
+// 强制动态渲染：deal 总量达 80 万+，ISR 按需静态化会为每个被访问的页面
+// 落盘生成缓存文件（曾导致容器可写层 .next/server 膨胀 30G 撑满磁盘），
+// 动态渲染不写磁盘缓存，HTML 仍为服务端渲染，SEO 不受影响
+export const dynamic = 'force-dynamic';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
-
-export async function generateStaticParams() {
-  try {
-    const { list: deals } = await fetchDeals();
-    const locales = ['en', 'zh'];
-
-    return locales.flatMap(locale =>
-      deals
-        .filter(deal => deal.slug && typeof deal.slug === 'string')
-        .map(deal => ({
-          locale,
-          slug: deal.slug,
-        }))
-    );
-  } catch {
-    // 构建时 API 不可用，返回空数组，页面将在运行时动态渲染
-    return [];
-  }
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
@@ -137,6 +119,7 @@ export default async function DealDetailPage({ params }: Props) {
                         alt={deal.title}
                         fill
                         className="object-contain transition-transform duration-500 group-hover:scale-105"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">

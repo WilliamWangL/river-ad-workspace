@@ -76,6 +76,7 @@ function RelatedDealCard({ deal, locale, labels }: { deal: Deal; locale: string;
             alt={deal.title}
             fill
             className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+            unoptimized
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-200">
