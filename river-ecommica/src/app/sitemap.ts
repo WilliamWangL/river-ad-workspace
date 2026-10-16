@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next';
-import { fetchStores, fetchPosts, fetchCategories, fetchDealSitemapCount, fetchDealSitemapPage } from '@/lib/api';
+import { fetchStores, fetchPosts, fetchCategories, fetchDealSitemapPage } from '@/lib/api';
 import { Category } from '@/types';
 
-// 全量 deal 分片体积大（约 80 万 URL / 16 片），低频再验证；
-// robots.ts 的分片列表与 generateSitemaps 跟随 count 接口 30 分钟缓存
-export const revalidate = 21600;
+// 构建阶段（CI docker build）后端 API 不可达，fetch 失败的结果会被静态固化
+// （曾导致 robots 只剩 1 行、主分片只剩 12 条且永不自愈），因此强制运行时实时渲染：
+// Google 抓取 sitemap 频率低，每片一次轻量分页查询（实测 0.8~6s）完全可接受
+export const dynamic = 'force-dynamic';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://deals.ecommica.com';
 const LOCALES = ['en', 'zh'];
@@ -12,6 +13,10 @@ const DEFAULT_LOCALE = 'en';
 
 /** Google sitemap 单文件上限 50,000 URL */
 export const DEALS_PER_SITEMAP = 50000;
+
+/** deal 分片数量上界：每片 5 万，当前约 80 万 deal = 16 片；超过 100 万需调大。
+ *  固定集合不依赖运行时接口，保证构建/运行行为确定；robots.txt 动态只列实际片数 */
+const MAX_DEAL_SITEMAP_SHARDS = 20;
 
 function buildAlternates(path: string) {
   return {
@@ -164,15 +169,8 @@ async function buildMainSitemap(): Promise<MetadataRoute.Sitemap> {
 }
 
 export async function generateSitemaps() {
-  let dealCount = 0;
-  try {
-    dealCount = await fetchDealSitemapCount();
-  } catch {
-    // API 不可用时仅生成主分片
-  }
-  const dealShardCount = Math.ceil(dealCount / DEALS_PER_SITEMAP);
   // id 0：主分片（静态/分类/商家/博客）；id 1..N：deal 分片（每片最多 5 万 URL）
-  return [{ id: 0 }, ...Array.from({ length: dealShardCount }, (_, i) => ({ id: i + 1 }))];
+  return [{ id: 0 }, ...Array.from({ length: MAX_DEAL_SITEMAP_SHARDS }, (_, i) => ({ id: i + 1 }))];
 }
 
 export default async function sitemap(props: {
