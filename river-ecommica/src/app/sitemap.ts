@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { fetchStores, fetchPosts, fetchCategories, fetchDealSitemapPage } from '@/lib/api';
+import { fetchStores, fetchPosts, fetchCategories, fetchDealSitemapPage, fetchDealSitemapHot } from '@/lib/api';
 import { Category } from '@/types';
 
 // 构建阶段（CI docker build）后端 API 不可达，fetch 失败的结果会被静态固化
@@ -130,10 +130,12 @@ async function buildMainSitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [storesResult, postsResult, categories] = await Promise.all([
+    const [storesResult, postsResult, categories, hotDeals] = await Promise.all([
       fetchStores({ pageSize: 200 }),
       fetchPosts({ pageSize: 200 }),
       fetchCategories(),
+      // 热门 deal 拉取失败不影响主文件其余部分
+      fetchDealSitemapHot().catch(() => []),
     ]);
 
     const stores = storesResult.list;
@@ -161,7 +163,18 @@ async function buildMainSitemap(): Promise<MetadataRoute.Sitemap> {
         alternates: buildAlternates(`/blog/${post.slug}`),
       }));
 
-    return [...staticPages, ...categoryPages, ...storePages, ...blogPages];
+    // 热门 deal（运营内容，非 feed 长尾）：进主文件让 Google 优先抓取
+    const hotDealPages: MetadataRoute.Sitemap = hotDeals
+      .filter(deal => deal.slug)
+      .map(deal => ({
+        url: `${BASE_URL}/${DEFAULT_LOCALE}/deals/${deal.slug}`,
+        lastModified: deal.updateTime ? new Date(deal.updateTime) : undefined,
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+        alternates: buildAlternates(`/deals/${deal.slug}`),
+      }));
+
+    return [...staticPages, ...categoryPages, ...storePages, ...blogPages, ...hotDealPages];
   } catch {
     // 构建时 API 不可用，只返回静态页面，动态页面将在运行时生成
     return staticPages;

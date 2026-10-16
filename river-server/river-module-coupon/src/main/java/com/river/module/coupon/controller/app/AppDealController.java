@@ -72,6 +72,15 @@ public class AppDealController {
         return success(dealService.getSitemapDealPage(safePageNo, cappedSize));
     }
 
+    @GetMapping("/sitemap-hot")
+    @Operation(summary = "获取热门 Deal（非 feed 导入的运营 deal，供 sitemap 主文件）")
+    @PermitAll
+    public CommonResult<List<AppDealSitemapRespVO>> getSitemapHotDeals(
+            @RequestParam(value = "limit", defaultValue = "5000", required = false) Integer limit) {
+        int capped = Math.min(Math.max(limit != null ? limit : 5000, 1), 50000);
+        return success(dealService.getSitemapHotDeals(capped));
+    }
+
     @GetMapping("/get-by-slug")
     @Operation(summary = "根据 slug 获取 Deal 详情")
     @Parameter(name = "slug", description = "Deal slug", required = true, example = "50-off-everything")

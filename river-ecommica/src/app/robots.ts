@@ -18,9 +18,11 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     // API 不可用时仅保留主分片
   }
   const dealShardCount = Math.ceil(dealCount / DEALS_PER_SITEMAP);
+  // 对外用根路径命名：sitemap.xml（主文件：静态/分类/商家/博客/热门 deal）
+  // 与 sitemap2..N.xml（deal 分片），由 next.config.ts rewrites 映射到 /sitemap/[id].xml
   const sitemaps = [
-    `${BASE_URL}/sitemap/0.xml`,
-    ...Array.from({ length: dealShardCount }, (_, i) => `${BASE_URL}/sitemap/${i + 1}.xml`),
+    `${BASE_URL}/sitemap.xml`,
+    ...Array.from({ length: dealShardCount }, (_, i) => `${BASE_URL}/sitemap${i + 2}.xml`),
   ];
 
   return {

@@ -95,6 +95,16 @@ export async function fetchDealSitemapPage(pageNo: number, pageSize: number): Pr
   return json.data || { total: 0, list: [] }
 }
 
+/** sitemap 主文件用：热门 deal（非 feed 导入的运营 deal，仅 slug/updateTime） */
+export async function fetchDealSitemapHot(limit = 5000): Promise<SitemapDeal[]> {
+  const res = await fetchWithTenant(`${getApiBaseUrl()}/coupon/deal/sitemap-hot?limit=${limit}`, {
+    next: { revalidate: 21600 },
+  })
+  if (!res.ok) throw new Error('Fetch hot deals for sitemap failed')
+  const json = await res.json()
+  return json.data || []
+}
+
 export interface PageResult<T> {
   total: number;
   list: T[];

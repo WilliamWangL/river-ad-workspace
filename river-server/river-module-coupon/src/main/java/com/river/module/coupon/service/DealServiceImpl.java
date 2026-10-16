@@ -97,6 +97,11 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    public List<AppDealSitemapRespVO> getSitemapHotDeals(int limit) {
+        return BeanUtils.toBean(dealMapper.selectSitemapHotDeals(limit), AppDealSitemapRespVO.class);
+    }
+
+    @Override
     public void validateDealExists(Long id) {
         if (dealMapper.selectById(id) == null) {
             throw exception(DEAL_NOT_EXISTS);

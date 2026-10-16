@@ -33,4 +33,7 @@ public interface DealService {
     /** 轻量分页查询 sitemap 所需字段（仅 id/slug/updateTime，按 id 升序） */
     PageResult<AppDealSitemapRespVO> getSitemapDealPage(Integer pageNo, Integer pageSize);
 
+    /** 热门 Deal（非 feed 导入的运营 deal，供 sitemap 主文件），仅 id/slug/updateTime */
+    List<AppDealSitemapRespVO> getSitemapHotDeals(int limit);
+
 }

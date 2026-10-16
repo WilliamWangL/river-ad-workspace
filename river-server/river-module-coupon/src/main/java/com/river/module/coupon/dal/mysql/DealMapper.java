@@ -114,6 +114,19 @@ public interface DealMapper extends BaseMapperX<DealDO> {
     }
 
     /**
+     * sitemap 主文件用热门 Deal：非 feed 批量导入的运营 deal（external_id 为空或
+     * 非 aliexpress- 前缀），按主键升序取前 limit 条。
+     */
+    default List<DealDO> selectSitemapHotDeals(int limit) {
+        return selectList(new LambdaQueryWrapperX<DealDO>()
+                .select(DealDO::getId, DealDO::getSlug, DealDO::getUpdateTime)
+                .eq(DealDO::getStatus, CommonStatusEnum.ENABLE.getStatus())
+                .and(w -> w.isNull(DealDO::getExternalId).or().notLike(DealDO::getExternalId, "aliexpress-%"))
+                .orderByAsc(DealDO::getId)
+                .last("LIMIT " + limit));
+    }
+
+    /**
      * 根据联盟网络ID和外部ID查询 Deal
      * 用于同步时判重
      */
