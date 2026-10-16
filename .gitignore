@@ -1,3 +1,7 @@
 .worktrees/
 .worktrees/
 .env
+# Python 运行副产物与日志
+__pycache__/
+*.log
+wget-log
