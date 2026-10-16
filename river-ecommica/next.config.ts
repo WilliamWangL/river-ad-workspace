@@ -5,6 +5,10 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // 禁用流式 metadata：动态渲染的详情页默认会将 title/meta 流式注入 <body>，
+  // 导致 Googlebot 等爬虫抓到的 HTML 中 <head> 里没有 title（SEO 失效）；
+  // 此配置强制所有请求的 metadata 阻塞渲染进 <head>
+  htmlLimitedBots: /.*/,
   turbopack: {
     root: __dirname,
   },
