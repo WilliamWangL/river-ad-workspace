@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { fetchDealSitemapCount } from '@/lib/api';
-import { DEALS_PER_SITEMAP } from './sitemap';
+import { DEALS_PER_SITEMAP, MAX_DEAL_SITEMAP_SHARDS } from './sitemap';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://deals.ecommica.com';
 
@@ -17,7 +17,11 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   } catch {
     // API 不可用时仅保留主分片
   }
-  const dealShardCount = Math.ceil(dealCount / DEALS_PER_SITEMAP);
+  // 分片上界与 sitemap.ts 的生成上界对齐（id 最大 20 → 对外最大 sitemap20.xml）
+  const dealShardCount = Math.min(
+    Math.ceil(dealCount / DEALS_PER_SITEMAP),
+    MAX_DEAL_SITEMAP_SHARDS - 1,
+  );
   // 对外用根路径命名：sitemap.xml（主文件：静态/分类/商家/博客/热门 deal）
   // 与 sitemap2..N.xml（deal 分片），由 next.config.ts rewrites 映射到 /sitemap/[id].xml
   const sitemaps = [

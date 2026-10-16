@@ -86,8 +86,9 @@ export async function fetchDealSitemapCount(): Promise<number> {
 
 /** sitemap 用：轻量 deal 分页（仅 slug/updateTime，按 id 升序） */
 export async function fetchDealSitemapPage(pageNo: number, pageSize: number): Promise<PageResult<SitemapDeal>> {
+  const safePageNo = Math.max(1, pageNo);
   const res = await fetchWithTenant(
-    `${getApiBaseUrl()}/coupon/deal/sitemap-page?pageNo=${pageNo}&pageSize=${pageSize}`,
+    `${getApiBaseUrl()}/coupon/deal/sitemap-page?pageNo=${safePageNo}&pageSize=${pageSize}`,
     { next: { revalidate: 21600 } },
   )
   if (!res.ok) throw new Error('Fetch deal sitemap page failed')

@@ -14,9 +14,9 @@ const DEFAULT_LOCALE = 'en';
 /** Google sitemap 单文件上限 50,000 URL */
 export const DEALS_PER_SITEMAP = 50000;
 
-/** deal 分片数量上界：每片 5 万，当前约 80 万 deal = 16 片；超过 100 万需调大。
+/** deal 分片数量上界：id 最大 20 → 对外 sitemap20.xml → deal 第 19 片（≈ 95 万 deal），超出需同步调大。
  *  固定集合不依赖运行时接口，保证构建/运行行为确定；robots.txt 动态只列实际片数 */
-const MAX_DEAL_SITEMAP_SHARDS = 20;
+export const MAX_DEAL_SITEMAP_SHARDS = 20;
 
 function buildAlternates(path: string) {
   return {
@@ -192,10 +192,13 @@ export default async function sitemap(props: {
   const rawId = Number(await props.id);
   const shardId = isNaN(rawId) ? 0 : rawId;
 
-  // deal 分片：轻量分页接口按 id 升序返回 slug + 真实更新时间
+  // deal 分片：轻量分页接口按 id 升序返回 slug + 真实更新时间。
+  // 对外 sitemapN.xml 经 rewrite 恒等映射到内部 /sitemap/N.xml，
+  // 对应 deal 第 N-1 片（第 1 片即 sitemap2.xml），故页号 = id - 1；
+  // id = 1 无对外名字，防御性归一到第 1 片（与 sitemap2.xml 重复，无害）
   if (shardId >= 1) {
     try {
-      const dealsResult = await fetchDealSitemapPage(shardId, DEALS_PER_SITEMAP);
+      const dealsResult = await fetchDealSitemapPage(shardId - 1, DEALS_PER_SITEMAP);
       return dealsResult.list
         .filter(deal => deal.slug)
         .map(deal => ({
